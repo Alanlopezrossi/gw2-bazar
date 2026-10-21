@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bazar GW2</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="#/bazar">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 18c2 4 10 4 12 0M12 12h.01M20 12h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg>
+      <span>Bazar <em>GW2</em></span>
+    </a>
+    <nav class="tabs" id="tabs">
+      <a href="#/bazar" data-tab="bazar">Bazar en vivo</a>
+      <a href="#/recs/vender" data-tab="recs">Recomendados</a>
+      <a href="#/calc" data-tab="calc">Calculadora</a>
+      <a href="#/cuenta" data-tab="cuenta">Mi cuenta</a>
+    </nav>
+    <div class="live" id="live" title="Estado de sincronización">
+      <span class="dot"></span><span id="liveText">conectando…</span>
+    </div>
+    <button class="icon-btn" id="btnSettings" title="Ajustes" aria-label="Ajustes">
+      <svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+    </button>
+  </header>
+  <div class="progress" id="progress"><span></span></div>
+
+  <p class="public-note">Datos en vivo de la API oficial de Guild Wars 2 y de DataWars2, descargados por tu navegador. La primera visita tarda ~1 minuto; después queda guardado. Sitio de fans, sin relación con ArenaNet.</p>
+  <main id="view" class="view"></main>
+
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer-scrim" data-close></div>
+    <div class="drawer-panel" role="dialog" aria-label="Detalle del item">
+      <button class="icon-btn close" data-close aria-label="Cerrar">✕</button>
+      <div id="drawerBody"></div>
+    </div>
+  </aside>
+
+  <dialog id="settings">
+    <form method="dialog" id="settingsForm">
+      <h2>Ajustes</h2>
+      <p class="muted">La API key es opcional y sólo hace falta para <strong>Mi cuenta</strong>. Se guarda en <code>data/config.json</code> en esta PC y sólo se envía a <code>api.guildwars2.com</code>.</p>
+      <p class="muted">Creala en <a href="https://account.arena.net/applications" target="_blank" rel="noopener">account.arena.net/applications</a> con permisos <code>account</code>, <code>inventories</code>, <code>characters</code> y <code>tradingpost</code>.</p>
+      <label>API key
+        <input id="apiKey" autocomplete="off" spellcheck="false" placeholder="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXXXXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" />
+      </label>
+      <p id="keyStatus" class="muted small"></p>
+      <div class="row-end">
+        <button type="button" class="btn ghost" id="btnClearKey">Borrar key</button>
+        <button type="button" class="btn ghost" id="btnRefresh">Forzar actualización</button>
+        <button type="button" class="btn" id="btnSaveKey">Guardar</button>
+        <button class="btn ghost" value="close">Cerrar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
