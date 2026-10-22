@@ -1,5 +1,7 @@
 import { localApi, localEvents } from './local-api.js';
 import { renderCalc } from './calc.js';
+import { renderMap } from './map.js';
+const normalizeText = (s) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 // Bazar GW2 — frontend (vanilla JS, sin build).
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -14,6 +16,7 @@ const S = { // estado de filtros por vista (persistido)
   vender: { q: '', cat: 'farm', sort: 'value', rarity: '', minSold: 50, maxDays: 0 },
   flips: { q: '', type: '', rarity: '', minProfit: 100, minRoi: 5, maxRoi: 200, minVol: 25, maxBuy: 0 },
   crafteo: { q: '', type: '', rarity: '', minProfit: 100, minRoi: 5, minVol: 10, autoOnly: false, discipline: '', mode: 'instant' },
+  equipo: { q: '', rarity: 'Legendary', type: '', sub: '', weight: '', source: '', sort: 'name', dir: 'asc', page: 1, limit: 100 },
 };
 try { const saved = JSON.parse(localStorage.getItem('gw2bazar.filters') || '{}'); for (const k of Object.keys(S)) if (saved[k]) S[k] = { ...S[k], ...saved[k] }; } catch {}
 const saveFilters = () => { try { localStorage.setItem('gw2bazar.filters', JSON.stringify(S)); } catch {} };
@@ -155,6 +158,8 @@ function route() {
   lastView = h;
   if (a === 'recs') renderRecs(b || 'vender');
   else if (a === 'cuenta' && !STATUS?.publicMode) renderAccount();
+  else if (a === 'equipo') renderEquipo();
+  else if (a === 'mapa') { current = { name: 'mapa', refresh() {} }; renderMap(view, { api, esc, toast, normalize: normalizeText, focusKey: b ? decodeURIComponent(b) : null }); }
   else if (a === 'calc') { const c = renderCalc(view, { coin, esc, api, debounce, itemCell, setKeyHandler: (fn) => (calcKeys = fn) }); current = { name: 'calc', refresh: c.refresh }; }
   else renderBazar();
 }
@@ -329,6 +334,59 @@ function renderRecs(kind) {
   load();
 }
 
+
+// ---------- Equipo (legendarios y ascendidos) ----------
+const EQ_SOURCES = { bazar: 'Bazar', crafteo: 'Crafteo', forja: 'Forja Mística', logro: 'Logro / colección', vendedor: 'NPC vendedor', contenedor: 'Contenedor', 'reward track': 'Reward track' };
+const srcChips = (list) => `<span class="chips eq-src">${(list || []).map((s) => `<span class="chip chip-${s.replace(/\s/g, '-')}">${esc(EQ_SOURCES[s] || s)}</span>`).join('') || '<span class="muted small">ver ficha</span>'}</span>`;
+const subName = (s) => (META.subtypes || {})[s] || s || '';
+
+function renderEquipo() {
+  const st = S.equipo;
+  view.innerHTML = `
+    <div class="page-head"><div><h1>Equipo</h1><p>Todos los legendarios y ascendidos del juego: cómo se consiguen (bazar, crafteo, Forja Mística, logros, NPC, contenedores), cuánto cuestan en el bazar y cuánto sale craftearlos. Tocá uno para ver el árbol completo y dónde conseguir cada parte.</p></div></div>
+    <div class="filters">
+      <input type="search" data-f="q" placeholder="Buscar… (ej: Crepúsculo, Aurora, Berserker, Zojja)" value="${esc(st.q)}">
+      <label>Rareza <select data-f="rarity"><option value="">Todas</option><option value="Legendary" ${st.rarity === 'Legendary' ? 'selected' : ''}>Legendario</option><option value="Ascended" ${st.rarity === 'Ascended' ? 'selected' : ''}>Ascendido</option></select></label>
+      <label>Tipo <select data-f="type">${options(META.types, st.type)}</select></label>
+      <label>Subtipo <select data-f="sub" id="eqSub"><option value="">Todos</option></select></label>
+      <label>Peso <select data-f="weight"><option value="">Todos</option>${Object.entries(META.weights || {}).map(([k, v]) => `<option value="${k}" ${st.weight === k ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
+      <label>Se consigue por <select data-f="source"><option value="">Cualquier vía</option>${Object.entries(EQ_SOURCES).map(([k, v]) => `<option value="${k}" ${st.source === k ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
+      <label>Ordenar <select data-f="sort"><option value="name" ${st.sort === 'name' ? 'selected' : ''}>nombre</option><option value="type" ${st.sort === 'type' ? 'selected' : ''}>tipo</option><option value="sell" ${st.sort === 'sell' ? 'selected' : ''}>precio en bazar</option><option value="craftCost" ${st.sort === 'craftCost' ? 'selected' : ''}>costo de crafteo</option></select></label>
+    </div>
+    <div class="pager" id="pagerTop"></div>
+    <div class="table-wrap"><table><thead><tr><th>Item</th><th>Cómo se consigue</th><th>Precio en bazar</th><th>Costo de crafteo</th><th>Logro / colección</th><th>NPC vendedor</th></tr></thead>
+      <tbody id="tb"><tr><td colspan="6"><div class="skeleton"></div></td></tr></tbody></table></div>
+    <div class="pager" id="pager"></div>`;
+  bindFilters(view, st, load);
+  async function load() {
+    try {
+      const d = await api(`/api/equipment?${qs({ ...st, mode: S.crafteo.mode })}`);
+      const tb = $('#tb');
+      if (!tb) return;
+      const sel = $('#eqSub');
+      if (sel) sel.innerHTML = `<option value="">Todos</option>${(d.subs || []).map((s) => `<option value="${esc(s)}" ${st.sub === s ? 'selected' : ''}>${esc(subName(s))}</option>`).join('')}`;
+      if (!d.ready) { tb.innerHTML = '<tr><td colspan="6" class="empty">Todavía no están los datos de equipo (src/equipment.json).</td></tr>'; return; }
+      tb.innerHTML = d.rows.length ? d.rows.map((r) => `<tr data-id="${r.id}">
+          <td>${itemCell(r, [typeName(r.type), subName(r.sub), (META.weights || {})[r.weight], r.stat, r.armory ? 'armería legendaria' : ''].filter(Boolean).join(' · '))}</td>
+          <td class="left">${srcChips(r.sources)}</td>
+          <td>${r.sell ? coin(r.sell) : '<span class="muted small">no se vende</span>'}</td>
+          <td>${r.craftCost != null ? coin(r.craftCost) : r.craftable ? '<span class="muted small">con partes no comerciables</span>' : '<span class="muted">—</span>'}</td>
+          <td class="left small">${r.achievement ? `${esc(r.achievement.name)}${r.achievement.category ? ` <span class="muted">(${esc(r.achievement.category)})</span>` : ''}${r.achievement.more > 0 ? ` <span class="muted">+${r.achievement.more}</span>` : ''}` : '<span class="muted">—</span>'}</td>
+          <td class="left small">${r.vendor ? `${esc(r.vendor.vendor)} <span class="muted">— ${esc(r.vendor.zone || '')}${r.vendor.cost ? ` · ${esc(r.vendor.cost)}` : ''}</span>${r.vendor.more > 0 ? ` <span class="muted">+${r.vendor.more}</span>` : ''}` : '<span class="muted">—</span>'}</td>
+        </tr>`).join('') : '<tr><td colspan="6" class="empty">Nada coincide con esos filtros.</td></tr>';
+      const goPage = (p) => { st.page = p; saveFilters(); load(); window.scrollTo({ top: 0 }); };
+      const setSize = (n) => { st.limit = n; st.page = 1; saveFilters(); load(); };
+      const info = { total: d.total, page: d.page, limit: d.limit, label: 'items' };
+      paintPager($('#pagerTop'), { ...info, compact: true }, goPage, setSize);
+      paintPager($('#pager'), info, goPage, setSize);
+    } catch (e) {
+      $('#tb').innerHTML = `<tr><td colspan="6" class="empty">Error: ${esc(e.message)}</td></tr>`;
+    }
+  }
+  current = { name: 'equipo', refresh: load };
+  load();
+}
+
 // ---------- Mi cuenta ----------
 function renderAccount(force = false) {
   view.innerHTML = `<div class="page-head"><div><h1>Mi cuenta</h1><p>Lo que tenés en banco, depósito de materiales e inventarios que vale la pena vender, más tus ventas activas en el bazar.</p></div>
@@ -495,7 +553,7 @@ function wikiDataHTML(w) {
   const list = (title, arr) => (arr?.length ? `<h4 class="sub-h">${title}</h4><ul class="steps">${arr.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : '');
   const vendors = w.soldBy?.length
     ? `<h4 class="sub-h">Lo venden estos NPC</h4><div class="table-wrap"><table class="ing"><thead><tr><th>NPC</th><th>Zona</th><th>Mapa</th><th>Costo</th><th>Notas</th></tr></thead><tbody>
-       ${w.soldBy.map((v) => `<tr><td class="left">${esc(v.vendor)}</td><td class="left">${esc(v.area)}</td><td class="left">${esc(v.zone)}</td><td class="left">${esc(v.cost)}</td><td class="left small muted">${esc(v.notes)}</td></tr>`).join('')}
+       ${w.soldBy.map((v) => `<tr><td class="left">${esc(v.vendor)}</td><td class="left">${esc(v.area)}</td><td class="left">${esc(v.zone)}</td><td class="left">${esc(v.cost)}</td><td class="left small"><a href="#/mapa/${encodeURIComponent(`${v.vendor}|${v.area}|${v.zone}`)}">📍 ver en el mapa</a> <span class="muted">${esc(v.notes)}</span></td></tr>`).join('')}
        </tbody></table></div>` : '';
   const body = vendors + list('Sale de estos contenedores / bolsas', w.containedIn) + list('Reward tracks (PvP / WvW)', w.rewardTracks) + list('Recolección', w.gathered) + list('Recompensa de', w.rewardedBy) + (w.note ? `<p class="muted small">${esc(w.note)}</p>` : '');
   if (!body) return '';
@@ -531,6 +589,8 @@ function itemHTML(d) {
     <div class="section"><h3>Cómo conseguirlo</h3>
       <div class="ways">${d.ways.map((w) => `<div class="way"><div class="ic">${WAY_ICON[w.kind] || '•'}</div><div><b>${esc(w.title)}</b><p>${coinText(w.text)}</p></div></div>`).join('')}</div>
     </div>
+    ${d.sources?.length ? `<div class="section"><h3>Formas de conseguirlo</h3>${srcChips(d.sources)}</div>` : ''}
+    ${d.achievements?.length ? `<div class="section"><h3>Logros y colecciones que lo dan</h3><ul class="steps">${d.achievements.map((a) => `<li><b>${esc(a.name)}</b>${a.category ? ` <span class="muted small">— ${esc(a.category)}</span>` : ''}${a.type === 'ItemSet' ? ' <span class="pill">colección</span>' : ''}</li>`).join('')}</ul></div>` : ''}
     ${recipesHTML(d)}
     <div class="section" id="wikiSec"><h3>Dónde se consigue: NPC, mapa, drops y contenedores <span class="muted small">(wiki oficial)</span></h3>${wikiDataHTML(d.wiki)}<div id="wikiBox"><div class="skeleton"></div></div></div>
     ${d.hints.length ? `<div class="section"><h3>Guía general para este tipo de item</h3><ul class="hint-list">${d.hints.map((h) => `<li>${esc(h)}</li>`).join('')}</ul></div>` : ''}

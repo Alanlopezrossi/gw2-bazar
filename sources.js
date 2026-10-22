@@ -4,6 +4,7 @@ import { state } from './store.js';
 import { row, net, craftTree, bestRecipe, tpBuyPrice, vol } from './analysis.js';
 import { GENERIC_HINTS } from './i18n.js';
 import { wikiEntry, wikiMeta } from './wikidata.js';
+import { achievementsFor, sourcesOf } from './equipment.js';
 
 /** Resumen corto de cómo se obtiene un item según la wiki (para hojas del árbol). */
 export function obtainSummary(id) {
@@ -186,6 +187,8 @@ export async function itemDetail(id, { mode = 'instant' } = {}) {
     shopping: tree ? shoppingList(tree) : null,
     wiki: w ? { soldBy: w.soldBy || [], containedIn: w.containedIn || [], gathered: w.gathered || [], rewardTracks: w.rewardTracks || [], rewardedBy: w.rewardedBy || [], note: w.note || '', title: w.title, snapshot: wikiMeta()?.at } : null,
     ways,
+    achievements: achievementsFor(id),
+    sources: sourcesOf(id),
     usedIn: usedIn(id, Infinity),
     hints: GENERIC_HINTS[it?.type] || [],
     links: {

@@ -313,5 +313,29 @@ details.tree-wrap > summary { cursor: pointer; color: var(--accent-2); font-size
 tr.obtain-row td { padding-top: 0; border-top: 0; }
 .wiki-data { margin-bottom: 10px; }
 
+/* equipo */
+.eq-src { margin: 0; gap: 4px; }
+.eq-src .chip { font-size: 11px; padding: 1px 7px; }
+.chip-bazar { background: rgba(98, 164, 218, 0.12); border-color: rgba(98, 164, 218, 0.45); color: #9ccaf0; }
+.chip-crafteo { background: rgba(111, 196, 138, 0.12); border-color: rgba(111, 196, 138, 0.45); color: #9fe0b2; }
+.chip-forja { background: rgba(181, 131, 255, 0.12); border-color: rgba(181, 131, 255, 0.45); color: #cfb2ff; }
+.chip-logro { background: rgba(251, 62, 141, 0.1); border-color: rgba(251, 62, 141, 0.4); color: #ff9cc4; }
+
+/* mapa */
+.map-grid { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 12px; }
+.map-list { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); max-height: 72vh; overflow-y: auto; }
+.mitem { display: grid; gap: 2px; width: 100%; text-align: left; background: transparent; border: 0; border-bottom: 1px solid var(--line); color: var(--text); padding: 8px 10px; cursor: pointer; font: inherit; }
+.mitem:hover { background: rgba(217, 170, 76, 0.08); }
+.map-box { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+#gmap { height: 72vh; background: #0b0d10; }
+.leaflet-container { font-family: var(--sans); }
+.leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--panel-2); color: var(--text); border: 1px solid var(--line-2); }
+.leaflet-popup-content a { color: var(--accent-2); }
+.mpop ul { margin: 6px 0 0; padding-left: 16px; max-height: 200px; overflow: auto; }
+.mpop li { margin: 2px 0; }
+.leaflet-control-attribution { background: rgba(14, 16, 20, 0.7) !important; color: var(--muted) !important; }
+.leaflet-control-attribution a { color: var(--accent-2) !important; }
+@media (max-width: 860px) { .map-grid { grid-template-columns: 1fr; } .map-list { max-height: 260px; } #gmap { height: 60vh; } }
+
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }

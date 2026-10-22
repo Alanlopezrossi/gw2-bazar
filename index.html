@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -19,6 +20,8 @@
     <nav class="tabs" id="tabs">
       <a href="#/bazar" data-tab="bazar">Bazar en vivo</a>
       <a href="#/recs/vender" data-tab="recs">Recomendados</a>
+      <a href="#/equipo" data-tab="equipo">Equipo</a>
+      <a href="#/mapa" data-tab="mapa">Mapa</a>
       <a href="#/calc" data-tab="calc">Calculadora</a>
       <a href="#/cuenta" data-tab="cuenta">Mi cuenta</a>
     </nav>
@@ -61,6 +64,7 @@
   </dialog>
 
   <div class="toast" id="toast" role="status"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <script type="module" src="app.js"></script>
 </body>
 </html>

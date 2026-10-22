@@ -3,15 +3,30 @@
 // recolección y reward tracks. Se generan con scripts/ y viven en src/wiki-data.json.
 import { state } from './store.js';
 
-let DATA = null; // { at, source, items: { [id]: entry } }
+let DATA = null; // { at, source, items: { [id]: entry }, shops: [...] }
+let GEN = 0;
 
 export function setWikiData(data) {
   DATA = data && data.items ? data : null;
+  GEN++;
   mergeWikiRecipes();
 }
 
 export function wikiEntry(id) {
   return DATA?.items?.[id] || null;
+}
+
+export function allWikiEntries() {
+  return DATA?.items || {};
+}
+
+/** Tiendas de NPC por moneda (sección "Currency for" de cada moneda en la wiki). */
+export function wikiGen() {
+  return GEN;
+}
+
+export function wikiShops() {
+  return DATA?.shops || [];
 }
 
 export function wikiMeta() {

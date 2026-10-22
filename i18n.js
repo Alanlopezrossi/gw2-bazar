@@ -49,6 +49,19 @@ export const DISCIPLINES = {
   'Mystic Forge': 'Forja Mística',
 };
 
+export const SUBTYPES = {
+  Axe: 'Hacha', Dagger: 'Daga', Mace: 'Maza', Pistol: 'Pistola', Scepter: 'Cetro', Sword: 'Espada',
+  Focus: 'Foco', Shield: 'Escudo', Torch: 'Antorcha', Warhorn: 'Cuerno de guerra',
+  Greatsword: 'Mandoble', Hammer: 'Martillo', LongBow: 'Arco largo', Rifle: 'Rifle', ShortBow: 'Arco corto', Staff: 'Báculo',
+  Harpoon: 'Lanza (acuática)', Speargun: 'Fusil de arpón', Trident: 'Tridente', Spear: 'Lanza',
+  Helm: 'Casco', HelmAquatic: 'Casco acuático', Shoulders: 'Hombreras', Coat: 'Pechera', Gloves: 'Guantes', Leggings: 'Perneras', Boots: 'Botas',
+  Accessory: 'Accesorio', Amulet: 'Amuleto', Ring: 'Anillo',
+  SmallBundle: 'Objeto de mano', LargeBundle: 'Objeto grande', Toy: 'Juguete', ToyTwoHanded: 'Juguete (2 manos)',
+  Rune: 'Runa', Sigil: 'Sello', Gem: 'Gema', Default: 'Otro', Relic: 'Reliquia',
+};
+
+export const WEIGHTS = { Light: 'Ligera', Medium: 'Media', Heavy: 'Pesada', Clothing: 'Ropa' };
+
 export const GAME_TYPES = {
   Activity: 'Actividades',
   Dungeon: 'Mazmorras',

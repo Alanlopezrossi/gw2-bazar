@@ -2,16 +2,20 @@
 import { state, loadCache, events } from './store.js';
 import { startScheduler } from './sync.js';
 import { setWikiData } from './wikidata.js';
+import { setEquipmentData, listEquipment } from './equipment.js';
+import { setGeoData, vendorMarkers } from './vendors.js';
 import { listItems, flips, demand, craftingProfits } from './analysis.js';
 import { itemDetail } from './sources.js';
 import { acquisition } from './wiki.js';
-import { TYPES, RARITIES, RARITY_ORDER, DISCIPLINES, GAME_TYPES, RECIPE_FLAGS } from './i18n.js';
+import { TYPES, RARITIES, RARITY_ORDER, DISCIPLINES, GAME_TYPES, RECIPE_FLAGS, SUBTYPES, WEIGHTS } from './i18n.js';
 
 export const localEvents = events;
 
 const ready = (async () => {
   await loadCache();
   try { setWikiData(await (await fetch('wiki-data.json')).json()); } catch (e) { console.warn('sin wiki-data.json', e); }
+  try { setEquipmentData(await (await fetch('equipment.json')).json()); } catch (e) { console.warn('sin equipment.json', e); }
+  try { setGeoData(await (await fetch('geo.json')).json()); } catch (e) { console.warn('sin geo.json', e); }
   startScheduler();
 })();
 
@@ -32,7 +36,9 @@ const routes = {
     hasKey: false,
     now: Date.now(),
   }),
-  '/api/meta': () => ({ types: TYPES, rarities: RARITIES, rarityOrder: RARITY_ORDER, disciplines: DISCIPLINES, gameTypes: GAME_TYPES, recipeFlags: RECIPE_FLAGS }),
+  '/api/meta': () => ({ types: TYPES, rarities: RARITIES, rarityOrder: RARITY_ORDER, disciplines: DISCIPLINES, gameTypes: GAME_TYPES, recipeFlags: RECIPE_FLAGS, subtypes: SUBTYPES, weights: WEIGHTS }),
+  '/api/vendors': () => vendorMarkers(),
+  '/api/equipment': (q) => listEquipment({ q: q.get('q') || '', rarity: q.get('rarity') || '', type: q.get('type') || '', sub: q.get('sub') || '', weight: q.get('weight') || '', source: q.get('source') || '', sort: q.get('sort') || 'name', dir: q.get('dir') || 'asc', page: num(q.get('page'), 1), limit: Math.min(1000, num(q.get('limit'), 100)), mode: q.get('mode') === 'order' ? 'order' : 'instant' }),
   '/api/items': (q) => listItems({
     q: q.get('q') || '', type: q.get('type') || '', rarity: q.get('rarity') || '', sort: q.get('sort') || 's1', dir: q.get('dir') || 'desc',
     page: num(q.get('page'), 1), limit: Math.min(1000, num(q.get('limit'), 100)), minVol: num(q.get('minVol'), 0), onlyFlip: q.get('onlyFlip') === '1',
