@@ -16,8 +16,10 @@ const GATED_EN = new Set([
   'Charged Quartz Crystal', 'Plate of Meaty Plant Food', 'Plate of Piquant Plant Food', 'Clay Pot', 'Grow Lamp', 'Heat Stone',
   'Dragon Hatchling Doll Eye', 'Dragon Hatchling Doll Hide', 'Dragon Hatchling Doll Frame', 'Dragon Hatchling Doll Adornments', 'Gossamer Stuffing',
 ]);
+// Mismos items por id (verificados contra la API), para no depender de que carguen los nombres en inglés.
+const GATED_IDS = new Set([46740, 46742, 46744, 46745, 43772, 66913, 66917, 66923, 66993, 67015, 79726, 79763, 79790, 79817]);
 export function isGated(id) {
-  return GATED_EN.has(state.items.get(id)?.nameEn);
+  return GATED_IDS.has(id) || GATED_EN.has(state.items.get(id)?.nameEn);
 }
 
 export function vol(id) {
