@@ -131,6 +131,12 @@ function usedIn(id, limit = 30) {
   };
 }
 
+const FLAG_ES = {
+  AccountBound: 'Ligado a la cuenta', AccountBindOnUse: 'Se liga a la cuenta al usarlo', SoulbindOnAcquire: 'Ligado al alma al conseguirlo', SoulBindOnUse: 'Se liga al alma al usarlo',
+  NoSell: 'No se puede vender a un NPC', NoSalvage: 'No se puede reciclar', NoMysticForge: 'No sirve en la Forja Mística', NotUpgradeable: 'No admite mejoras',
+  Unique: 'Único (sólo uno equipado)', DeleteWarning: 'Pide confirmación al borrarlo', HideSuffix: '', MonsterOnly: 'Sólo para monstruos', NoUnderwater: 'No se usa bajo el agua', BulkConsume: 'Se puede consumir en cantidad',
+};
+
 export async function itemDetail(id, { mode = 'instant' } = {}) {
   const it = state.items.get(id);
   if (!it && !state.prices.has(id)) return null;
@@ -177,6 +183,7 @@ export async function itemDetail(id, { mode = 'instant' } = {}) {
   const hist = state.history.get(id) || [];
   return {
     item: it || { id, name: `#${id}` },
+    props: (it?.flags || []).map((f) => FLAG_ES[f]).filter(Boolean),
     market: r,
     listings,
     netSell: p?.sell ? net(Math.max(p.sell - 1, 1)) : 0,

@@ -3,6 +3,7 @@ import { state } from './store.js';
 import { bestRecipe, net } from './analysis.js';
 import { wikiEntry } from './wikidata.js';
 import { normalize } from './analysis.js';
+import { achievementsOfItem } from './catalog.js';
 
 let EQ = null; // { at, items: [...], achievements: { [id]: [...] } }
 let byId = new Map();
@@ -22,7 +23,9 @@ export function equipmentMeta() {
 }
 
 export function achievementsFor(id) {
-  return EQ?.achievements?.[id] || [];
+  const out = (EQ?.achievements?.[id] || []).map((a) => ({ ...a, role: 'recompensa' }));
+  for (const a of achievementsOfItem(id)) if (!out.some((x) => x.id === a.id && x.role === a.role)) out.push(a);
+  return out;
 }
 
 /** Formas de obtener un item, como etiquetas. */
@@ -33,7 +36,7 @@ export function sourcesOf(id) {
   const recs = state.byOutput.get(id) || [];
   if (recs.some((r) => r.id > 0)) tags.push('crafteo');
   if (recs.some((r) => r.id < 0)) tags.push('forja');
-  if (achievementsFor(id).length) tags.push('logro');
+  if (achievementsFor(id).some((a) => a.role === 'recompensa')) tags.push('logro');
   const w = wikiEntry(id);
   if (w?.soldBy?.length) tags.push('vendedor');
   if (w?.containedIn?.length) tags.push('contenedor');

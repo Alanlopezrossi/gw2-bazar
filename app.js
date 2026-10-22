@@ -17,6 +17,7 @@ const S = { // estado de filtros por vista (persistido)
   vender: { q: '', cat: 'farm', sort: 'value', rarity: '', minSold: 50, maxDays: 0 },
   flips: { q: '', type: '', rarity: '', minProfit: 100, minRoi: 5, maxRoi: 200, minVol: 25, maxBuy: 0 },
   crafteo: { q: '', type: '', rarity: '', minProfit: 100, minRoi: 5, minVol: 10, autoOnly: false, discipline: '', mode: 'instant' },
+  items: { q: '', type: '', rarity: '', source: '', sort: '', dir: 'asc', page: 1, limit: 50 },
   equipo: { q: '', rarity: 'Legendary', type: '', sub: '', weight: '', source: '', sort: 'name', dir: 'asc', page: 1, limit: 100 },
 };
 try { const saved = JSON.parse(localStorage.getItem('gw2bazar.filters') || '{}'); for (const k of Object.keys(S)) if (saved[k]) S[k] = { ...S[k], ...saved[k] }; } catch {}
@@ -228,6 +229,7 @@ function route() {
   if (a === 'recs') renderRecs(b || 'vender');
   else if (a === 'cuenta' && !STATUS?.publicMode) renderAccount();
   else if (a === 'equipo') renderEquipo();
+  else if (a === 'items') renderItems();
   else if (a === 'logros') { current = { name: 'logros', refresh() {} }; renderLogros(view, { api, esc, toast, normalize: normalizeText, catId: b === 'c' && c ? Number(c) : null }); }
   else if (a === 'logro' && b) { current = { name: 'logro', refresh() {} }; renderLogro(view, { api, esc, toast, normalize: normalizeText, id: Number(b) }); window.scrollTo(0, 0); }
   else if (a === 'mapa') { current = { name: 'mapa', refresh() {} }; renderMap(view, { api, esc, toast, normalize: normalizeText, focusKey: b ? decodeURIComponent(b) : null }); }
@@ -478,6 +480,87 @@ function renderEquipo() {
   load();
 }
 
+// ---------- Items (todos los del juego) ----------
+const IT_SOURCES = { bazar: 'Bazar', crafteo: 'Crafteo', forja: 'Forja Mística', logro: 'Logro', vendedor: 'NPC vendedor', contenedor: 'Contenedor', ingrediente: 'Es ingrediente', 'colección': 'Lo pide una colección' };
+const IT_COLS = [['name', 'Item'], ['type', 'Tipo'], ['rarity', 'Rareza'], ['level', 'Nivel'], ['sell', 'Precio en bazar'], ['sources', 'Cómo se consigue / para qué sirve']];
+const iconCache = new Map();
+async function fillIcons(root, rows) {
+  const need = rows.filter((r) => !r.icon && !iconCache.has(r.id)).map((r) => r.id);
+  if (need.length) {
+    try {
+      const base = globalThis.GW2_API_BASE || 'https://api.guildwars2.com';
+      const list = await fetch(`${base}/v2/items?ids=${need.join(',')}&lang=es`).then((x) => x.json());
+      for (const it of Array.isArray(list) ? list : []) iconCache.set(it.id, it.icon);
+    } catch { /* sin íconos */ }
+  }
+  for (const r of rows) {
+    const src = r.icon || iconCache.get(r.id);
+    const ph = src && root.querySelector(`tr[data-id="${r.id}"] .icon-ph`);
+    if (ph) ph.outerHTML = `<img loading="lazy" src="${esc(src)}" alt="" class="bd-${esc(r.rarity)}">`;
+  }
+}
+
+function renderItems() {
+  const st = S.items;
+  view.innerHTML = `
+    <div class="page-head"><div><h1>Items</h1><p>Todos los items del juego (no sólo los del bazar). Buscá por nombre en español o inglés, por ID o pegando el código de chat del juego. Tocá uno para ver <b>cómo se consigue</b>, <b>para qué sirve</b> (recetas, Forja Mística, colecciones), dónde se obtiene y su precio.</p></div></div>
+    <div class="filters">
+      <input type="search" data-f="q" placeholder="Buscar… (ej: Don de la suerte, Gift of Fortune, 19626, [&AgEaTAAA])" value="${esc(st.q)}" autofocus>
+      <label>Tipo <select data-f="type">${options(META.types, st.type)}</select></label>
+      <label>Rareza <select data-f="rarity">${options(META.rarityOrder, st.rarity, 'Todas')}</select></label>
+      <label>Se consigue / sirve <select data-f="source"><option value="">Cualquiera</option>${Object.entries(IT_SOURCES).map(([k, v]) => `<option value="${k}" ${st.source === k ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
+    </div>
+    <div class="pager" id="pagerTop"></div>
+    <div class="table-wrap"><table data-managed><thead><tr>${IT_COLS.map(([k, l]) => `<th data-it="${k}" class="sortable${st.sort === k ? ` sorted ${st.dir}` : ''}" title="Ordenar por esta columna">${l}</th>`).join('')}</tr></thead>
+      <tbody id="tb"><tr><td colspan="6"><div class="skeleton"></div></td></tr></tbody></table></div>
+    <div class="pager" id="pager"></div>`;
+  bindFilters(view, st, load);
+  view.querySelector('thead').addEventListener('click', (e) => {
+    const th = e.target.closest('th[data-it]');
+    if (!th) return;
+    const k = th.dataset.it;
+    if (st.sort === k) st.dir = st.dir === 'desc' ? 'asc' : 'desc';
+    else { st.sort = k; st.dir = ['sell', 'level', 'rarity', 'sources'].includes(k) ? 'desc' : 'asc'; }
+    st.page = 1;
+    saveFilters();
+    renderItems();
+  });
+  let seq = 0;
+  async function load() {
+    const my = ++seq;
+    const tb = $('#tb');
+    if (!st.q && !st.type && !st.rarity && !st.source) {
+      tb.innerHTML = '<tr><td colspan="6" class="empty">Escribí el nombre de un item (en español o inglés), su ID o su código de chat, o elegí un tipo o rareza para listar.</td></tr>';
+      $('#pagerTop').innerHTML = ''; $('#pager').innerHTML = '';
+      return;
+    }
+    tb.innerHTML = '<tr><td colspan="6"><div class="skeleton"></div></td></tr>';
+    try {
+      const d = await api(`/api/catalog?${qs(st)}`);
+      if (my !== seq || !$('#tb')) return;
+      if (!d.ready) { $('#tb').innerHTML = '<tr><td colspan="6" class="empty">Todavía no está el catálogo completo de items (src/items-index.json).</td></tr>'; return; }
+      $('#tb').innerHTML = d.rows.length ? d.rows.map((r) => `<tr data-id="${r.id}">
+          <td>${itemCell(r, [r.nameEn && r.nameEn !== r.name ? `EN: ${r.nameEn}` : '', `ID ${r.id}`].filter(Boolean).join(' · '))}</td>
+          <td class="left small">${esc(typeName(r.type))}${r.sub ? ` <span class="muted">· ${esc(subName(r.sub))}</span>` : ''}</td>
+          <td class="left small rar-${esc(r.rarity)}">${esc(rarName(r.rarity))}</td>
+          <td class="num">${r.level || '<span class="muted">—</span>'}</td>
+          <td>${r.sell ? coin(r.sell) : r.buy ? `<span class="small muted">orden</span> ${coin(r.buy)}` : '<span class="muted small">no se vende</span>'}</td>
+          <td class="left"><span class="chips eq-src">${r.sources.map((x) => `<span class="chip chip-${x.replace(/\s/g, '-')}">${esc(IT_SOURCES[x] || x)}</span>`).join('') || '<span class="muted small">ver ficha</span>'}</span></td>
+        </tr>`).join('') : '<tr><td colspan="6" class="empty">No encontré ningún item con eso. Probá con el nombre en inglés o una parte del nombre.</td></tr>';
+      const goPage = (p) => { st.page = p; saveFilters(); load(); window.scrollTo({ top: 0 }); };
+      const setSize = (n) => { st.limit = n; st.page = 1; saveFilters(); load(); };
+      const info = { total: d.total, page: d.page, limit: d.limit, label: 'items' };
+      paintPager($('#pagerTop'), { ...info, compact: true }, goPage, setSize);
+      paintPager($('#pager'), info, goPage, setSize);
+      fillIcons(view, d.rows);
+    } catch (e) {
+      if ($('#tb')) $('#tb').innerHTML = `<tr><td colspan="6" class="empty">Error: ${esc(e.message)}</td></tr>`;
+    }
+  }
+  current = { name: 'items', refresh: load };
+  load();
+}
+
 // ---------- Mi cuenta ----------
 function renderAccount(force = false) {
   view.innerHTML = `<div class="page-head"><div><h1>Mi cuenta</h1><p>Lo que tenés en banco, depósito de materiales e inventarios que vale la pena vender, más tus ventas activas en el bazar.</p></div>
@@ -666,7 +749,9 @@ function itemHTML(d) {
         ${it.chat ? `<button class="btn ghost small" data-copy="${esc(it.chat)}">Copiar código de chat</button>` : ''}</div></div>
     </div>
     ${it.desc ? `<p class="d-desc">${esc(it.desc)}</p>` : ''}
-    <div class="cards">
+    ${d.props?.length ? `<div class="chips">${d.props.map((x) => `<span class="pill">${esc(x)}</span>`).join('')}</div>` : ''}
+    ${summaryHTML(d)}
+    ${m && (m.sell || m.buy) ? `<div class="cards">
       <div class="card"><div class="k">Orden de compra</div><div class="v">${coin(m.buy)}</div><div class="h">${qty(m.buyQty)} pedidas</div></div>
       <div class="card"><div class="k">Precio de venta</div><div class="v">${coin(m.sell)}</div><div class="h">${qty(m.sellQty)} en venta</div></div>
       <div class="card"><div class="k">Cobrás publicando</div><div class="v">${coin(d.netSell)}</div><div class="h">venta − 1c − 15%</div></div>
@@ -674,24 +759,53 @@ function itemHTML(d) {
       <div class="card"><div class="k">Vendidos 24h / 7d</div><div class="v num">${qty(m.s1)} <span class="muted">/ ${qty(m.s7)}</span></div><div class="h">órdenes llenadas: ${qty(m.b1)} / ${qty(m.b7)}</div></div>
       <div class="card"><div class="k">Margen de flipeo</div><div class="v">${coin(m.profit)}</div><div class="h">ROI ${pct(m.roi)}</div></div>
     </div>
-    <div class="section"><h3>Precio últimas 24 h</h3>${sparkline(d.history)}</div>
+    <div class="section"><h3>Precio últimas 24 h</h3>${sparkline(d.history)}</div>` : ''}
     ${L ? `<div class="section"><h3>Libro de órdenes en vivo <span class="muted small">(${new Date(L.at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })})</span></h3><div class="two">${depth(L.sells, 'Vendiendo a')}${depth(L.buys, 'Comprando a')}</div></div>` : ''}
 
     <div class="section"><h3>Cómo conseguirlo</h3>
       <div class="ways">${d.ways.map((w) => `<div class="way"><div class="ic">${WAY_ICON[w.kind] || '•'}</div><div><b>${esc(w.title)}</b><p>${coinText(w.text)}</p></div></div>`).join('')}</div>
     </div>
     ${d.sources?.length ? `<div class="section"><h3>Formas de conseguirlo</h3>${srcChips(d.sources)}</div>` : ''}
-    ${d.achievements?.length ? `<div class="section"><h3>Logros y colecciones que lo dan</h3><ul class="steps">${d.achievements.map((a) => `<li><a href="#/logro/${a.id}"><b>${esc(a.name)}</b></a>${a.category ? ` <span class="muted small">— ${esc(a.category)}</span>` : ''}${a.type === 'ItemSet' ? ' <span class="pill">colección</span>' : ''}</li>`).join('')}</ul></div>` : ''}
+    ${achList(d.achievements, 'recompensa', 'Logros y colecciones que lo dan como recompensa')}
     ${recipesHTML(d)}
     <div class="section" id="wikiSec"><h3>Dónde se consigue: NPC, mapa, drops y contenedores <span class="muted small">(wiki oficial)</span></h3>${wikiDataHTML(d.wiki)}<div id="wikiBox"><div class="skeleton"></div></div></div>
     ${d.hints.length ? `<div class="section"><h3>Guía general para este tipo de item</h3><ul class="hint-list">${d.hints.map((h) => `<li>${esc(h)}</li>`).join('')}</ul></div>` : ''}
-    ${d.usedIn.total ? `<div class="section"><h3>Se usa para craftear (${d.usedIn.total})</h3>
+    ${achList(d.achievements, 'parte', 'Colecciones y logros que lo piden')}
+    ${d.usedIn.total ? `<div class="section"><h3>Qué se puede hacer con él: se usa para craftear (${d.usedIn.total})</h3>
       <p class="muted small">Si se usa en muchas recetas que se venden bien, la demanda es estable.</p><div id="usedInBox"></div></div>` : ''}
     <div class="section"><h3>Enlaces</h3><div class="links">
       ${d.links.wiki ? `<a class="btn ghost small" target="_blank" rel="noopener" href="${esc(d.links.wiki)}">Wiki (inglés)</a>` : ''}
       <a class="btn ghost small" target="_blank" rel="noopener" href="${esc(d.links.wikiEs)}">Wiki (español)</a>
       <a class="btn ghost small" target="_blank" rel="noopener" href="${esc(d.links.bltc)}">Historial en GW2BLTC</a>
     </div></div>`;
+}
+
+function achList(list, role, title) {
+  const l = (list || []).filter((a) => (a.role || 'recompensa') === role);
+  if (!l.length) return '';
+  return `<div class="section"><h3>${title} (${l.length})</h3><ul class="steps">${l.slice(0, 60).map((a) => `<li><a href="#/logro/${a.id}"><b>${esc(a.name)}</b></a>${a.category ? ` <span class="muted small">— ${esc(a.category)}</span>` : ''}${a.type === 'ItemSet' ? ' <span class="pill">colección</span>' : ''}</li>`).join('')}${l.length > 60 ? `<li class="muted small">y ${l.length - 60} más…</li>` : ''}</ul></div>`;
+}
+
+/** Resumen rápido arriba de la ficha: cómo se consigue y para qué sirve. */
+function summaryHTML(d) {
+  const it = d.item, m = d.market || {};
+  const get = [], use = [];
+  if (m.sell || m.buy) get.push(`se compra en el bazar (${coin(m.sell || m.buy)})`);
+  if ((d.sources || []).includes('crafteo')) get.push('se craftea');
+  if ((d.sources || []).includes('forja')) get.push('sale de la Forja Mística');
+  if ((d.sources || []).includes('vendedor')) get.push(`lo venden NPC${d.wiki?.soldBy?.length ? ` (${d.wiki.soldBy.length})` : ''}`);
+  if ((d.sources || []).includes('contenedor')) get.push('sale de contenedores/bolsas');
+  const rew = (d.achievements || []).filter((a) => (a.role || 'recompensa') === 'recompensa').length;
+  if (rew) get.push(`recompensa de ${rew} logro${rew === 1 ? '' : 's'}`);
+  if (d.wiki?.gathered?.length) get.push('se recolecta');
+  if (d.wiki?.rewardTracks?.length) get.push('reward tracks');
+  if (d.usedIn?.total) use.push(`ingrediente en ${d.usedIn.total} receta${d.usedIn.total === 1 ? '' : 's'} (crafteo o Forja Mística)`);
+  const part = (d.achievements || []).filter((a) => a.role === 'parte').length;
+  if (part) use.push(`lo piden ${part} colección${part === 1 ? '' : 'es'}/logro${part === 1 ? '' : 's'}`);
+  if (it.vendor) use.push(`venderlo a un NPC por ${coin(it.vendor)}`);
+  if (m.sell || m.buy) use.push('venderlo en el bazar');
+  if (!get.length && !use.length) return '';
+  return `<div class="explain d-summary">${get.length ? `<div><b>Cómo se consigue:</b> ${get.join(' · ')}</div>` : '<div><b>Cómo se consigue:</b> mirá la sección de la wiki más abajo.</div>'}${use.length ? `<div><b>Para qué sirve:</b> ${use.join(' · ')}</div>` : ''}</div>`;
 }
 
 function wireItem(body, d) {

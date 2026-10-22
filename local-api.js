@@ -4,6 +4,8 @@ import { startScheduler } from './sync.js';
 import { setWikiData } from './wikidata.js';
 import { setEquipmentData, listEquipment } from './equipment.js';
 import { setGeoData, vendorMarkers } from './vendors.js';
+import { setCatalog, setAchItems, searchCatalog, indexItem } from './catalog.js';
+import { syncItems } from './sync.js';
 import { listItems, flips, demand, craftingProfits } from './analysis.js';
 import { itemDetail } from './sources.js';
 import { acquisition } from './wiki.js';
@@ -17,8 +19,17 @@ const ready = (async () => {
   try { setWikiData(await (await fetch('wiki-data.json')).json()); } catch (e) { console.warn('sin wiki-data.json', e); }
   try { setEquipmentData(await (await fetch('equipment.json')).json()); } catch (e) { console.warn('sin equipment.json', e); }
   try { setGeoData(await (await fetch('geo.json')).json()); } catch (e) { console.warn('sin geo.json', e); }
+  // Logros por item: chico, se carga siempre (la ficha lo usa).
+  try { setAchItems(await (await fetch('ach-items.json')).json()); } catch (e) { console.warn('sin ach-items.json', e); }
   startScheduler();
 })();
+
+// El índice de todos los items pesa varios MB: sólo se baja la primera vez que se usa la pestaña Items.
+let catalogP = null;
+function loadCatalog() {
+  if (!catalogP) catalogP = fetch('items-index.json').then((r) => r.json()).then(setCatalog).catch((e) => { catalogP = null; throw e; });
+  return catalogP;
+}
 
 function num(v, d = 0) {
   if (v == null || v === '') return d;
@@ -39,6 +50,10 @@ const routes = {
   }),
   '/api/meta': () => ({ types: TYPES, rarities: RARITIES, rarityOrder: RARITY_ORDER, disciplines: DISCIPLINES, gameTypes: GAME_TYPES, recipeFlags: RECIPE_FLAGS, subtypes: SUBTYPES, weights: WEIGHTS }),
   '/api/vendors': () => vendorMarkers(),
+  '/api/catalog': async (q) => {
+    await loadCatalog();
+    return searchCatalog({ q: q.get('q') || '', type: q.get('type') || '', rarity: q.get('rarity') || '', source: q.get('source') || '', sort: q.get('sort') || '', dir: q.get('dir') || 'asc', page: num(q.get('page'), 1), limit: Math.min(1000, num(q.get('limit'), 50)) });
+  },
   '/api/ach-guide': (q) => achievementGuide(q.get('title') || '', { id: Number(q.get('id')) || 0, cat: q.get('cat') || '' }),
   '/api/equipment': (q) => listEquipment({ q: q.get('q') || '', rarity: q.get('rarity') || '', type: q.get('type') || '', sub: q.get('sub') || '', weight: q.get('weight') || '', source: q.get('source') || '', sort: q.get('sort') || 'name', dir: q.get('dir') || 'asc', page: num(q.get('page'), 1), limit: Math.min(1000, num(q.get('limit'), 100)), mode: q.get('mode') === 'order' ? 'order' : 'instant' }),
   '/api/items': (q) => listItems({
@@ -68,6 +83,8 @@ export async function localApi(path) {
     if (m) {
       const id = Number(m[1]);
       if (m[2]) return { status: 200, body: await acquisition(id, { force: url.searchParams.get('force') === '1' }) };
+      if (!state.items.has(id) && !state.prices.has(id)) { try { await syncItems([id]); } catch { /* sigue */ } }
+      if (!state.items.has(id) && !state.prices.has(id)) { const ix = indexItem(id); if (ix) state.items.set(id, { ...ix, vendor: 0, flags: [], gameTypes: [], desc: '', icon: null }); }
       const d = await itemDetail(id, { mode: url.searchParams.get('mode') === 'order' ? 'order' : 'instant' });
       return d ? { status: 200, body: d } : { status: 404, body: { error: 'Item no encontrado (¿todavía cargando?)' } };
     }
