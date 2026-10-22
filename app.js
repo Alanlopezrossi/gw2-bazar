@@ -10,7 +10,7 @@ const pf = new Intl.NumberFormat('es-AR', { style: 'percent', maximumFractionDig
 let META = { types: {}, rarities: {}, rarityOrder: [], disciplines: {} };
 let STATUS = null;
 const S = { // estado de filtros por vista (persistido)
-  bazar: { q: '', type: '', rarity: '', sort: 's1', dir: 'desc', page: 1, minVol: 0, onlyFlip: false },
+  bazar: { q: '', type: '', rarity: '', sort: 's1', dir: 'desc', page: 1, minVol: 0, onlyFlip: false, limit: 100 },
   vender: { q: '', cat: 'farm', sort: 'value', rarity: '', minSold: 50, maxDays: 0 },
   flips: { q: '', type: '', rarity: '', minProfit: 100, minRoi: 5, maxRoi: 200, minVol: 25, maxBuy: 0 },
   crafteo: { q: '', type: '', rarity: '', minProfit: 100, minRoi: 5, minVol: 10, autoOnly: false, discipline: '', mode: 'instant' },
@@ -142,6 +142,7 @@ function renderBazar() {
       <label>Vendidos/día ≥ <input type="number" min="0" data-f="minVol" value="${st.minVol}"></label>
       <label><input type="checkbox" data-f="onlyFlip" ${st.onlyFlip ? 'checked' : ''}> sólo con margen positivo</label>
     </div>
+    <div class="pager" id="pagerTop"></div>
     <div class="table-wrap"><table><thead><tr>${BAZAR_COLS.map(([k, l]) => `<th data-sort="${k}" class="${st.sort === k ? `sorted ${st.dir}` : ''}">${l}</th>`).join('')}</tr></thead><tbody id="tb"><tr><td colspan="10"><div class="skeleton"></div></td></tr></tbody></table></div>
     <div class="pager" id="pager"></div>`;
   bindFilters(view, st, load);
@@ -157,7 +158,7 @@ function renderBazar() {
   );
   async function load() {
     try {
-      const d = await api(`/api/items?${qs({ ...st, limit: 50 })}`);
+      const d = await api(`/api/items?${qs({ ...st, limit: st.limit || 100 })}`);
       const tb = $('#tb');
       if (!tb) return;
       tb.innerHTML = d.rows.length
@@ -170,9 +171,20 @@ function renderBazar() {
             <td class="num">${pct(r.change24)}</td></tr>`).join('')
         : `<tr><td colspan="10" class="empty">${STATUS?.counts.prices ? 'Nada coincide con esos filtros.' : 'Descargando precios por primera vez…'}</td></tr>`;
       const pages = Math.max(1, Math.ceil(d.total / d.limit));
-      $('#pager').innerHTML = `<span>${nf.format(d.total)} items · página ${d.page} de ${pages}</span>
-        <span class="btns"><button class="btn ghost small" data-p="-1" ${d.page <= 1 ? 'disabled' : ''}>← Anterior</button><button class="btn ghost small" data-p="1" ${d.page >= pages ? 'disabled' : ''}>Siguiente →</button></span>`;
-      $$('#pager [data-p]').forEach((b) => b.addEventListener('click', () => { st.page = Math.min(pages, Math.max(1, st.page + Number(b.dataset.p))); saveFilters(); load(); window.scrollTo({ top: 0 }); }));
+      const sizes = [50, 100, 250, 500, 1000];
+      const nav = (where) => `<span class="btns">
+          <button class="btn ghost small" data-go="1" ${d.page <= 1 ? 'disabled' : ''}>« Primera</button>
+          <button class="btn ghost small" data-go="${d.page - 1}" ${d.page <= 1 ? 'disabled' : ''}>← Anterior</button>
+          <label class="pg">Página <input type="number" min="1" max="${pages}" value="${d.page}" data-jump="${where}"> de ${nf.format(pages)}</label>
+          <button class="btn ghost small" data-go="${d.page + 1}" ${d.page >= pages ? 'disabled' : ''}>Siguiente →</button>
+          <button class="btn ghost small" data-go="${pages}" ${d.page >= pages ? 'disabled' : ''}>Última »</button></span>`;
+      $('#pager').innerHTML = `<span>${nf.format(d.total)} items · mostrando ${nf.format(Math.min(d.total, (d.page - 1) * d.limit + 1))}–${nf.format(Math.min(d.total, d.page * d.limit))}
+          · <label class="pg">por página <select data-size>${sizes.map((n) => `<option ${n === d.limit ? 'selected' : ''}>${n}</option>`).join('')}</select></label></span>${nav('bottom')}`;
+      $('#pagerTop').innerHTML = `<span>${nf.format(d.total)} items en el bazar</span>${nav('top')}`;
+      const go = (p) => { st.page = Math.min(pages, Math.max(1, p)); saveFilters(); load(); window.scrollTo({ top: 0 }); };
+      $$('#pager [data-go], #pagerTop [data-go]').forEach((b) => b.addEventListener('click', () => go(Number(b.dataset.go))));
+      $$('#pager [data-jump], #pagerTop [data-jump]').forEach((i) => i.addEventListener('change', () => go(Number(i.value) || 1)));
+      $('#pager [data-size]').addEventListener('change', (e) => { st.limit = Number(e.target.value); st.page = 1; saveFilters(); load(); });
     } catch (e) {
       $('#tb').innerHTML = `<tr><td colspan="10" class="empty">Error: ${esc(e.message)}</td></tr>`;
     }

@@ -33,7 +33,7 @@ const routes = {
   '/api/meta': () => ({ types: TYPES, rarities: RARITIES, rarityOrder: RARITY_ORDER, disciplines: DISCIPLINES, gameTypes: GAME_TYPES, recipeFlags: RECIPE_FLAGS }),
   '/api/items': (q) => listItems({
     q: q.get('q') || '', type: q.get('type') || '', rarity: q.get('rarity') || '', sort: q.get('sort') || 's1', dir: q.get('dir') || 'desc',
-    page: num(q.get('page'), 1), limit: Math.min(200, num(q.get('limit'), 50)), minVol: num(q.get('minVol'), 0), onlyFlip: q.get('onlyFlip') === '1',
+    page: num(q.get('page'), 1), limit: Math.min(1000, num(q.get('limit'), 100)), minVol: num(q.get('minVol'), 0), onlyFlip: q.get('onlyFlip') === '1',
   }),
   '/api/recs/flips': (q) => flips({
     minProfit: num(q.get('minProfit'), 100), minRoi: num(q.get('minRoi'), 5) / 100, maxRoi: num(q.get('maxRoi'), 200) / 100, minVol: num(q.get('minVol'), 25),
