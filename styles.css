@@ -380,6 +380,10 @@ tr.obtain-row td { padding-top: 0; border-top: 0; }
 .wiki-html table { width: auto; }
 a.chip { text-decoration: none; display: inline-block; margin: 2px; }
 @media (max-width: 860px) { .ach-layout { grid-template-columns: 1fr; } .ach-cats { position: static; max-height: 260px; } }
+.ach-snap .wl { color: var(--accent-2); }
+.ach-snap ul { margin: 4px 0 4px 18px; padding: 0; }
+.ach-snap div { margin: 2px 0; }
+.ach-snap i { display: block; margin: 4px 0; color: var(--muted); }
 
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }

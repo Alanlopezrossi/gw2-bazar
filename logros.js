@@ -362,38 +362,72 @@ export async function renderLogro(view, { api, esc, id, toast, normalize }) {
       </div></div>
     </div>`;
 
-  // Guía de la wiki + lugares mencionados que existen en el mapa.
-  try {
-    const gd = await api(`/api/ach-guide?title=${encodeURIComponent(en?.name || a.name)}&id=${a.id}&cat=${encodeURIComponent(catEn)}`);
-    const box = view.querySelector('#aguide');
-    if (!box) return;
-    if (!gd.available) { box.innerHTML = `<p class="muted">${esc(gd.reason || 'Sin guía.')}</p><a class="btn ghost small" target="_blank" rel="noopener" href="${esc(gd.url || '#')}">Abrir en la wiki</a>`; return; }
-    const { html, links } = cleanWiki(gd.kind === 'category' ? rowsOf(gd.html, gd.achId) : gd.html, esc);
-    box.innerHTML = `${gd.source === 'archivo' ? '<p class="muted small">La wiki está caída: muestro la copia archivada (puede estar algo desactualizada).</p>' : ''}${gd.kind === 'category' ? `<p class="muted small">De la página de la categoría en la wiki: <a target="_blank" rel="noopener" href="${esc(gd.url)}">${esc(gd.title)}</a></p>` : ''}<div class="wiki-html">${html}</div>`;
-    let labels = null;
-    try { labels = (await api('/api/vendors')).labels; } catch {}
-    if (labels && links.length) {
-      const idx = new Map();
-      for (const s of labels.sectors) idx.set(normalize(s.en), { ...s, kind: 'sector' });
-      for (const m of labels.maps) idx.set(normalize(m.en), { ...m, kind: 'mapa' });
-      for (const w of labels.waypoints || []) if (!idx.has(normalize(w.en))) idx.set(normalize(w.en), { ...w, kind: 'waypoint' });
-      const hits = [];
-      for (const l of links) { const h = idx.get(normalize(l)); if (h && !hits.some((x) => x.en === h.en)) hits.push(h); }
-      // Primero waypoints, después mapas y sectores en el orden en que aparecen en la guía.
-      const rank = { waypoint: 0, mapa: 1, sector: 2 };
-      hits.sort((x, y) => rank[x.kind] - rank[y.kind]);
-      hits.splice(12);
-      if (hits.length) {
-        view.querySelector('#aplaces').innerHTML = `<p class="small"><b>Lugares mencionados:</b> ${hits.map((h) => `<a class="chip" href="#/mapa/@${h.c[0]},${h.c[1]},${encodeURIComponent(h.es)}" title="${esc(h.en)}${h.chat ? ` · ${esc(h.chat)}` : ''}">${h.kind === 'waypoint' ? '🌀' : '📍'} ${esc(h.es)}</a>${h.chat ? `<button class="btn ghost small" data-copy="${esc(h.chat)}" title="Copiar código del waypoint para el chat del juego">${esc(h.chat)}</button>` : ''}`).join(' ')}</p>`;
-      }
+  // Lugares y guía. 1) lugares deducidos del texto del logro (API oficial, sin wiki);
+  // 2) guía de la instantánea incluida en el sitio; 3) si no está, la wiki en vivo o su copia archivada.
+  const placesBox = view.querySelector('#aplaces');
+  const box = view.querySelector('#aguide');
+  let labels = null;
+  try { labels = (await api('/api/vendors')).labels; } catch {}
+  const found = [];
+  const add = (h) => { if (h && !found.some((x) => x.en === h.en)) found.push(h); };
+  const all = labels ? [
+    ...labels.waypoints.map((w) => ({ ...w, kind: 'waypoint' })),
+    ...labels.maps.map((m) => ({ ...m, kind: 'mapa' })),
+    ...labels.sectors.map((x) => ({ ...x, kind: 'sector' })),
+  ] : [];
+  if (labels) {
+    const text = ` ${normalize([a.name, a.description, a.requirement, a.locked_text, cat?.name, ...bits.map((b) => b.text || '')].join(' | '))} `;
+    for (const c of all) {
+      const n = normalize(c.es);
+      if (n.length < 5) continue;
+      const i = text.indexOf(n);
+      if (i > 0 && !/[a-z0-9]/.test(text[i - 1]) && !/[a-z0-9]/.test(text[i + n.length] || ' ')) add(c);
     }
-    view.querySelector('#aplaces').addEventListener('click', async (e) => {
-      const b = e.target.closest('[data-copy]');
-      if (!b) return;
-      try { await navigator.clipboard.writeText(b.dataset.copy); toast?.('Waypoint copiado: pegalo en el chat del juego'); } catch { toast?.(b.dataset.copy); }
-    });
-  } catch (e) {
-    const box = view.querySelector('#aguide');
-    if (box) box.innerHTML = `<p class="muted">No pude traer la guía (${esc(e.message)}).</p>`;
+  }
+  const byEn = new Map(all.map((c) => [normalize(c.en), c]));
+  const paintPlaces = () => {
+    const rank = { waypoint: 0, mapa: 1, sector: 2 };
+    const list = [...found].sort((x, y) => rank[x.kind] - rank[y.kind]).slice(0, 12);
+    if (!placesBox || !list.length) return;
+    placesBox.innerHTML = `<p class="small"><b>Dónde:</b> ${list.map((h) => `<a class="chip" href="#/mapa/@${h.c[0]},${h.c[1]},${encodeURIComponent(h.es)}" title="${esc(h.en)}${h.chat ? ` · ${esc(h.chat)}` : ''}">${h.kind === 'waypoint' ? '🌀' : '📍'} ${esc(h.es)}</a>${h.chat ? `<button class="btn ghost small" data-copy="${esc(h.chat)}" title="Copiar código del waypoint para el chat del juego">${esc(h.chat)}</button>` : ''}`).join(' ')}</p>`;
+  };
+  paintPlaces();
+  placesBox?.addEventListener('click', async (e) => {
+    const b = e.target.closest('[data-copy]');
+    if (!b) return;
+    try { await navigator.clipboard.writeText(b.dataset.copy); toast?.('Waypoint copiado: pegalo en el chat del juego'); } catch { toast?.(b.dataset.copy); }
+  });
+
+  const snap = await snapshot();
+  const sg = snap?.guides?.[a.id];
+  if (sg && box) {
+    box.innerHTML = `<div class="wiki-html ach-snap">${sg.h}</div><p class="muted small">Guía incluida en el sitio (wiki oficial, copia del ${esc(snap.at || '')}). <button class="btn ghost small" id="aLive">Buscar versión más completa en la wiki</button></p>`;
+    for (const l of sg.l || []) add(byEn.get(normalize(l)));
+    paintPlaces();
+    box.querySelector('#aLive')?.addEventListener('click', () => loadWiki(true));
+    return;
+  }
+  await loadWiki(false);
+
+  async function loadWiki(replace) {
+    try {
+      if (replace) box.innerHTML = '<div class="skeleton"></div>';
+      const gd = await api(`/api/ach-guide?title=${encodeURIComponent(en?.name || a.name)}&id=${a.id}&cat=${encodeURIComponent(catEn)}`);
+      if (!box.isConnected) return;
+      if (!gd.available) { box.innerHTML = `<p class="muted">${esc(gd.reason || 'Sin guía.')}</p><a class="btn ghost small" target="_blank" rel="noopener" href="${esc(gd.url || '#')}">Abrir en la wiki</a>`; return; }
+      const { html, links } = cleanWiki(gd.kind === 'category' ? rowsOf(gd.html, gd.achId) : gd.html, esc);
+      box.innerHTML = `${gd.source === 'archivo' ? '<p class="muted small">La wiki está caída: muestro la copia archivada (puede estar algo desactualizada).</p>' : ''}${gd.kind === 'category' ? `<p class="muted small">De la página de la categoría en la wiki: <a target="_blank" rel="noopener" href="${esc(gd.url)}">${esc(gd.title)}</a></p>` : ''}<div class="wiki-html">${html}</div>`;
+      for (const l of links) add(byEn.get(normalize(l)));
+      paintPlaces();
+    } catch (e) {
+      if (box) box.innerHTML = `<p class="muted">No pude traer la guía (${esc(e.message)}).</p>`;
+    }
   }
 }
+
+let SNAP = null;
+function snapshot() {
+  if (!SNAP) SNAP = fetch('ach-guides.json').then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  return SNAP;
+}
+
