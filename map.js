@@ -27,13 +27,14 @@ export async function renderMap(view, { api, esc, toast, focusKey, normalize }) 
     return { refresh() {} };
   }
   const L = window.L;
-  const Z = d.geo.maxZoom;
-  gmap = L.map('gmap', { crs: L.CRS.Simple, minZoom: 1, maxZoom: Z, zoomControl: true, attributionControl: true });
+  // Las coordenadas de la API son píxeles en zoom 7 (los mosaicos llegan hasta 7, aunque la API diga 8).
+  const Z = 7;
+  gmap = L.map('gmap', { crs: L.CRS.Simple, minZoom: 1, maxZoom: Z + 1, zoomControl: true, attributionControl: true });
   const un = (c) => gmap.unproject(c, Z);
   const bounds = L.latLngBounds(un([0, d.geo.dims[1]]), un([d.geo.dims[0], 0]));
-  L.tileLayer('https://tiles.guildwars2.com/1/1/{z}/{x}/{y}.jpg', { minZoom: 1, maxZoom: Z, bounds, noWrap: true, attribution: 'Mapa © ArenaNet · datos: API oficial y wiki de GW2' }).addTo(gmap);
+  L.tileLayer('https://tiles.guildwars2.com/1/1/{z}/{x}/{y}.jpg', { minZoom: 1, maxZoom: Z + 1, maxNativeZoom: Z, bounds, noWrap: true, attribution: 'Mapa © ArenaNet · datos: API oficial y wiki de GW2' }).addTo(gmap);
   gmap.setMaxBounds(bounds.pad(0.1));
-  gmap.setView(un([d.geo.dims[0] * 0.5, d.geo.dims[1] * 0.45]), 2);
+  gmap.setView(un([49216, 31488]), 3); // centrado en Arco del León
   const layer = L.layerGroup().addTo(gmap);
 
   const sel = view.querySelector('#mcur');
@@ -48,6 +49,7 @@ export async function renderMap(view, { api, esc, toast, focusKey, normalize }) 
     </div>`;
 
   const markerOf = new Map();
+  let outline = null;
   let shown = [];
   function apply() {
     const q = normalize(view.querySelector('#mq').value).trim();
@@ -60,8 +62,17 @@ export async function renderMap(view, { api, esc, toast, focusKey, normalize }) 
       const hay = normalize(`${m.vendor} ${m.zone} ${m.area} ${m.loc.mapName || ''} ${m.items.map((i) => i.name).join(' ')}`);
       return q.split(/\s+/).every((w) => hay.includes(w));
     });
+    // NPC en el mismo sector: los abrimos en espiral para que no queden apilados en un solo punto.
+    const stack = new Map();
     for (const m of shown) {
-      const mk = L.circleMarker(un(m.loc.coord), { radius: m.loc.precision === 'sector' ? 7 : 5, color: '#1a1407', weight: 1.5, fillColor: m.loc.precision === 'sector' ? '#f0c873' : '#9a958a', fillOpacity: 0.95 })
+      const ck = m.loc.coord.join(',');
+      const i = stack.get(ck) || 0;
+      stack.set(ck, i + 1);
+      const a = i * 2.399963, r = i ? 22 * Math.sqrt(i) : 0;
+      m.pos = [m.loc.coord[0] + r * Math.cos(a), m.loc.coord[1] + r * Math.sin(a)];
+      const R = m.loc.rect;
+      if (R) m.pos = [Math.min(Math.max(m.pos[0], R[0][0] + 10), R[1][0] - 10), Math.min(Math.max(m.pos[1], R[0][1] + 10), R[1][1] - 10)];
+      const mk = L.circleMarker(un(m.pos), { radius: m.loc.precision === 'sector' ? 7 : 5, color: '#1a1407', weight: 1.5, fillColor: m.loc.precision === 'sector' ? '#f0c873' : '#9a958a', fillOpacity: 0.95 })
         .bindTooltip(esc(m.vendor), { direction: 'top' })
         .bindPopup(popup(m), { maxWidth: 360, maxHeight: 320 });
       mk.addTo(layer);
@@ -76,8 +87,10 @@ export async function renderMap(view, { api, esc, toast, focusKey, normalize }) 
     const m = d.markers.find((x) => x.key === key);
     const mk = markerOf.get(key);
     if (!m || !mk) return false;
+    if (outline) outline.remove();
+    if (m.loc.rect) outline = L.rectangle(L.latLngBounds(un(m.loc.rect[0]), un(m.loc.rect[1])), { color: '#f0c873', weight: 1.5, dashArray: '6 4', fill: false, interactive: false }).addTo(gmap);
     gmap.once('moveend', () => mk.openPopup());
-    gmap.flyTo(un(m.loc.coord), Math.min(Z, 5), { duration: 0.8 });
+    gmap.flyTo(un(m.pos || m.loc.coord), 6, { duration: 0.8 });
     return true;
   }
   view.querySelector('#mq').addEventListener('input', () => apply());

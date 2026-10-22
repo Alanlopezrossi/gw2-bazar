@@ -116,18 +116,18 @@ function locate(area, zone, idx) {
   let sec = secs.find((s) => maps.some((m) => m.id === s.map)) || (!maps.length ? secs[0] : null);
   if (sec) {
     const map = GEO.maps[sec.map];
-    return { coord: sec.coord, mapId: sec.map, mapName: map?.name || map?.nameEn, sector: sec.name || sec.nameEn, precision: 'sector' };
+    return { coord: sec.coord, mapId: sec.map, mapName: map?.name || map?.nameEn, sector: sec.name || sec.nameEn, precision: 'sector', rect: map?.rect };
   }
   // A veces la "zona" de la wiki es en realidad un sector (ej. un pabellón dentro de un mapa).
   if (!maps.length && nz && idx.sectorsByName.has(nz)) {
     const s2 = idx.sectorsByName.get(nz)[0];
     const map = GEO.maps[s2.map];
-    return { coord: s2.coord, mapId: s2.map, mapName: map?.name || map?.nameEn, sector: s2.name || s2.nameEn, precision: 'sector' };
+    return { coord: s2.coord, mapId: s2.map, mapName: map?.name || map?.nameEn, sector: s2.name || s2.nameEn, precision: 'sector', rect: map?.rect };
   }
   if (maps.length) {
     const m = maps[0];
     const c = [(m.rect[0][0] + m.rect[1][0]) / 2, (m.rect[0][1] + m.rect[1][1]) / 2].map(Math.round);
-    return { coord: c, mapId: m.id, mapName: m.name || m.nameEn, sector: null, precision: 'mapa' };
+    return { coord: c, mapId: m.id, mapName: m.name || m.nameEn, sector: null, precision: 'mapa', rect: m.rect };
   }
   return null;
 }
