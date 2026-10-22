@@ -436,6 +436,52 @@ function treeHTML(n, top = true) {
   return `<li><details class="tg" ${open ? 'open' : ''}><summary>${head}</summary><ul>${n.children.map((c) => treeHTML(c, false)).join('')}</ul></details></li>`;
 }
 
+
+const discName = (ds) => (ds || []).map((x) => META.disciplines[x] || x).join(', ');
+const ingIcon = (g) => (g.icon ? `<img src="${esc(g.icon)}" alt="" class="ing-ic bd-${esc(g.rarity)}">` : '<span class="ing-ic icon-ph"></span>');
+
+/** Sección "Cómo se crea": recetas, ingredientes, lista de compras y árbol completo. */
+function recipesHTML(d) {
+  if (!d.recipes?.length) return '';
+  const cards = d.recipes.map((r, i) => `
+    <div class="recipe">
+      <div class="recipe-h">
+        <b>${d.recipes.length > 1 ? `Receta ${i + 1}` : 'Receta'}</b>
+        <span class="pill">${esc(discName(r.disciplines))} · nivel ${r.minRating}</span>
+        <span class="pill ${r.needsRecipe ? 'warn' : 'good'}">${r.needsRecipe ? 'hay que aprender la receta (item de receta)' : 'se aprende sola al subir la disciplina'}</span>
+        ${r.outCount > 1 ? `<span class="pill">da ${r.outCount} unidades</span>` : ''}
+      </div>
+      <table class="ing"><thead><tr><th>Ingrediente</th><th>Cantidad</th><th>Precio c/u</th><th>Subtotal</th><th>De dónde sale</th></tr></thead><tbody>
+      ${r.ingredients.map((g) => g.kind !== 'Item'
+        ? `<tr><td>${g.coin ? 'Monedas' : esc(`${g.kind} #${g.id}`)}</td><td class="num">${qty(g.count)}</td><td></td><td>${g.coin ? coin(g.count) : ''}</td><td class="left small muted">${g.coin ? 'se paga al craftear' : 'divisa / mejora de clan'}</td></tr>`
+        : `<tr data-goto="${g.id}" class="clickable"><td><span class="ing-name">${ingIcon(g)}<span class="rar-${esc(g.rarity)}">${esc(g.name)}</span></span></td><td class="num">${qty(g.count)}</td>
+            <td>${coin(g.unit)}</td><td>${g.unit != null ? coin(g.unit * g.count) : coin(null)}</td>
+            <td class="left small">${[g.tradable ? 'bazar' : '', g.craftable ? 'se craftea' : '', !g.tradable && !g.craftable ? '<span class="pill warn">no comerciable: NPC, drop o divisa (ver abajo)</span>' : ''].filter(Boolean).join(' · ')}</td></tr>`).join('')}
+      </tbody></table>
+    </div>`).join('');
+
+  const sh = d.shopping;
+  const shop = sh ? `
+    <h4 class="sub-h">Lista de compras para 1 unidad <span class="muted small">(camino más barato: comprar lo que conviene y craftear el resto)</span></h4>
+    <table class="ing"><thead><tr><th>Material</th><th>Cantidad</th><th>Precio c/u</th><th>Subtotal</th></tr></thead><tbody>
+      ${sh.items.map((e) => e.kind !== 'Item'
+        ? `<tr><td>${esc(e.name)}</td><td class="num">${qty(e.qty)}</td><td></td><td class="muted small">divisa</td></tr>`
+        : `<tr data-goto="${e.id}" class="clickable"><td><span class="ing-name">${ingIcon(e)}<span class="rar-${esc(e.rarity)}">${esc(e.name)}</span></span></td><td class="num">${qty(e.qty)}</td><td>${coin(e.unit)}</td><td>${e.unit != null ? coin(e.unit * e.qty) : '<span class="pill warn">sin precio</span>'}</td></tr>`).join('')}
+      ${sh.coins ? `<tr><td>Monedas (costo de la receta)</td><td></td><td></td><td>${coin(sh.coins)}</td></tr>` : ''}
+      <tr class="tot"><td>Total</td><td></td><td></td><td>${coin(sh.total)}${sh.missing ? ` <span class="muted small">+ ${sh.missing} sin precio</span>` : ''}</td></tr>
+    </tbody></table>
+    ${sh.crafts.length ? `<h4 class="sub-h">Pasos intermedios que conviene craftear</h4><ul class="steps">${sh.crafts.map((c) => `<li>${qty(c.qty)}× <a href="#/item/${c.id}" data-goto="${c.id}" class="rar-${esc(c.rarity)}">${esc(c.name)}</a> <span class="muted small">— ${esc(discName(c.disciplines))} ${c.minRating ?? ''}${c.needsRecipe ? ' · requiere receta' : ''}${c.gated ? ' · 1 por día' : ''}</span></li>`).join('')}</ul>` : ''}` : '';
+
+  return `<div class="section"><h3>Cómo se crea</h3>
+    ${cards}
+    ${shop}
+    ${d.tree ? `<details class="tree-wrap"><summary>Ver árbol de crafteo completo</summary>
+      <p class="muted small">Verde = la opción más barata en cada paso. Ingredientes con <em>${S.crafteo.mode === 'order' ? 'órdenes de compra' : 'compra instantánea'}</em> (cambialo en Recomendados → Crafteo).</p>
+      <div class="tree"><ul>${treeHTML(d.tree)}</ul></div></details>` : ''}
+    <p class="muted small">Las recetas de la Forja Mística no están en la API oficial: si existen, aparecen en la sección de la wiki.</p>
+  </div>`;
+}
+
 const WAY_ICON = { tp: '⚖', craft: '⚒', 'npc-sell': '🪙', notp: '✋' };
 
 function itemHTML(d) {
@@ -465,10 +511,8 @@ function itemHTML(d) {
     <div class="section"><h3>Cómo conseguirlo</h3>
       <div class="ways">${d.ways.map((w) => `<div class="way"><div class="ic">${WAY_ICON[w.kind] || '•'}</div><div><b>${esc(w.title)}</b><p>${coinText(w.text)}</p></div></div>`).join('')}</div>
     </div>
-    ${d.tree ? `<div class="section"><h3>Árbol de crafteo</h3>
-      <p class="muted small">Verde = la opción más barata en cada paso. Ingredientes con <em>${S.crafteo.mode === 'order' ? 'órdenes de compra' : 'compra instantánea'}</em> (cambialo en Recomendados → Crafteo).</p>
-      <div class="tree"><ul>${treeHTML(d.tree)}</ul></div></div>` : ''}
-    <div class="section" id="wikiSec"><h3>Farmeo, NPCs, drops y contenedores <span class="muted small">(wiki oficial)</span></h3><div id="wikiBox"><div class="skeleton"></div></div></div>
+    ${recipesHTML(d)}
+    <div class="section" id="wikiSec"><h3>Dónde se consigue: NPC, mapa, drops y contenedores <span class="muted small">(wiki oficial)</span></h3><div id="wikiBox"><div class="skeleton"></div></div></div>
     ${d.hints.length ? `<div class="section"><h3>Guía general para este tipo de item</h3><ul class="hint-list">${d.hints.map((h) => `<li>${esc(h)}</li>`).join('')}</ul></div>` : ''}
     ${d.usedIn.total ? `<div class="section"><h3>Se usa para craftear (${d.usedIn.total})</h3>
       <p class="muted small">Si se usa en muchas recetas que se venden bien, la demanda es estable.</p><div id="usedInBox"></div></div>` : ''}

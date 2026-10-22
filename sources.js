@@ -4,9 +4,71 @@ import { state } from './store.js';
 import { row, net, craftTree, bestRecipe, tpBuyPrice, vol } from './analysis.js';
 import { GENERIC_HINTS } from './i18n.js';
 
+/** Recetas del item (todas), con ingredientes directos y de dónde sale cada uno. */
+function recipesOf(id) {
+  return (state.byOutput.get(id) || []).map((r) => ({
+    id: r.id,
+    disciplines: r.disciplines,
+    minRating: r.min_rating,
+    outCount: r.output_item_count || 1,
+    autoLearned: r.flags?.includes('AutoLearned') || false,
+    needsRecipe: r.flags?.includes('LearnedFromItem') || false,
+    timeMs: r.time_to_craft_ms || 0,
+    chat: r.chat_link,
+    ingredients: r.ingredients.map((g) => {
+      if (g.type !== 'Item') return { kind: g.type, id: g.id, count: g.count, coin: g.type === 'Currency' && g.id === 1 };
+      const it = state.items.get(g.id);
+      const p = state.prices.get(g.id);
+      return {
+        kind: 'Item',
+        id: g.id,
+        count: g.count,
+        name: it?.name || `#${g.id}`,
+        icon: it?.icon || null,
+        rarity: it?.rarity || null,
+        tradable: !!p,
+        unit: p ? p.sell || (p.buy ? p.buy + 1 : null) : null,
+        craftable: state.byOutput.has(g.id),
+      };
+    }),
+  }));
+}
+
+/** Lista de compras: materiales base que hay que conseguir siguiendo el camino más barato del árbol. */
+function shoppingList(tree) {
+  const leaves = new Map();
+  let coins = 0;
+  const crafts = [];
+  (function walk(n, root) {
+    if (n.currency) {
+      if (n.coin) coins += n.qty;
+      else {
+        const k = `${n.currency}:${n.id}`;
+        const e = leaves.get(k) || { kind: n.currency, id: n.id, qty: 0, name: `${n.currency} #${n.id}` };
+        e.qty += n.qty;
+        leaves.set(k, e);
+      }
+      return;
+    }
+    // La raíz siempre se craftea (es la lista para crearlo); abajo, lo que sea más barato.
+    const craftIt = n.children.length && (root || n.chosen === 'craft' || n.tpUnit == null);
+    if (craftIt) {
+      crafts.push({ id: n.id, name: n.name, icon: n.icon, rarity: n.rarity, qty: n.qty, disciplines: n.recipe?.disciplines || [], minRating: n.recipe?.minRating, needsRecipe: n.recipe?.flags?.includes('LearnedFromItem'), gated: n.gated });
+      n.children.forEach((c) => walk(c, false));
+      return;
+    }
+    const e = leaves.get(n.id) || { kind: 'Item', id: n.id, name: n.name, icon: n.icon, rarity: n.rarity, qty: 0, unit: n.tpUnit, tradable: n.tradable };
+    e.qty += n.qty;
+    leaves.set(n.id, e);
+  })(tree, true);
+  const items = [...leaves.values()].sort((a, b) => (b.unit || 0) * b.qty - (a.unit || 0) * a.qty);
+  const total = items.reduce((t, e) => t + (e.unit || 0) * e.qty, 0) + coins;
+  return { items, coins, total, missing: items.filter((e) => e.kind === 'Item' && e.unit == null).length, crafts: crafts.slice(1) };
+}
+
 async function liveListings(id) {
   try {
-    const { data } = await getJSON(`${GW2_BASE}/v2/commerce/listings/${id}`, { retries: 1, timeout: 15000 });
+    const { data } = await getJSON(`${GW2_BASE}/v2/commerce/listings/${id}`, { retries: 1, timeout: 15000, limited: false });
     return {
       buys: (data.buys || []).slice(0, 8),
       sells: (data.sells || []).slice(0, 8),
@@ -95,6 +157,8 @@ export async function itemDetail(id, { mode = 'instant' } = {}) {
     netInstant: p?.buy ? net(p.buy) : 0,
     history: hist.map(([t, b, s]) => [t * 60_000, b, s]),
     tree,
+    recipes: recipesOf(id),
+    shopping: tree ? shoppingList(tree) : null,
     ways,
     usedIn: usedIn(id, Infinity),
     hints: GENERIC_HINTS[it?.type] || [],
