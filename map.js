@@ -29,12 +29,14 @@ export async function renderMap(view, { api, esc, toast, focusKey, normalize }) 
   const L = window.L;
   // Las coordenadas de la API son píxeles en zoom 7 (los mosaicos llegan hasta 7, aunque la API diga 8).
   const Z = 7;
-  gmap = L.map('gmap', { crs: L.CRS.Simple, minZoom: 1, maxZoom: Z + 1, zoomControl: true, attributionControl: true });
+  gmap = L.map('gmap', { crs: L.CRS.Simple, minZoom: -1, maxZoom: Z + 1, zoomSnap: 0.5, zoomDelta: 0.5, wheelPxPerZoomLevel: 90, zoomControl: true, attributionControl: true });
+  window.gw2map = gmap;
   const un = (c) => gmap.unproject(c, Z);
   const bounds = L.latLngBounds(un([0, d.geo.dims[1]]), un([d.geo.dims[0], 0]));
-  L.tileLayer('https://tiles.guildwars2.com/1/1/{z}/{x}/{y}.jpg', { minZoom: 1, maxZoom: Z + 1, maxNativeZoom: Z, bounds, noWrap: true, attribution: 'Mapa © ArenaNet · datos: API oficial y wiki de GW2' }).addTo(gmap);
-  gmap.setMaxBounds(bounds.pad(0.1));
-  gmap.setView(un([49216, 31488]), 3); // centrado en Arco del León
+  L.tileLayer('https://tiles.guildwars2.com/1/1/{z}/{x}/{y}.jpg', { minZoom: -1, maxZoom: Z + 1, minNativeZoom: 0, maxNativeZoom: Z, bounds, noWrap: true, attribution: 'Mapa © ArenaNet · datos: API oficial y wiki de GW2' }).addTo(gmap);
+  gmap.setMaxBounds(bounds.pad(0.25));
+  // Arranca mostrando el continente entero; con la rueda o los botones se acerca a cualquier mapa.
+  gmap.fitBounds(bounds);
   const layer = L.layerGroup().addTo(gmap);
 
   const sel = view.querySelector('#mcur');

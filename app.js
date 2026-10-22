@@ -673,7 +673,10 @@ function connectEvents() {
     current?.refresh?.();
     if (openId) openItem(openId, { silent: true });
   });
-  es.onerror = () => { $('#live').className = 'live err'; $('#liveText').textContent = 'sin conexión con el servidor local'; };
+  let lost = false;
+  es.onerror = () => { lost = true; $('#live').className = 'live err'; $('#liveText').textContent = 'sin conexión con el servidor local'; };
+  // Si el servidor se reinició (por ejemplo tras una actualización), recargamos para usar la versión nueva.
+  es.onopen = () => { if (lost) location.reload(); };
 }
 
 // ---------- ajustes ----------
