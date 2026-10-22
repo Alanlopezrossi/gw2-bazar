@@ -37,6 +37,30 @@ export async function renderMap(view, { api, esc, toast, focusKey, normalize }) 
   gmap.setMaxBounds(bounds.pad(0.25));
   // Arranca mostrando el continente entero; con la rueda o los botones se acerca a cualquier mapa.
   gmap.fitBounds(bounds);
+  // Nombres de zonas: regiones (lejos), mapas (zoom medio) y sectores (cerca). En español; al pasar el cursor, en inglés.
+  gmap.createPane('labels');
+  gmap.getPane('labels').style.zIndex = 350;
+  const lbl = (kind) => (x) => L.marker(un(x.c), {
+    pane: 'labels', keyboard: false,
+    icon: L.divIcon({ className: `map-label ${kind}${x.city ? ' city' : ''}`, html: `<span>${esc(x.es)}</span>`, iconSize: null }),
+  }).bindTooltip(x.en === x.es ? x.en : `${esc(x.en)} <span class="muted">(inglés)</span>`, { direction: 'top', offset: [0, -8], className: 'label-tip' });
+  const L_ = d.labels || { regions: [], maps: [], sectors: [] };
+  const groups = {
+    regions: L.layerGroup(L_.regions.map(lbl('lbl-region'))),
+    maps: L.layerGroup(L_.maps.map(lbl('lbl-map'))),
+    sectors: L.layerGroup(L_.sectors.map(lbl('lbl-sector'))),
+  };
+  function showLabels() {
+    const z = gmap.getZoom();
+    const want = { regions: z < 2, maps: z >= 2 && z < 5, sectors: z >= 5 };
+    gmap.getContainer().classList.toggle('z-far', z < 1);
+    for (const [k, g] of Object.entries(groups)) {
+      if (want[k] && !gmap.hasLayer(g)) g.addTo(gmap);
+      if (!want[k] && gmap.hasLayer(g)) gmap.removeLayer(g);
+    }
+  }
+  gmap.on('zoomend', showLabels);
+  showLabels();
   const layer = L.layerGroup().addTo(gmap);
 
   const sel = view.querySelector('#mcur');

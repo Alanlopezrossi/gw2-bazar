@@ -11,6 +11,7 @@ let cache = { key: '', markers: null };
 export function setGeoData(data) {
   GEO = data && data.maps ? data : null;
   cache.key = '';
+  labelsCache = null;
 }
 export function geoInfo() {
   return GEO ? { dims: GEO.dims, maxZoom: GEO.maxZoom, continent: GEO.continent, at: GEO.at } : null;
@@ -132,6 +133,47 @@ function locate(area, zone, idx) {
   return null;
 }
 
+const REGION_ES = {
+  Kryta: 'Kryta', Ascalon: 'Ascalon', 'Shiverpeak Mountains': 'Picosescalofriantes', 'Tarnished Coast': 'Costa Deslustrada',
+  'Steamspur Mountains': 'Montañas Espuelavapor', 'Ruins of Orr': 'Ruinas de Orr', 'Maguuma Wastes': 'Páramos de Maguuma',
+  'Heart of Maguuma': 'Corazón de Maguuma', 'Ring of Fire': 'Anillo de Fuego', 'Crystal Desert': 'Desierto de Cristal',
+  Cantha: 'Cantha', 'Horn of Maguuma': 'Cuerno de Maguuma', Janthir: 'Janthir', Castora: 'Castora',
+};
+let labelsCache = null;
+/** Nombres para dibujar sobre el mapa: regiones, mapas explorables y sectores (español + inglés). */
+export function mapLabels() {
+  if (!GEO) return null;
+  if (labelsCache) return labelsCache;
+  const sectorsOf = new Map();
+  for (const sc of GEO.sectors) sectorsOf.set(sc.map, (sectorsOf.get(sc.map) || 0) + 1);
+  const area = (r) => (r[1][0] - r[0][0]) * (r[1][1] - r[0][1]);
+  const overlap = (a, b) => Math.max(0, Math.min(a[1][0], b[1][0]) - Math.max(a[0][0], b[0][0])) * Math.max(0, Math.min(a[1][1], b[1][1]) - Math.max(a[0][1], b[0][1]));
+  // Nos quedamos con los mapas "reales": sin instancias de historia ni copias superpuestas.
+  const cand = Object.values(GEO.maps)
+    .filter((m) => m.public && m.nameEn && m.name && !/\((public|heart of thorns)\)|^convergence/i.test(m.nameEn) && (sectorsOf.get(m.id) || 0) > 0)
+    .sort((a, b) => (sectorsOf.get(b.id) || 0) - (sectorsOf.get(a.id) || 0) || area(b.rect) - area(a.rect));
+  const kept = [];
+  for (const m of cand) {
+    if (kept.some((k) => overlap(k.rect, m.rect) > 0.5 * area(m.rect))) continue;
+    kept.push(m);
+  }
+  const keptIds = new Set(kept.map((m) => m.id));
+  const maps = kept.map((m) => ({ es: m.name, en: m.nameEn, c: [(m.rect[0][0] + m.rect[1][0]) / 2, (m.rect[0][1] + m.rect[1][1]) / 2].map(Math.round), rect: m.rect, city: m.level?.[0] === 0 }));
+  const sectors = GEO.sectors.filter((sc) => keptIds.has(sc.map) && sc.nameEn).map((sc) => ({ es: sc.name || sc.nameEn, en: sc.nameEn, c: sc.coord }));
+  const byRegion = new Map();
+  for (const m of kept) {
+    if (!m.region) continue;
+    // Centro ponderado por superficie: queda sobre el grueso de la región y no en el medio del mar.
+    const r = byRegion.get(m.region) || { sx: 0, sy: 0, w: 0 };
+    const a = area(m.rect);
+    r.sx += a * (m.rect[0][0] + m.rect[1][0]) / 2; r.sy += a * (m.rect[0][1] + m.rect[1][1]) / 2; r.w += a;
+    byRegion.set(m.region, r);
+  }
+  const regions = [...byRegion].map(([en, r]) => ({ es: REGION_ES[en] || en, en, c: [Math.round(r.sx / r.w), Math.round(r.sy / r.w)] }));
+  labelsCache = { regions, maps, sectors };
+  return labelsCache;
+}
+
 /** Todos los vendedores conocidos (de la wiki), con su ubicación y lo que venden. */
 export function vendorMarkers() {
   if (!GEO) return { ready: false, markers: [], unplaced: [] };
@@ -196,6 +238,7 @@ export function vendorMarkers() {
     unplaced,
     currencies: [...allCurrencies].sort((a, b) => b[1] - a[1]).map(([es, n]) => ({ es, n })),
     geo: geoInfo(),
+    labels: mapLabels(),
   };
   cache = { key, markers: result };
   return result;

@@ -337,5 +337,16 @@ tr.obtain-row td { padding-top: 0; border-top: 0; }
 .leaflet-control-attribution a { color: var(--accent-2) !important; }
 @media (max-width: 860px) { .map-grid { grid-template-columns: 1fr; } .map-list { max-height: 260px; } #gmap { height: 60vh; } }
 
+/* Nombres de zonas sobre el mapa */
+.map-label { white-space: nowrap; width: auto !important; height: auto !important; margin: 0 !important; }
+.map-label span { display: inline-block; transform: translate(-50%, -50%); color: #fff; text-shadow: 0 0 3px #000, 0 0 6px #000, 1px 1px 2px #000; cursor: help; pointer-events: auto; }
+.map-label.lbl-region span { font-family: 'Cinzel', Georgia, serif; font-size: 20px; letter-spacing: .12em; text-transform: uppercase; color: #f0d79a; opacity: .92; }
+.map-label.lbl-map span { font-size: 13px; font-weight: 700; }
+.map-label.lbl-map.city span { color: #f0c873; }
+.map-label.lbl-sector span { font-size: 11px; font-style: italic; opacity: .9; }
+.leaflet-tooltip.label-tip { background: #1a1407; color: #f3ead6; border: 1px solid #5a4a2a; font-size: 12px; }
+.leaflet-tooltip.label-tip .muted { color: #a99f8a; }
+.z-far .map-label.lbl-region span { font-size: 11px; letter-spacing: .06em; }
+
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }
