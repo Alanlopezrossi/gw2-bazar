@@ -4,7 +4,7 @@ import { startScheduler } from './sync.js';
 import { setWikiData } from './wikidata.js';
 import { setEquipmentData, listEquipment } from './equipment.js';
 import { setGeoData, vendorMarkers } from './vendors.js';
-import { setCatalog, setAchItems, searchCatalog, indexItem } from './catalog.js';
+import { setCatalog, setAchItems, setExtraItems, searchCatalog, indexItem } from './catalog.js';
 import { syncItems } from './sync.js';
 import { listItems, flips, demand, craftingProfits } from './analysis.js';
 import { itemDetail } from './sources.js';
@@ -27,7 +27,12 @@ const ready = (async () => {
 // El índice de todos los items pesa varios MB: sólo se baja la primera vez que se usa la pestaña Items.
 let catalogP = null;
 function loadCatalog() {
-  if (!catalogP) catalogP = fetch('items-index.json').then((r) => r.json()).then(setCatalog).catch((e) => { catalogP = null; throw e; });
+  if (!catalogP) {
+    catalogP = Promise.all([
+      fetch('items-extra.json').then((r) => (r.ok ? r.json() : null)).then(setExtraItems).catch(() => {}),
+      fetch('items-index.json').then((r) => r.json()),
+    ]).then(([, idx]) => setCatalog(idx)).catch((e) => { catalogP = null; throw e; });
+  }
   return catalogP;
 }
 
@@ -84,7 +89,8 @@ export async function localApi(path) {
       const id = Number(m[1]);
       if (m[2]) return { status: 200, body: await acquisition(id, { force: url.searchParams.get('force') === '1' }) };
       if (!state.items.has(id) && !state.prices.has(id)) { try { await syncItems([id]); } catch { /* sigue */ } }
-      if (!state.items.has(id) && !state.prices.has(id)) { const ix = indexItem(id); if (ix) state.items.set(id, { ...ix, vendor: 0, flags: [], gameTypes: [], desc: '', icon: null }); }
+      if (!state.items.has(id) && !state.prices.has(id)) { try { await loadCatalog(); } catch { /* sigue */ } }
+      if (!state.items.has(id) && !state.prices.has(id)) { const ix = indexItem(id); if (ix) state.items.set(id, { vendor: 0, flags: [], gameTypes: [], desc: '', icon: null, ...ix }); }
       const d = await itemDetail(id, { mode: url.searchParams.get('mode') === 'order' ? 'order' : 'instant' });
       return d ? { status: 200, body: d } : { status: 404, body: { error: 'Item no encontrado (¿todavía cargando?)' } };
     }

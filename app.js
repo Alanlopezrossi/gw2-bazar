@@ -481,7 +481,7 @@ function renderEquipo() {
 }
 
 // ---------- Items (todos los del juego) ----------
-const IT_SOURCES = { bazar: 'Bazar', crafteo: 'Crafteo', forja: 'Forja Mística', logro: 'Logro', vendedor: 'NPC vendedor', contenedor: 'Contenedor', ingrediente: 'Es ingrediente', 'colección': 'Lo pide una colección' };
+const IT_SOURCES = { 'fuera de la API': 'Fuera de la API oficial', bazar: 'Bazar', crafteo: 'Crafteo', forja: 'Forja Mística', logro: 'Logro', vendedor: 'NPC vendedor', contenedor: 'Contenedor', ingrediente: 'Es ingrediente', 'colección': 'Lo pide una colección' };
 const IT_COLS = [['name', 'Item'], ['type', 'Tipo'], ['rarity', 'Rareza'], ['level', 'Nivel'], ['sell', 'Precio en bazar'], ['sources', 'Cómo se consigue / para qué sirve']];
 const iconCache = new Map();
 async function fillIcons(root, rows) {
@@ -748,6 +748,7 @@ function itemHTML(d) {
         <div class="meta"><span>${esc(typeName(it.type))}${it.sub ? ` · ${esc(it.sub)}` : ''}</span><span>${esc(rarName(it.rarity))}</span>${it.level ? `<span>Nivel ${it.level}</span>` : ''}${it.nameEn ? `<span>EN: ${esc(it.nameEn)}</span>` : ''}<span>ID ${it.id}</span>
         ${it.chat ? `<button class="btn ghost small" data-copy="${esc(it.chat)}">Copiar código de chat</button>` : ''}</div></div>
     </div>
+    ${it.removed ? `<div class="explain">Este item <b>ya no está en la API oficial</b> (lo quitaron del juego o hay que volver a descubrirlo). Los datos son la última versión conocida, de <a href="https://es.gw2treasures.com/item/${it.id}" target="_blank" rel="noopener">gw2treasures</a>.</div>` : ''}
     ${it.desc ? `<p class="d-desc">${esc(it.desc)}</p>` : ''}
     ${d.props?.length ? `<div class="chips">${d.props.map((x) => `<span class="pill">${esc(x)}</span>`).join('')}</div>` : ''}
     ${summaryHTML(d)}

@@ -9,9 +9,43 @@ let ACH = null; // { achievements: {id: [name, cat, isCollection]}, items: {item
 
 export function setCatalog(data) {
   if (!data?.rows) { IDX = null; return; }
+  base = data;
+  // Sumamos los items extra (fuera de la API) que no estén ya en el índice.
+  const have = new Set(data.rows.map((r) => r[0]));
+  const extraRows = Object.keys(EXTRA?.items || {}).map(Number).filter((id) => !have.has(id)).map((id) => { const e = extraItem(id); return [id, e.name, e.nameEn, e.type, e.sub, e.rarity, e.level]; });
+  data = { ...data, rows: [...data.rows, ...extraRows].map((r) => {
+    if (r[1] || !EXTRA?.items?.[r[0]]) return r;
+    const e = extraItem(r[0]);
+    return [r[0], e.name, r[2] || e.nameEn, r[3], r[4], r[5], r[6]];
+  }) };
   for (const r of data.rows) { r[1] = String(r[1] || '').trim(); r[2] = String(r[2] || '').trim(); }
   IDX = { at: data.at, rows: data.rows, hay: data.rows.map((r) => normalize(`${r[1]} ${r[2]}`)), byId: new Map(data.rows.map((r, i) => [r[0], i])) };
 }
+// Items que la API oficial no publica (quitados del juego o sin redescubrir), sacados de gw2treasures.
+let EXTRA = null; // { items: { id: { es, en, type, sub, typeEs, rarity, level, icon, desc, removed } } }
+let base = null; // índice original, para poder volver a mezclar
+const TYPE_ALIAS_ES = { 'material artesanal': 'CraftingMaterial', 'objeto para espalda': 'Back' };
+export function setExtraItems(data) {
+  EXTRA = data?.items ? data : null;
+  if (EXTRA) {
+    // Fuera: ids que tampoco conoce gw2treasures ("Item not found"). Tipos con otra traducción.
+    const items = {};
+    for (const [id, e] of Object.entries(EXTRA.items)) {
+      if (!e || /^item not found$/i.test(e.es || '') || /^item not found$/i.test(e.en || '')) continue;
+      items[id] = e.type ? e : { ...e, type: TYPE_ALIAS_ES[String(e.typeEs || '').toLowerCase()] || '' };
+    }
+    EXTRA = { ...EXTRA, items };
+  }
+  if (base) setCatalog(base);
+}
+export function extraItem(id) {
+  const e = EXTRA?.items?.[id];
+  if (!e) return null;
+  const unnamed = (n) => !n || /^\[&/.test(n);
+  const name = !unnamed(e.es) ? e.es : !unnamed(e.en) ? e.en : `(sin nombre) ${e.subEs || e.typeEs || ''}`.trim();
+  return { id: Number(id), name, nameEn: unnamed(e.en) ? '' : e.en, type: e.type || '', sub: e.sub || '', rarity: e.rarity || '', level: e.level || 0, icon: e.icon || null, desc: /Database and tool collection/.test(e.desc || '') ? '' : e.desc || '', vendor: 0, flags: [], gameTypes: [], removed: e.removed !== false, typeEs: e.typeEs || '' };
+}
+
 export function setAchItems(data) {
   ACH = data?.items ? data : null;
 }
@@ -31,6 +65,8 @@ export function achievementsOfItem(id) {
 
 /** Item mínimo a partir del índice (para ítems que todavía no están en el catálogo descargado). */
 export function indexItem(id) {
+  const ex = extraItem(id);
+  if (ex) return ex;
   const i = IDX?.byId.get(id);
   if (i == null) return null;
   const r = IDX.rows[i];
@@ -96,7 +132,9 @@ export function searchCatalog({ q = '', type = '', rarity = '', source = '', sor
     const r = IDX.rows[i];
     const it = state.items.get(r[0]);
     const p = state.prices.get(r[0]);
-    return { id: r[0], name: r[1] || r[2], nameEn: r[2], type: r[3], sub: r[4], rarity: r[5], level: r[6], icon: it?.icon || null, sell: p?.sell || 0, buy: p?.buy || 0, sources: tags(r[0]) };
+    const ex = EXTRA?.items?.[r[0]];
+    if (ex && !r[1]) { const e2 = extraItem(r[0]); r[1] = e2.name; r[2] = r[2] || e2.nameEn; }
+    return { id: r[0], name: r[1] || r[2] || `(sin nombre) #${r[0]}`, nameEn: r[2], type: r[3], sub: r[4], rarity: r[5], level: r[6], icon: it?.icon || ex?.icon || null, sell: p?.sell || 0, buy: p?.buy || 0, sources: ex?.removed !== false && ex ? ['fuera de la API', ...tags(r[0])] : tags(r[0]) };
   });
   if (source) rows = rows.filter((r) => r.sources.includes(source));
   // Orden: si no se eligió, primero coincidencias exactas de nombre, después las que empiezan igual.
