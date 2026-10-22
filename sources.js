@@ -3,6 +3,27 @@ import { getJSON, GW2_BASE } from './gw2api.js';
 import { state } from './store.js';
 import { row, net, craftTree, bestRecipe, tpBuyPrice, vol } from './analysis.js';
 import { GENERIC_HINTS } from './i18n.js';
+import { wikiEntry, wikiMeta } from './wikidata.js';
+
+/** Resumen corto de cómo se obtiene un item según la wiki (para hojas del árbol). */
+export function obtainSummary(id) {
+  const w = wikiEntry(id);
+  if (!w) return null;
+  const out = [];
+  for (const v of (w.soldBy || []).slice(0, 2)) out.push({ kind: 'npc', text: `${v.vendor}${v.area || v.zone ? ` (${[v.area, v.zone].filter(Boolean).join(', ')})` : ''}${v.cost ? ` — ${v.cost}` : ''}` });
+  for (const t of (w.rewardTracks || []).slice(0, 1)) out.push({ kind: 'track', text: t });
+  for (const t of (w.rewardedBy || []).slice(0, 1)) out.push({ kind: 'reward', text: t });
+  for (const t of (w.containedIn || []).slice(0, 2)) out.push({ kind: 'container', text: t });
+  for (const t of (w.gathered || []).slice(0, 1)) out.push({ kind: 'gather', text: t });
+  if (!out.length && w.note) out.push({ kind: 'note', text: w.note.slice(0, 160) });
+  return out.length ? out : null;
+}
+
+function annotate(n) {
+  if (!n || n.currency) return;
+  if (n.tpUnit == null && n.craftUnit == null) n.obtain = obtainSummary(n.id);
+  n.children.forEach(annotate);
+}
 
 /** Recetas del item (todas), con ingredientes directos y de dónde sale cada uno. */
 function recipesOf(id) {
@@ -14,6 +35,7 @@ function recipesOf(id) {
     autoLearned: r.flags?.includes('AutoLearned') || false,
     needsRecipe: r.flags?.includes('LearnedFromItem') || false,
     timeMs: r.time_to_craft_ms || 0,
+    fromWiki: r.id < 0,
     chat: r.chat_link,
     ingredients: r.ingredients.map((g) => {
       if (g.type !== 'Item') return { kind: g.type, id: g.id, count: g.count, coin: g.type === 'Currency' && g.id === 1 };
@@ -29,6 +51,7 @@ function recipesOf(id) {
         tradable: !!p,
         unit: p ? p.sell || (p.buy ? p.buy + 1 : null) : null,
         craftable: state.byOutput.has(g.id),
+        obtain: !p && !state.byOutput.has(g.id) ? obtainSummary(g.id) : null,
       };
     }),
   }));
@@ -57,7 +80,7 @@ function shoppingList(tree) {
       n.children.forEach((c) => walk(c, false));
       return;
     }
-    const e = leaves.get(n.id) || { kind: 'Item', id: n.id, name: n.name, icon: n.icon, rarity: n.rarity, qty: 0, unit: n.tpUnit, tradable: n.tradable };
+    const e = leaves.get(n.id) || { kind: 'Item', id: n.id, name: n.name, icon: n.icon, rarity: n.rarity, qty: 0, unit: n.tpUnit, tradable: n.tradable, obtain: n.obtain || null };
     e.qty += n.qty;
     leaves.set(n.id, e);
   })(tree, true);
@@ -116,6 +139,8 @@ export async function itemDetail(id, { mode = 'instant' } = {}) {
   const best = bestRecipe(id, mode);
   const tp = tpBuyPrice(id, mode);
   const tree = state.byOutput.has(id) ? craftTree(id, 1, mode) : null;
+  annotate(tree);
+  const w = wikiEntry(id);
 
   const ways = [];
   if (p && (p.sell || p.buy)) {
@@ -159,6 +184,7 @@ export async function itemDetail(id, { mode = 'instant' } = {}) {
     tree,
     recipes: recipesOf(id),
     shopping: tree ? shoppingList(tree) : null,
+    wiki: w ? { soldBy: w.soldBy || [], containedIn: w.containedIn || [], gathered: w.gathered || [], rewardTracks: w.rewardTracks || [], rewardedBy: w.rewardedBy || [], note: w.note || '', title: w.title, snapshot: wikiMeta()?.at } : null,
     ways,
     usedIn: usedIn(id, Infinity),
     hints: GENERIC_HINTS[it?.type] || [],

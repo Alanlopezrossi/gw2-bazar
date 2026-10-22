@@ -46,6 +46,7 @@ export const DISCIPLINES = {
   Scribe: 'Escriba',
   Tailor: 'Sastre',
   Weaponsmith: 'Armero',
+  'Mystic Forge': 'Forja Mística',
 };
 
 export const GAME_TYPES = {

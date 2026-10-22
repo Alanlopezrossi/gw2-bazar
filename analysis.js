@@ -186,7 +186,7 @@ export function demand({ type = '', rarity = '', q = '', cat = '', minPrice = 0,
 
 let memo = { key: '', instant: new Map(), order: new Map() };
 function memoFor(mode) {
-  const key = `${state.meta.pricesAt}|${state.meta.recipesAt}`;
+  const key = `${state.meta.pricesAt}|${state.meta.recipesAt}|${state.meta.wikiAt || 0}`;
   if (memo.key !== key) memo = { key, instant: new Map(), order: new Map() };
   return memo[mode];
 }

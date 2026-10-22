@@ -305,5 +305,13 @@ tr.clickable:hover { background: rgba(255, 255, 255, 0.03); }
 details.tree-wrap { margin-top: 12px; }
 details.tree-wrap > summary { cursor: pointer; color: var(--accent-2); font-size: 13px; margin-bottom: 6px; }
 
+/* fuentes de la wiki */
+.obtain { display: inline-flex; flex-wrap: wrap; gap: 4px 8px; }
+.ob { font-size: 12px; color: var(--muted); background: var(--bg-2); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; }
+.ob-npc { color: var(--accent-2); }
+.tobtain { margin: 0 0 4px 64px; }
+tr.obtain-row td { padding-top: 0; border-top: 0; }
+.wiki-data { margin-bottom: 10px; }
+
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }

@@ -1,6 +1,7 @@
 // Versión navegador de src/sync.js: baja todo desde el navegador del visitante y lo cachea en IndexedDB.
 import { getAllPages, getByIds, getJSON, GW2_BASE, DW2_BASE } from './gw2api.js';
 import { state, setRecipes, broadcast, idbSet } from './store.js';
+import { mergeWikiRecipes, wikiItemIds } from './wikidata.js';
 
 const MIN = 60_000;
 export const INTERVALS = {
@@ -171,6 +172,8 @@ export async function runCycle({ first = false } = {}) {
     } else if (first) {
       await step('items de recetas', () => syncItems(recipeItemIds()));
     }
+    await step('items de la wiki', () => syncItems(wikiItemIds()));
+    mergeWikiRecipes();
     await step('nombres en inglés', syncEnglish);
     setPhase('al día');
     broadcast('prices', { at: state.meta.pricesAt });

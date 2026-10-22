@@ -1,6 +1,7 @@
 // Reemplaza al servidor: atiende las mismas rutas /api/* dentro del navegador.
 import { state, loadCache, events } from './store.js';
 import { startScheduler } from './sync.js';
+import { setWikiData } from './wikidata.js';
 import { listItems, flips, demand, craftingProfits } from './analysis.js';
 import { itemDetail } from './sources.js';
 import { acquisition } from './wiki.js';
@@ -10,6 +11,7 @@ export const localEvents = events;
 
 const ready = (async () => {
   await loadCache();
+  try { setWikiData(await (await fetch('wiki-data.json')).json()); } catch (e) { console.warn('sin wiki-data.json', e); }
   startScheduler();
 })();
 

@@ -429,8 +429,8 @@ function treeHTML(n, top = true) {
   const tp = n.tpUnit != null ? `<span class="opt ${n.chosen === 'tp' ? 'on' : ''}">comprar ${coin(n.tpUnit * n.qty)}</span>` : n.tradable ? '' : '<span class="pill">no comerciable</span>';
   const cr = n.craftUnit != null ? `<span class="opt ${n.chosen === 'craft' ? 'on' : ''}">craftear ${coin(n.craftUnit * n.qty)}</span>` : n.recipe?.incomplete ? '<span class="pill warn">receta con ingredientes sin precio</span>' : ''
   const gate = n.gated ? '<span class="pill warn">1 por día</span>' : '';
-  const disc = n.recipe ? `<span class="muted small">${esc(n.recipe.disciplines.map((d) => META.disciplines[d] || d).join(', '))} ${n.recipe.minRating}${n.recipe.flags?.includes('LearnedFromItem') ? ' · requiere receta' : ''}${n.recipe.outCount > 1 ? ` · da ${n.recipe.outCount}` : ''}</span>` : '';
-  const head = `<div class="tnode">${n.children.length ? '<span class="tw">▸</span>' : '<span style="width:12px"></span>'}<span class="q">${qty(n.qty)}×</span>${img}<span class="lnk rar-${esc(n.rarity)}" data-goto="${n.id}">${esc(n.name)}</span>${gate}${tp}${cr}${disc}</div>`;
+  const disc = n.recipe ? `<span class="muted small">${esc(n.recipe.disciplines.map((d) => META.disciplines[d] || d).join(', '))} ${n.recipe.flags?.includes('Wiki') ? '' : n.recipe.minRating}${n.recipe.flags?.includes('LearnedFromItem') ? ' · requiere receta' : ''}${n.recipe.outCount > 1 ? ` · da ${n.recipe.outCount}` : ''}</span>` : '';
+  const head = `<div class="tnode">${n.children.length ? '<span class="tw">▸</span>' : '<span style="width:12px"></span>'}<span class="q">${qty(n.qty)}×</span>${img}<span class="lnk rar-${esc(n.rarity)}" data-goto="${n.id}">${esc(n.name)}</span>${gate}${tp}${cr}${disc}</div>${n.obtain ? `<div class="tobtain">${obtainHTML(n.obtain)}</div>` : ''}`;
   if (!n.children.length) return `<li>${head}</li>`;
   const open = top || n.chosen === 'craft';
   return `<li><details class="tg" ${open ? 'open' : ''}><summary>${head}</summary><ul>${n.children.map((c) => treeHTML(c, false)).join('')}</ul></details></li>`;
@@ -447,8 +447,10 @@ function recipesHTML(d) {
     <div class="recipe">
       <div class="recipe-h">
         <b>${d.recipes.length > 1 ? `Receta ${i + 1}` : 'Receta'}</b>
-        <span class="pill">${esc(discName(r.disciplines))} · nivel ${r.minRating}</span>
-        <span class="pill ${r.needsRecipe ? 'warn' : 'good'}">${r.needsRecipe ? 'hay que aprender la receta (item de receta)' : 'se aprende sola al subir la disciplina'}</span>
+        ${r.fromWiki
+          ? `<span class="pill warn">${esc(discName(r.disciplines))}</span><span class="pill">receta tomada de la wiki</span>`
+          : `<span class="pill">${esc(discName(r.disciplines))} · nivel ${r.minRating}</span>
+        <span class="pill ${r.needsRecipe ? 'warn' : 'good'}">${r.needsRecipe ? 'hay que aprender la receta (item de receta)' : 'se aprende sola al subir la disciplina'}</span>`}
         ${r.outCount > 1 ? `<span class="pill">da ${r.outCount} unidades</span>` : ''}
       </div>
       <table class="ing"><thead><tr><th>Ingrediente</th><th>Cantidad</th><th>Precio c/u</th><th>Subtotal</th><th>De dónde sale</th></tr></thead><tbody>
@@ -456,7 +458,7 @@ function recipesHTML(d) {
         ? `<tr><td>${g.coin ? 'Monedas' : esc(`${g.kind} #${g.id}`)}</td><td class="num">${qty(g.count)}</td><td></td><td>${g.coin ? coin(g.count) : ''}</td><td class="left small muted">${g.coin ? 'se paga al craftear' : 'divisa / mejora de clan'}</td></tr>`
         : `<tr data-goto="${g.id}" class="clickable"><td><span class="ing-name">${ingIcon(g)}<span class="rar-${esc(g.rarity)}">${esc(g.name)}</span></span></td><td class="num">${qty(g.count)}</td>
             <td>${coin(g.unit)}</td><td>${g.unit != null ? coin(g.unit * g.count) : coin(null)}</td>
-            <td class="left small">${[g.tradable ? 'bazar' : '', g.craftable ? 'se craftea' : '', !g.tradable && !g.craftable ? '<span class="pill warn">no comerciable: NPC, drop o divisa (ver abajo)</span>' : ''].filter(Boolean).join(' · ')}</td></tr>`).join('')}
+            <td class="left small">${[g.tradable ? 'bazar' : '', g.craftable ? 'se craftea' : '', !g.tradable && !g.craftable ? (g.obtain ? obtainHTML(g.obtain) : '<span class="pill warn">no comerciable: NPC, drop o divisa</span>') : ''].filter(Boolean).join(' · ')}</td></tr>`).join('')}
       </tbody></table>
     </div>`).join('');
 
@@ -466,7 +468,7 @@ function recipesHTML(d) {
     <table class="ing"><thead><tr><th>Material</th><th>Cantidad</th><th>Precio c/u</th><th>Subtotal</th></tr></thead><tbody>
       ${sh.items.map((e) => e.kind !== 'Item'
         ? `<tr><td>${esc(e.name)}</td><td class="num">${qty(e.qty)}</td><td></td><td class="muted small">divisa</td></tr>`
-        : `<tr data-goto="${e.id}" class="clickable"><td><span class="ing-name">${ingIcon(e)}<span class="rar-${esc(e.rarity)}">${esc(e.name)}</span></span></td><td class="num">${qty(e.qty)}</td><td>${coin(e.unit)}</td><td>${e.unit != null ? coin(e.unit * e.qty) : '<span class="pill warn">sin precio</span>'}</td></tr>`).join('')}
+        : `<tr data-goto="${e.id}" class="clickable"><td><span class="ing-name">${ingIcon(e)}<span class="rar-${esc(e.rarity)}">${esc(e.name)}</span></span></td><td class="num">${qty(e.qty)}</td><td>${coin(e.unit)}</td><td>${e.unit != null ? coin(e.unit * e.qty) : '<span class="pill warn">sin precio</span>'}</td></tr>${e.obtain ? `<tr class="obtain-row"><td colspan="4">${obtainHTML(e.obtain)}</td></tr>` : ''}`).join('')}
       ${sh.coins ? `<tr><td>Monedas (costo de la receta)</td><td></td><td></td><td>${coin(sh.coins)}</td></tr>` : ''}
       <tr class="tot"><td>Total</td><td></td><td></td><td>${coin(sh.total)}${sh.missing ? ` <span class="muted small">+ ${sh.missing} sin precio</span>` : ''}</td></tr>
     </tbody></table>
@@ -475,11 +477,28 @@ function recipesHTML(d) {
   return `<div class="section"><h3>Cómo se crea</h3>
     ${cards}
     ${shop}
-    ${d.tree ? `<details class="tree-wrap"><summary>Ver árbol de crafteo completo</summary>
+    ${d.tree ? `<details class="tree-wrap" open><summary>Árbol completo en cadena (tocá cada rama para abrir o cerrar)</summary>
       <p class="muted small">Verde = la opción más barata en cada paso. Ingredientes con <em>${S.crafteo.mode === 'order' ? 'órdenes de compra' : 'compra instantánea'}</em> (cambialo en Recomendados → Crafteo).</p>
       <div class="tree"><ul>${treeHTML(d.tree)}</ul></div></details>` : ''}
-    <p class="muted small">Las recetas de la Forja Mística no están en la API oficial: si existen, aparecen en la sección de la wiki.</p>
+    <p class="muted small">Las recetas de la Forja Mística no están en la API oficial: las tomamos de la wiki oficial (copia archivada). Si un item salió después de esa copia, puede faltar su receta.</p>
   </div>`;
+}
+
+
+const OBTAIN_ICON = { npc: '🧑‍💼', track: '🎖', reward: '🏆', container: '🎁', gather: '⛏', note: 'ℹ' };
+const obtainHTML = (list) => `<span class="obtain">${list.map((o) => `<span class="ob ob-${o.kind}">${OBTAIN_ICON[o.kind] || '•'} ${esc(o.text)}</span>`).join('')}</span>`;
+
+/** Bloque "Dónde se consigue" con datos de la wiki ya extraídos (no depende de que la wiki esté en línea). */
+function wikiDataHTML(w) {
+  if (!w) return '';
+  const list = (title, arr) => (arr?.length ? `<h4 class="sub-h">${title}</h4><ul class="steps">${arr.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : '');
+  const vendors = w.soldBy?.length
+    ? `<h4 class="sub-h">Lo venden estos NPC</h4><div class="table-wrap"><table class="ing"><thead><tr><th>NPC</th><th>Zona</th><th>Mapa</th><th>Costo</th><th>Notas</th></tr></thead><tbody>
+       ${w.soldBy.map((v) => `<tr><td class="left">${esc(v.vendor)}</td><td class="left">${esc(v.area)}</td><td class="left">${esc(v.zone)}</td><td class="left">${esc(v.cost)}</td><td class="left small muted">${esc(v.notes)}</td></tr>`).join('')}
+       </tbody></table></div>` : '';
+  const body = vendors + list('Sale de estos contenedores / bolsas', w.containedIn) + list('Reward tracks (PvP / WvW)', w.rewardTracks) + list('Recolección', w.gathered) + list('Recompensa de', w.rewardedBy) + (w.note ? `<p class="muted small">${esc(w.note)}</p>` : '');
+  if (!body) return '';
+  return `<div class="wiki-data">${body}<p class="muted small">Datos de la wiki oficial (copia archivada${w.snapshot ? ` del ${esc(w.snapshot)}` : ''}). Los nombres de NPC y mapas están en inglés, como en la wiki.</p></div>`;
 }
 
 const WAY_ICON = { tp: '⚖', craft: '⚒', 'npc-sell': '🪙', notp: '✋' };
@@ -512,7 +531,7 @@ function itemHTML(d) {
       <div class="ways">${d.ways.map((w) => `<div class="way"><div class="ic">${WAY_ICON[w.kind] || '•'}</div><div><b>${esc(w.title)}</b><p>${coinText(w.text)}</p></div></div>`).join('')}</div>
     </div>
     ${recipesHTML(d)}
-    <div class="section" id="wikiSec"><h3>Dónde se consigue: NPC, mapa, drops y contenedores <span class="muted small">(wiki oficial)</span></h3><div id="wikiBox"><div class="skeleton"></div></div></div>
+    <div class="section" id="wikiSec"><h3>Dónde se consigue: NPC, mapa, drops y contenedores <span class="muted small">(wiki oficial)</span></h3>${wikiDataHTML(d.wiki)}<div id="wikiBox"><div class="skeleton"></div></div></div>
     ${d.hints.length ? `<div class="section"><h3>Guía general para este tipo de item</h3><ul class="hint-list">${d.hints.map((h) => `<li>${esc(h)}</li>`).join('')}</ul></div>` : ''}
     ${d.usedIn.total ? `<div class="section"><h3>Se usa para craftear (${d.usedIn.total})</h3>
       <p class="muted small">Si se usa en muchas recetas que se venden bien, la demanda es estable.</p><div id="usedInBox"></div></div>` : ''}
@@ -548,6 +567,7 @@ async function loadWiki(id, force = false) {
     }
     const css = `body{font:14px/1.45 system-ui,sans-serif;margin:10px;color:#222;background:#f6f3ea}a{color:#6b4a0e}table{border-collapse:collapse;width:100%;font-size:13px}td,th{border:1px solid #ddd3bd;padding:4px 6px;text-align:left}th{background:#ebe3cf}img{vertical-align:middle;max-width:100%;height:auto}h2,h3,h4{font-size:15px;margin:14px 0 6px}`;
     box.innerHTML = `${w.methods?.length ? `<div class="chips">${w.methods.map((m) => `<span class="chip">${esc(m)}</span>`).join('')}</div>` : ''}
+      ${w.archived ? '<p class="muted small"><span class="pill warn">copia archivada</span> La wiki está en mantenimiento: esto viene de su última copia en archive.org.</p>' : ''}
       ${w.note ? `<p class="muted">${esc(w.note)}</p>` : ''}
       ${w.html ? '<iframe class="wiki" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin" referrerpolicy="no-referrer"></iframe>' : ''}
       <div class="links" style="margin-top:8px"><a class="btn ghost small" target="_blank" rel="noopener" href="${esc(w.pageUrl || w.link)}">Ver página completa: ${esc(w.page || 'wiki')}</a></div>`;

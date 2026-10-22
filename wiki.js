@@ -65,6 +65,31 @@ function sanitize(html) {
     .replace(/<a /g, '<a target="_blank" rel="noopener noreferrer" ');
 }
 
+/** Plan B cuando la wiki está caída: la copia archivada de la página en archive.org. */
+async function fromArchive(item, base) {
+  if (!item?.nameEn) return null;
+  const p = encodeURIComponent(item.nameEn.replace(/ /g, '_')).replace(/%2F/g, '/');
+  for (const y of ['2026', '2025']) {
+    try {
+      const r = await fetch(`https://web.archive.org/web/${y}id_/${WIKI_BASE}/wiki/${p}`, { signal: AbortSignal.timeout(25000) });
+      if (!r.ok) continue;
+      const html = await r.text();
+      const i = html.search(/id="Acquisition"/);
+      if (i < 0) return { ...base, available: true, archived: true, page: item.nameEn, pageUrl: `${WIKI_BASE}/wiki/${p}`, methods: [], html: '', note: 'La página archivada no tiene sección "Acquisition".', at: Date.now() };
+      // Desde el final del encabezado de Acquisition hasta el próximo encabezado de nivel 2.
+      let start = html.indexOf('</h2>', i) + 5;
+      if (html.slice(start, start + 40).trimStart().startsWith('</div>')) start = html.indexOf('</div>', start) + 6;
+      const rest = html.slice(start);
+      const endRel = rest.search(/<div class="mw-heading mw-heading2|<h2[\s>]|<div class="printfooter|<\/main>/);
+      const raw = (endRel < 0 ? rest : rest.slice(0, endRel)).replace(/<span class="mw-editsection">[\s\S]*?<\/span>\s*<\/span>/g, '');
+      const subs = [...raw.matchAll(/<h[34][^>]*id="([^"]+)"/g)].map((m) => m[1]);
+      const methods = [...new Set(subs.map(labelFor))];
+      return { ...base, available: true, archived: true, page: item.nameEn, pageUrl: `${WIKI_BASE}/wiki/${p}`, methods, html: sanitize(raw), at: Date.now() };
+    } catch { /* probamos el año anterior */ }
+  }
+  return null;
+}
+
 export async function acquisition(id, { force = false } = {}) {
   const item = state.items.get(id);
   const link = item?.chat
@@ -80,7 +105,14 @@ export async function acquisition(id, { force = false } = {}) {
       if (Date.now() - c.at < TTL) return c;
     } catch { /* sin caché */ }
   }
-  if (Date.now() < failUntil.t) return { ...base, available: false, reason: 'La wiki no responde (probablemente en mantenimiento). Reintento en unos minutos.' };
+  if (Date.now() < failUntil.t) {
+    const arch = await fromArchive(item, base);
+    if (arch) {
+      try { await idbSet(cachePath, arch); } catch {}
+      return arch;
+    }
+    return { ...base, available: false, reason: 'La wiki no responde (probablemente en mantenimiento). Reintento en unos minutos.' };
+  }
 
   try {
     const page = await findPage(item);
@@ -109,6 +141,11 @@ export async function acquisition(id, { force = false } = {}) {
     return out;
   } catch (e) {
     failUntil.t = Date.now() + 10 * 60_000;
+    const arch = await fromArchive(item, base);
+    if (arch) {
+      try { await idbSet(cachePath, arch); } catch {}
+      return arch;
+    }
     return { ...base, available: false, reason: `La wiki no está disponible ahora (${e.message}). Probá más tarde o abrila con el link.` };
   }
 }
