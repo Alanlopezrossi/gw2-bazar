@@ -21,7 +21,7 @@ export function obtainSummary(id) {
 
 function annotate(n) {
   if (!n || n.currency) return;
-  if (n.tpUnit == null && n.craftUnit == null) n.obtain = obtainSummary(n.id);
+  if (n.tpUnit == null && n.craftUnit == null && !n.children.length) n.obtain = obtainSummary(n.id);
   n.children.forEach(annotate);
 }
 

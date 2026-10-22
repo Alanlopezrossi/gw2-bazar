@@ -432,7 +432,8 @@ function treeHTML(n, top = true) {
   const disc = n.recipe ? `<span class="muted small">${esc(n.recipe.disciplines.map((d) => META.disciplines[d] || d).join(', '))} ${n.recipe.flags?.includes('Wiki') ? '' : n.recipe.minRating}${n.recipe.flags?.includes('LearnedFromItem') ? ' · requiere receta' : ''}${n.recipe.outCount > 1 ? ` · da ${n.recipe.outCount}` : ''}</span>` : '';
   const head = `<div class="tnode">${n.children.length ? '<span class="tw">▸</span>' : '<span style="width:12px"></span>'}<span class="q">${qty(n.qty)}×</span>${img}<span class="lnk rar-${esc(n.rarity)}" data-goto="${n.id}">${esc(n.name)}</span>${gate}${tp}${cr}${disc}</div>${n.obtain ? `<div class="tobtain">${obtainHTML(n.obtain)}</div>` : ''}`;
   if (!n.children.length) return `<li>${head}</li>`;
-  const open = top || n.chosen === 'craft';
+  // Abrimos solas las ramas que hay que craftear sí o sí (Forja, no comerciables) para ver la cadena completa.
+  const open = top || n.chosen === 'craft' || !n.tradable || n.recipe?.flags?.includes('Wiki');
   return `<li><details class="tg" ${open ? 'open' : ''}><summary>${head}</summary><ul>${n.children.map((c) => treeHTML(c, false)).join('')}</ul></details></li>`;
 }
 
@@ -472,7 +473,7 @@ function recipesHTML(d) {
       ${sh.coins ? `<tr><td>Monedas (costo de la receta)</td><td></td><td></td><td>${coin(sh.coins)}</td></tr>` : ''}
       <tr class="tot"><td>Total</td><td></td><td></td><td>${coin(sh.total)}${sh.missing ? ` <span class="muted small">+ ${sh.missing} sin precio</span>` : ''}</td></tr>
     </tbody></table>
-    ${sh.crafts.length ? `<h4 class="sub-h">Pasos intermedios que conviene craftear</h4><ul class="steps">${sh.crafts.map((c) => `<li>${qty(c.qty)}× <a href="#/item/${c.id}" data-goto="${c.id}" class="rar-${esc(c.rarity)}">${esc(c.name)}</a> <span class="muted small">— ${esc(discName(c.disciplines))} ${c.minRating ?? ''}${c.needsRecipe ? ' · requiere receta' : ''}${c.gated ? ' · 1 por día' : ''}</span></li>`).join('')}</ul>` : ''}` : '';
+    ${sh.crafts.length ? `<h4 class="sub-h">Pasos intermedios que conviene craftear</h4><ul class="steps">${sh.crafts.map((c) => `<li>${qty(c.qty)}× <a href="#/item/${c.id}" data-goto="${c.id}" class="rar-${esc(c.rarity)}">${esc(c.name)}</a> <span class="muted small">— ${esc(discName(c.disciplines))} ${c.minRating || ''}${c.needsRecipe ? ' · requiere receta' : ''}${c.gated ? ' · 1 por día' : ''}</span></li>`).join('')}</ul>` : ''}` : '';
 
   return `<div class="section"><h3>Cómo se crea</h3>
     ${cards}
