@@ -384,6 +384,8 @@ a.chip { text-decoration: none; display: inline-block; margin: 2px; }
 .ach-snap ul { margin: 4px 0 4px 18px; padding: 0; }
 .ach-snap div { margin: 2px 0; }
 .ach-snap i { display: block; margin: 4px 0; color: var(--muted); }
+thead th { cursor: pointer; user-select: none; }
+thead th:hover { color: var(--text); }
 
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }

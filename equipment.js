@@ -68,12 +68,26 @@ function rowOf(it, mode) {
   };
 }
 
+// Valor por el que se ordena cada columna (null = sin dato: siempre al final).
 const SORTS = {
-  name: (a, b) => a.name.localeCompare(b.name, 'es'),
-  sell: (a, b) => (a.sell || Infinity) - (b.sell || Infinity),
-  craftCost: (a, b) => (a.craftCost ?? Infinity) - (b.craftCost ?? Infinity),
-  type: (a, b) => `${a.type}${a.sub}`.localeCompare(`${b.type}${b.sub}`) || a.name.localeCompare(b.name, 'es'),
+  name: (r) => r.name,
+  type: (r) => `${r.type} ${r.sub || ''} ${r.name}`,
+  sources: (r) => r.sources.length,
+  sell: (r) => r.sell || null,
+  craftCost: (r) => r.craftCost ?? null,
+  achievement: (r) => r.achievement?.name || null,
+  vendor: (r) => r.vendor?.vendor || null,
 };
+function sortRows(rows, get, dir) {
+  const m = dir === 'desc' ? -1 : 1;
+  return rows.sort((x, y) => {
+    const a = get(x), b = get(y);
+    const ea = a == null || a === '', eb = b == null || b === '';
+    if (ea || eb) return ea === eb ? 0 : ea ? 1 : -1;
+    if (typeof a === 'number' && typeof b === 'number') return m * (a - b);
+    return m * String(a).localeCompare(String(b), 'es', { numeric: true, sensitivity: 'base' });
+  });
+}
 
 export function listEquipment({ q = '', rarity = '', type = '', sub = '', weight = '', source = '', sort = 'name', dir = 'asc', page = 1, limit = 100, mode = 'instant' } = {}) {
   if (!EQ) return { total: 0, page, limit, rows: [], ready: false, subs: [] };
@@ -94,8 +108,7 @@ export function listEquipment({ q = '', rarity = '', type = '', sub = '', weight
     if (source && !r.sources.includes(source)) continue;
     rows.push(r);
   }
-  const cmp = SORTS[sort] || SORTS.name;
-  rows.sort((a, b) => (dir === 'desc' ? cmp(b, a) : cmp(a, b)));
+  sortRows(rows, SORTS[sort] || SORTS.name, dir);
   const start = (Math.max(1, page) - 1) * limit;
   return { total: rows.length, page, limit, rows: rows.slice(start, start + limit), ready: true, subs: [...subs].sort(), at: EQ.at };
 }

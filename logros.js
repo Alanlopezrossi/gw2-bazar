@@ -129,6 +129,16 @@ export async function renderLogros(view, { api, esc, normalize, catId = null, to
   let rows = [];
   let page = 1;
   const PER = 50;
+  const sort = { col: null, dir: 'asc' };
+  const COLS = [['Logro', 'left'], ['Qué hay que hacer', 'left'], ['Puntos', ''], ['Recompensa', 'left'], ['Tu progreso', '']];
+  const rewardKey = (a) => (a.rewards || []).map((r) => r.type).sort().join(',') || null;
+  const KEY = [
+    (a) => a.name,
+    (a) => requirement(a) || null,
+    (a) => points(a),
+    rewardKey,
+    (a) => { const p = P.get(a.id); return p?.done ? 2 : p ? 1 + (p.current || 0) / (p.max || goal(a) || 1) / 2 : 0; },
+  ];
   function paintList() {
     const q = normalize(view.querySelector('#aq').value).trim();
     const mine = view.querySelector('#amine').checked;
@@ -142,13 +152,23 @@ export async function renderLogros(view, { api, esc, normalize, catId = null, to
       const hay = normalize(`${a.name} ${a.requirement} ${a.description} ${c?.name || ''}`);
       return words.every((w) => hay.includes(w));
     });
+    if (sort.col != null) {
+      const get = KEY[sort.col];
+      const m = sort.dir === 'asc' ? 1 : -1;
+      list.sort((x, y) => {
+        const a = get(x), b = get(y);
+        const ea = a == null || a === '', eb = b == null || b === '';
+        if (ea || eb) return ea === eb ? 0 : ea ? 1 : -1;
+        return typeof a === 'number' ? m * (a - b) : m * String(a).localeCompare(String(b), 'es', { sensitivity: 'base' });
+      });
+    }
     const pages = Math.max(1, Math.ceil(list.length / PER));
     page = Math.min(page, pages);
     view.querySelector('#acount').textContent = `${list.length.toLocaleString('es-AR')} logros`;
     const slice = list.slice((page - 1) * PER, page * PER);
     view.querySelector('#alist').innerHTML = !list.length
       ? '<div class="empty">Nada coincide.</div>'
-      : `<div class="table-wrap"><table><thead><tr><th class="left">Logro</th><th class="left">Qué hay que hacer</th><th>Puntos</th><th class="left">Recompensa</th>${P.unavailable ? '' : '<th>Tu progreso</th>'}</tr></thead><tbody>
+      : `<div class="table-wrap"><table data-managed><thead><tr>${COLS.slice(0, P.unavailable ? 4 : 5).map(([l, cls], i) => `<th data-col="${i}" class="sortable ${cls}${sort.col === i ? ` sorted ${sort.dir}` : ''}" title="Ordenar por esta columna">${l}</th>`).join('')}</tr></thead><tbody>
         ${slice.map((a) => {
           const c = M.catById.get(M.catOfAch.get(a.id));
           const st = stateOf(a, P);
@@ -164,6 +184,15 @@ export async function renderLogros(view, { api, esc, normalize, catId = null, to
         <div class="pager">${page > 1 ? '<button class="btn ghost small" data-p="-1">← Anterior</button>' : ''}<span class="muted small">Página ${page} de ${pages}</span>${page < pages ? '<button class="btn ghost small" data-p="1">Siguiente →</button>' : ''}</div>`;
   }
   view.querySelector('#alist').addEventListener('click', (e) => {
+    const th = e.target.closest('th[data-col]');
+    if (th) {
+      const i = Number(th.dataset.col);
+      if (sort.col === i) sort.dir = sort.dir === 'desc' ? 'asc' : 'desc';
+      else { sort.col = i; sort.dir = i === 2 || i === 4 ? 'desc' : 'asc'; }
+      page = 1;
+      paintList();
+      return;
+    }
     const p = e.target.closest('[data-p]');
     if (p) { page += Number(p.dataset.p); paintList(); view.querySelector('#alist').scrollIntoView({ block: 'start' }); return; }
     const r = e.target.closest('[data-ach]');

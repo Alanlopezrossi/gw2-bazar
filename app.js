@@ -38,7 +38,7 @@ function coin(c, { plain = false } = {}) {
   if (g) parts.push(`<span class="g">${nf.format(g)}</span>`);
   if (g || s) parts.push(`<span class="s">${g ? String(s).padStart(2, '0') : s}</span>`);
   parts.push(`<span class="c">${g || s ? String(cu).padStart(2, '0') : cu}</span>`);
-  return `<span class="coin${neg ? ' neg' : ''}">${parts.join('')}</span>`;
+  return `<span class="coin${neg ? ' neg' : ''}" data-v="${neg ? -v : v}">${parts.join('')}</span>`;
 }
 const coinText = (t) => esc(t).replace(/\{\{c:(-?\d+)\}\}/g, (_, n) => coin(Number(n)));
 const qty = (n) => (n == null ? '<span class="muted">—</span>' : nf.format(n));
@@ -93,6 +93,64 @@ function qs(o) {
 }
 
 
+// ---------- ordenar tablas tocando el nombre de la columna ----------
+const isEmptyVal = (v) => v == null || v === '' || (typeof v === 'number' && Number.isNaN(v));
+/** Ordena en el lugar; los vacíos siempre quedan al final. */
+function sortRows(rows, get, dir) {
+  const m = dir === 'asc' ? 1 : -1;
+  return rows.sort((x, y) => {
+    const a = get(x), b = get(y);
+    const ea = isEmptyVal(a), eb = isEmptyVal(b);
+    if (ea || eb) return ea === eb ? 0 : ea ? 1 : -1;
+    if (typeof a === 'number' && typeof b === 'number') return m * (a - b);
+    return m * String(a).localeCompare(String(b), 'es', { numeric: true, sensitivity: 'base' });
+  });
+}
+/** Valor de una celda ya pintada: monedas (data-v), números o texto. */
+function cellValue(td) {
+  if (!td) return null;
+  const v = td.querySelector('[data-v]');
+  if (v) return Number(v.dataset.v);
+  const t = td.textContent.replace(/\s+/g, ' ').trim();
+  if (!t || t === '—') return null;
+  const n = t.replace(/^[^\d−-]*(?=[−-]?\d)/, '').replace(/\./g, '').replace(',', '.').replace('−', '-').match(/^-?\d+(\.\d+)?/);
+  if (n && /^[^a-záéíóúñ]*[\d]/i.test(t)) return Number(n[0]);
+  return t.toLowerCase();
+}
+const firstDir = (sample) => (typeof sample === 'number' ? 'desc' : 'asc');
+/** Encabezado clickeable para tablas que se ordenan con los datos (todas las páginas, no sólo la visible). */
+function headHTML(head, sort) {
+  return head.map((h, i) => `<th data-col="${i}" class="sortable${sort.col === i ? ` sorted ${sort.dir}` : ''}" title="Ordenar por esta columna">${h}</th>`).join('');
+}
+function bindHeadSort(thead, sort, sample, onChange) {
+  if (!thead) return;
+  thead.closest('table')?.setAttribute('data-managed', '');
+  thead.addEventListener('click', (e) => {
+    const th = e.target.closest('th[data-col]');
+    if (!th) return;
+    const i = Number(th.dataset.col);
+    if (sort.col === i) sort.dir = sort.dir === 'desc' ? 'asc' : 'desc';
+    else { sort.col = i; sort.dir = firstDir(sample(i)); }
+    thead.querySelectorAll('th[data-col]').forEach((t) => t.className = `sortable${Number(t.dataset.col) === sort.col ? ` sorted ${sort.dir}` : ''}`);
+    onChange();
+  });
+}
+// El resto de las tablas (ficha del item, etc.): se ordenan las filas en pantalla.
+document.addEventListener('click', (e) => {
+  const th = e.target.closest('thead th');
+  if (!th || th.dataset.sort || th.dataset.col || th.closest('[data-managed]')) return;
+  const table = th.closest('table');
+  const tb = table?.tBodies[0];
+  if (!tb || tb.rows.length < 2) return;
+  const idx = [...th.parentElement.children].indexOf(th);
+  const rows = [...tb.rows].filter((r) => r.cells.length > idx && !r.querySelector('.empty'));
+  const sample = rows.map((r) => cellValue(r.cells[idx])).find((v) => !isEmptyVal(v));
+  const dir = th.classList.contains('sorted') ? (th.classList.contains('asc') ? 'desc' : 'asc') : firstDir(sample);
+  sortRows(rows, (r) => cellValue(r.cells[idx]), dir).forEach((r) => tb.appendChild(r));
+  th.parentElement.querySelectorAll('th').forEach((t) => t.classList.remove('sorted', 'asc', 'desc'));
+  th.classList.add('sorted', dir);
+});
+
 // ---------- paginador compartido (todas las listas) ----------
 const PAGE_SIZES = [25, 50, 100, 250, 500, 1000];
 /** Pinta los controles de paginación en `el` y devuelve nada; onGo(page) y onSize(limit) los maneja quien llama. */
@@ -120,8 +178,18 @@ function paintPager(el, { total, page, limit, label = 'items', compact = false }
 function pagedTable(el, { head, rows, row, label = 'items', limit = 50, empty = 'Sin resultados.', rowAttr = 'data-id' }) {
   if (!el) return;
   const pg = { page: 1, limit };
-  el.innerHTML = `<div class="pager" data-pt></div><div class="table-wrap"><table><thead><tr>${head.map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody data-tb></tbody></table></div><div class="pager" data-pb></div>`;
+  const sort = { col: null, dir: 'desc' };
+  rows = [...rows];
+  el.innerHTML = `<div class="pager" data-pt></div><div class="table-wrap"><table><thead><tr>${headHTML(head, sort)}</tr></thead><tbody data-tb></tbody></table></div><div class="pager" data-pb></div>`;
   const tb = el.querySelector('[data-tb]');
+  // Valor de cada celda: se pinta la fila una vez en un <tr> suelto y se lee (sirve para monedas, números y texto).
+  const valCache = new Map();
+  const val = (r, i) => {
+    let v = valCache.get(r);
+    if (!v) { const t = document.createElement('tbody'); t.innerHTML = `<tr>${row(r)}</tr>`; v = [...t.rows[0].cells].map(cellValue); valCache.set(r, v); }
+    return v[i];
+  };
+  bindHeadSort(el.querySelector('thead'), sort, (i) => rows.map((r) => val(r, i)).find((v) => !isEmptyVal(v)), () => { sortRows(rows, (r) => val(r, sort.col), sort.dir); pg.page = 1; paint(false); });
   function paint(scroll) {
     const slice = rows.slice((pg.page - 1) * pg.limit, pg.page * pg.limit);
     tb.innerHTML = slice.length ? slice.map((r) => `<tr ${rowAttr}="${r.id}">${row(r)}</tr>`).join('') : `<tr><td colspan="${head.length}" class="empty">${empty}</td></tr>`;
@@ -259,6 +327,7 @@ const RECS = {
       <label>Días de stock ≤ (0 = sin límite) <input type="number" min="0" step="0.5" data-f="maxDays" value="${st.maxDays}"></label>`,
     url: (st) => `/api/recs/demand?${qs(st)}`,
     head: ['Item', 'Precio en el bazar', 'Cobrás publicando (−15%)', 'Cobrás al instante', 'Vendidos 24h', 'Oro movido por día', 'Días de stock', 'Δ 24h'],
+    keys: ['name', 'sell', 'netSell', 'netInstant', 's1', 'dailyValue', 'daysOfStock', 'change24'],
     row: (r) => `<td>${itemCell(r)}</td><td>${coin(r.sell)}</td><td>${coin(r.netSell)}</td><td>${coin(r.netInstant)}</td><td class="num">${qty(r.s1)}</td><td>${coin(r.dailyValue)}</td>
       <td class="num">${r.daysOfStock == null ? '—' : `<span class="${r.daysOfStock < 1 ? 'pos' : r.daysOfStock > 7 ? 'neg' : ''}">${r.daysOfStock.toFixed(1)}</span>`}</td><td class="num">${pct(r.change24)}</td>`,
   },
@@ -275,6 +344,7 @@ const RECS = {
       <label>Precio máx. por unidad (cobre, 0 = sin límite) <input type="number" min="0" data-f="maxBuy" value="${st.maxBuy}"></label>`,
     url: (st) => `/api/recs/flips?${qs(st)}`,
     head: ['Item', 'Comprar a', 'Vender a', 'Margen neto', 'ROI', 'Se mueven/día', 'Cantidad sugerida', 'Inversión', 'Ganancia/día'],
+    keys: ['name', 'buy', 'sell', 'profit', 'roi', 'moves', 'qty', 'capital', 'potential'],
     row: (r) => `<td>${itemCell(r)}</td><td>${coin(r.buy + 1)}</td><td>${coin(Math.max(r.sell - 1, r.buy + 1))}</td><td>${coin(r.profit)}</td><td class="num">${pct(r.roi)}</td><td class="num">${qty(r.moves)}</td><td class="num">${qty(r.qty)}</td><td>${coin(r.capital)}</td><td>${coin(r.potential)}</td>`,
   },
   crafteo: {
@@ -290,11 +360,13 @@ const RECS = {
       <label><input type="checkbox" data-f="autoOnly" ${st.autoOnly ? 'checked' : ''}> sólo recetas que se aprenden solas</label>`,
     url: (st) => `/api/recs/crafting?${qs(st)}`,
     head: ['Item', 'Costo de crafteo', 'Cobrás publicando', 'Ganancia x unidad', 'ROI', 'Vendidos 24h', 'Disciplina', 'Cantidad/día', 'Ganancia/día'],
+    keys: ['name', 'craftCost', 'sellNet', 'craftProfit', 'craftRoi', 's1', (r) => (r.disciplines || []).map((d) => META.disciplines[d] || d).join(', '), 'qty', 'potential'],
     row: (r) => `<td>${itemCell(r)}</td><td>${coin(r.craftCost)}</td><td>${coin(r.sellNet)}</td><td>${coin(r.craftProfit)}</td><td class="num">${pct(r.craftRoi)}</td><td class="num">${qty(r.s1)}</td>
       <td class="left small">${esc((r.disciplines || []).map((d) => META.disciplines[d] || d).join(', '))} <span class="muted">${r.minRating}</span>${r.needsRecipe ? ' <span class="pill warn">receta</span>' : ''}${r.gated ? ' <span class="pill warn">1 por día</span>' : ''}</td><td class="num">${qty(r.qty)}</td><td>${coin(r.potential)}</td>`,
   },
 };
 
+const RSORT = {};
 function renderRecs(kind) {
   const conf = RECS[kind] || RECS.vender;
   const st = S[kind] || S.vender;
@@ -304,9 +376,13 @@ function renderRecs(kind) {
     <div class="explain">${conf.explain}</div>
     <div class="filters">${conf.filters(st)}</div>
     <div class="pager" id="pagerTop"></div>
-    <div class="table-wrap"><table><thead><tr>${conf.head.map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody id="tb"><tr><td colspan="${conf.head.length}"><div class="skeleton"></div></td></tr></tbody></table></div>
+    <div class="table-wrap"><table><thead><tr>${headHTML(conf.head, RSORT[kind] ||= { col: null, dir: 'desc' })}</tr></thead><tbody id="tb"><tr><td colspan="${conf.head.length}"><div class="skeleton"></div></td></tr></tbody></table></div>
     <div class="pager" id="pager"></div>`;
   let all = [];
+  const rsort = RSORT[kind];
+  const getter = (i) => { const k = conf.keys?.[i]; return typeof k === 'function' ? k : (r) => r[k]; };
+  const applySort = () => { if (rsort.col != null && conf.keys) sortRows(all, getter(rsort.col), rsort.dir); };
+  bindHeadSort(view.querySelector('thead'), rsort, (i) => all.map(getter(i)).find((v) => !isEmptyVal(v)), () => { applySort(); pg.page = 1; paint(); });
   const pg = { page: 1, limit: st.limit || 100 };
   bindFilters(view, st, () => { pg.page = 1; load(); });
   function paint() {
@@ -327,6 +403,7 @@ function renderRecs(kind) {
   async function load() {
     try {
       all = await api(conf.url(st) + '&limit=100000');
+      applySort();
       paint();
     } catch (e) {
       $('#tb').innerHTML = `<tr><td colspan="${conf.head.length}" class="empty">Error: ${esc(e.message)}</td></tr>`;
@@ -343,6 +420,7 @@ const EQ_SOURCES = { bazar: 'Bazar', crafteo: 'Crafteo', forja: 'Forja Mística'
 const srcChips = (list) => `<span class="chips eq-src">${(list || []).map((s) => `<span class="chip chip-${s.replace(/\s/g, '-')}">${esc(EQ_SOURCES[s] || s)}</span>`).join('') || '<span class="muted small">ver ficha</span>'}</span>`;
 const subName = (s) => (META.subtypes || {})[s] || s || '';
 
+const EQ_COLS = [['name', 'Item'], ['sources', 'Cómo se consigue'], ['sell', 'Precio en bazar'], ['craftCost', 'Costo de crafteo'], ['achievement', 'Logro / colección'], ['vendor', 'NPC vendedor']];
 function renderEquipo() {
   const st = S.equipo;
   view.innerHTML = `
@@ -354,13 +432,23 @@ function renderEquipo() {
       <label>Subtipo <select data-f="sub" id="eqSub"><option value="">Todos</option></select></label>
       <label>Peso <select data-f="weight"><option value="">Todos</option>${Object.entries(META.weights || {}).map(([k, v]) => `<option value="${k}" ${st.weight === k ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
       <label>Se consigue por <select data-f="source"><option value="">Cualquier vía</option>${Object.entries(EQ_SOURCES).map(([k, v]) => `<option value="${k}" ${st.source === k ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
-      <label>Ordenar <select data-f="sort"><option value="name" ${st.sort === 'name' ? 'selected' : ''}>nombre</option><option value="type" ${st.sort === 'type' ? 'selected' : ''}>tipo</option><option value="sell" ${st.sort === 'sell' ? 'selected' : ''}>precio en bazar</option><option value="craftCost" ${st.sort === 'craftCost' ? 'selected' : ''}>costo de crafteo</option></select></label>
+      <label>Ordenar <select data-f="sort"><option value="name" ${st.sort === 'name' ? 'selected' : ''}>nombre</option><option value="type" ${st.sort === 'type' ? 'selected' : ''}>tipo</option><option value="sell" ${st.sort === 'sell' ? 'selected' : ''}>precio en bazar</option><option value="craftCost" ${st.sort === 'craftCost' ? 'selected' : ''}>costo de crafteo</option><option value="sources" ${st.sort === 'sources' ? 'selected' : ''}>formas de conseguirlo</option><option value="achievement" ${st.sort === 'achievement' ? 'selected' : ''}>logro</option><option value="vendor" ${st.sort === 'vendor' ? 'selected' : ''}>NPC vendedor</option></select></label>
     </div>
     <div class="pager" id="pagerTop"></div>
-    <div class="table-wrap"><table><thead><tr><th>Item</th><th>Cómo se consigue</th><th>Precio en bazar</th><th>Costo de crafteo</th><th>Logro / colección</th><th>NPC vendedor</th></tr></thead>
+    <div class="table-wrap"><table data-managed><thead><tr>${EQ_COLS.map(([k, l]) => `<th data-eq="${k}" class="sortable${st.sort === k ? ` sorted ${st.dir || 'asc'}` : ''}" title="Ordenar por esta columna">${l}</th>`).join('')}</tr></thead>
       <tbody id="tb"><tr><td colspan="6"><div class="skeleton"></div></td></tr></tbody></table></div>
     <div class="pager" id="pager"></div>`;
   bindFilters(view, st, load);
+  view.querySelector('thead').addEventListener('click', (e) => {
+    const th = e.target.closest('th[data-eq]');
+    if (!th) return;
+    const k = th.dataset.eq;
+    if (st.sort === k) st.dir = st.dir === 'desc' ? 'asc' : 'desc';
+    else { st.sort = k; st.dir = ['sell', 'craftCost', 'sources'].includes(k) ? 'desc' : 'asc'; }
+    st.page = 1;
+    saveFilters();
+    renderEquipo();
+  });
   async function load() {
     try {
       const d = await api(`/api/equipment?${qs({ ...st, mode: S.crafteo.mode })}`);
