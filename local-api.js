@@ -37,16 +37,16 @@ const routes = {
   }),
   '/api/recs/flips': (q) => flips({
     minProfit: num(q.get('minProfit'), 100), minRoi: num(q.get('minRoi'), 5) / 100, maxRoi: num(q.get('maxRoi'), 200) / 100, minVol: num(q.get('minVol'), 25),
-    maxBuy: num(q.get('maxBuy'), 0), type: q.get('type') || '', rarity: q.get('rarity') || '', q: q.get('q') || '', limit: Math.min(300, num(q.get('limit'), 100)),
+    maxBuy: num(q.get('maxBuy'), 0), type: q.get('type') || '', rarity: q.get('rarity') || '', q: q.get('q') || '', limit: Math.min(100000, num(q.get('limit'), 100)),
   }),
   '/api/recs/demand': (q) => demand({
     type: q.get('type') || '', rarity: q.get('rarity') || '', q: q.get('q') || '', cat: q.get('cat') || '', minPrice: num(q.get('minPrice'), 0),
-    minSold: num(q.get('minSold'), 50), maxDays: num(q.get('maxDays'), 0), sort: q.get('sort') === 'unit' ? 'unit' : 'value', limit: Math.min(300, num(q.get('limit'), 100)),
+    minSold: num(q.get('minSold'), 50), maxDays: num(q.get('maxDays'), 0), sort: q.get('sort') === 'unit' ? 'unit' : 'value', limit: Math.min(100000, num(q.get('limit'), 100)),
   }),
   '/api/recs/crafting': (q) => craftingProfits({
     mode: q.get('mode') === 'order' ? 'order' : 'instant', minProfit: num(q.get('minProfit'), 100), minRoi: num(q.get('minRoi'), 5) / 100, minVol: num(q.get('minVol'), 10),
     autoOnly: q.get('autoOnly') === '1', discipline: q.get('discipline') || '', type: q.get('type') || '', rarity: q.get('rarity') || '', q: q.get('q') || '',
-    limit: Math.min(300, num(q.get('limit'), 100)),
+    limit: Math.min(100000, num(q.get('limit'), 100)),
   }),
 };
 

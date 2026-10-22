@@ -88,6 +88,51 @@ function qs(o) {
   return p.toString();
 }
 
+
+// ---------- paginador compartido (todas las listas) ----------
+const PAGE_SIZES = [25, 50, 100, 250, 500, 1000];
+/** Pinta los controles de paginación en `el` y devuelve nada; onGo(page) y onSize(limit) los maneja quien llama. */
+function paintPager(el, { total, page, limit, label = 'items', compact = false }, onGo, onSize) {
+  if (!el) return;
+  const pages = Math.max(1, Math.ceil(total / limit));
+  const from = total ? (page - 1) * limit + 1 : 0;
+  const to = Math.min(total, page * limit);
+  el.innerHTML = `<span>${nf.format(total)} ${label}${compact ? '' : ` · mostrando ${nf.format(from)}–${nf.format(to)}`}
+      · <label class="pg">por página <select data-size>${PAGE_SIZES.map((n) => `<option ${n === limit ? 'selected' : ''}>${n}</option>`).join('')}</select></label></span>
+    <span class="btns">
+      <button class="btn ghost small" data-go="1" ${page <= 1 ? 'disabled' : ''}>« Primera</button>
+      <button class="btn ghost small" data-go="${page - 1}" ${page <= 1 ? 'disabled' : ''}>← Anterior</button>
+      <label class="pg">Página <input type="number" min="1" max="${pages}" value="${page}" data-jump> de ${nf.format(pages)}</label>
+      <button class="btn ghost small" data-go="${page + 1}" ${page >= pages ? 'disabled' : ''}>Siguiente →</button>
+      <button class="btn ghost small" data-go="${pages}" ${page >= pages ? 'disabled' : ''}>Última »</button>
+    </span>`;
+  const go = (p) => onGo(Math.min(pages, Math.max(1, p || 1)));
+  el.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); go(Number(b.dataset.go)); }));
+  el.querySelector('[data-jump]').addEventListener('change', (e) => go(Number(e.target.value)));
+  el.querySelector('[data-size]').addEventListener('change', (e) => onSize(Number(e.target.value)));
+}
+
+/** Tabla paginada en el cliente: pinta `rows` en `el` con paginador arriba y abajo. */
+function pagedTable(el, { head, rows, row, label = 'items', limit = 50, empty = 'Sin resultados.', rowAttr = 'data-id' }) {
+  if (!el) return;
+  const pg = { page: 1, limit };
+  el.innerHTML = `<div class="pager" data-pt></div><div class="table-wrap"><table><thead><tr>${head.map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody data-tb></tbody></table></div><div class="pager" data-pb></div>`;
+  const tb = el.querySelector('[data-tb]');
+  function paint(scroll) {
+    const slice = rows.slice((pg.page - 1) * pg.limit, pg.page * pg.limit);
+    tb.innerHTML = slice.length ? slice.map((r) => `<tr ${rowAttr}="${r.id}">${row(r)}</tr>`).join('') : `<tr><td colspan="${head.length}" class="empty">${empty}</td></tr>`;
+    const info = { total: rows.length, page: pg.page, limit: pg.limit, label };
+    const goPage = (p) => { pg.page = p; paint(true); };
+    const setSize = (n) => { pg.limit = n; pg.page = 1; paint(true); };
+    const pt = el.querySelector('[data-pt]'), pb = el.querySelector('[data-pb]');
+    // Si entra todo en una página, no hace falta paginador.
+    if (rows.length <= Math.min(...PAGE_SIZES)) { pt.innerHTML = ''; pb.innerHTML = ''; }
+    else { paintPager(pt, { ...info, compact: true }, goPage, setSize); paintPager(pb, info, goPage, setSize); }
+    if (scroll) el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }
+  paint(false);
+}
+
 // ---------- router ----------
 const view = $('#view');
 let current = null; // { name, refresh }
@@ -171,20 +216,11 @@ function renderBazar() {
             <td class="num">${pct(r.change24)}</td></tr>`).join('')
         : `<tr><td colspan="10" class="empty">${STATUS?.counts.prices ? 'Nada coincide con esos filtros.' : 'Descargando precios por primera vez…'}</td></tr>`;
       const pages = Math.max(1, Math.ceil(d.total / d.limit));
-      const sizes = [50, 100, 250, 500, 1000];
-      const nav = (where) => `<span class="btns">
-          <button class="btn ghost small" data-go="1" ${d.page <= 1 ? 'disabled' : ''}>« Primera</button>
-          <button class="btn ghost small" data-go="${d.page - 1}" ${d.page <= 1 ? 'disabled' : ''}>← Anterior</button>
-          <label class="pg">Página <input type="number" min="1" max="${pages}" value="${d.page}" data-jump="${where}"> de ${nf.format(pages)}</label>
-          <button class="btn ghost small" data-go="${d.page + 1}" ${d.page >= pages ? 'disabled' : ''}>Siguiente →</button>
-          <button class="btn ghost small" data-go="${pages}" ${d.page >= pages ? 'disabled' : ''}>Última »</button></span>`;
-      $('#pager').innerHTML = `<span>${nf.format(d.total)} items · mostrando ${nf.format(Math.min(d.total, (d.page - 1) * d.limit + 1))}–${nf.format(Math.min(d.total, d.page * d.limit))}
-          · <label class="pg">por página <select data-size>${sizes.map((n) => `<option ${n === d.limit ? 'selected' : ''}>${n}</option>`).join('')}</select></label></span>${nav('bottom')}`;
-      $('#pagerTop').innerHTML = `<span>${nf.format(d.total)} items en el bazar</span>${nav('top')}`;
-      const go = (p) => { st.page = Math.min(pages, Math.max(1, p)); saveFilters(); load(); window.scrollTo({ top: 0 }); };
-      $$('#pager [data-go], #pagerTop [data-go]').forEach((b) => b.addEventListener('click', () => go(Number(b.dataset.go))));
-      $$('#pager [data-jump], #pagerTop [data-jump]').forEach((i) => i.addEventListener('change', () => go(Number(i.value) || 1)));
-      $('#pager [data-size]').addEventListener('change', (e) => { st.limit = Number(e.target.value); st.page = 1; saveFilters(); load(); });
+      const goPage = (p) => { st.page = p; saveFilters(); load(); window.scrollTo({ top: 0 }); };
+      const setSize = (n) => { st.limit = n; st.page = 1; saveFilters(); load(); };
+      const info = { total: d.total, page: d.page, limit: d.limit, label: 'items en el bazar' };
+      paintPager($('#pagerTop'), { ...info, compact: true }, goPage, setSize);
+      paintPager($('#pager'), info, goPage, setSize);
     } catch (e) {
       $('#tb').innerHTML = `<tr><td colspan="10" class="empty">Error: ${esc(e.message)}</td></tr>`;
     }
@@ -259,16 +295,31 @@ function renderRecs(kind) {
     <div class="subtabs">${Object.entries(RECS).map(([k, c]) => `<a href="#/recs/${k}" class="${k === kind ? 'active' : ''}">${c.label}</a>`).join('')}</div>
     <div class="explain">${conf.explain}</div>
     <div class="filters">${conf.filters(st)}</div>
-    <div class="table-wrap"><table><thead><tr>${conf.head.map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody id="tb"><tr><td colspan="${conf.head.length}"><div class="skeleton"></div></td></tr></tbody></table></div>`;
-  bindFilters(view, st, load);
+    <div class="pager" id="pagerTop"></div>
+    <div class="table-wrap"><table><thead><tr>${conf.head.map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody id="tb"><tr><td colspan="${conf.head.length}"><div class="skeleton"></div></td></tr></tbody></table></div>
+    <div class="pager" id="pager"></div>`;
+  let all = [];
+  const pg = { page: 1, limit: st.limit || 100 };
+  bindFilters(view, st, () => { pg.page = 1; load(); });
+  function paint() {
+    const tb = $('#tb');
+    if (!tb) return;
+    const pages = Math.max(1, Math.ceil(all.length / pg.limit));
+    if (pg.page > pages) pg.page = pages;
+    const slice = all.slice((pg.page - 1) * pg.limit, pg.page * pg.limit);
+    tb.innerHTML = slice.length
+      ? slice.map((r) => `<tr data-id="${r.id}">${conf.row(r)}</tr>`).join('')
+      : `<tr><td colspan="${conf.head.length}" class="empty">${!STATUS?.counts.volume ? 'Esperando datos de volumen (DataWars2)…' : kind === 'crafteo' && !STATUS?.counts.recipes ? 'Descargando recetas…' : 'Nada cumple esos filtros. Probá aflojarlos.'}</td></tr>`;
+    const goPage = (p) => { pg.page = p; paint(); window.scrollTo({ top: 0 }); };
+    const setSize = (n) => { pg.limit = n; st.limit = n; pg.page = 1; saveFilters(); paint(); };
+    const info = { total: all.length, page: pg.page, limit: pg.limit, label: 'resultados' };
+    paintPager($('#pagerTop'), { ...info, compact: true }, goPage, setSize);
+    paintPager($('#pager'), info, goPage, setSize);
+  }
   async function load() {
     try {
-      const rows = await api(conf.url(st));
-      const tb = $('#tb');
-      if (!tb) return;
-      tb.innerHTML = rows.length
-        ? rows.map((r) => `<tr data-id="${r.id}">${conf.row(r)}</tr>`).join('')
-        : `<tr><td colspan="${conf.head.length}" class="empty">${!STATUS?.counts.volume ? 'Esperando datos de volumen (DataWars2)…' : kind === 'crafteo' && !STATUS?.counts.recipes ? 'Descargando recetas…' : 'Nada cumple esos filtros. Probá aflojarlos.'}</td></tr>`;
+      all = await api(conf.url(st) + '&limit=100000');
+      paint();
     } catch (e) {
       $('#tb').innerHTML = `<tr><td colspan="${conf.head.length}" class="empty">Error: ${esc(e.message)}</td></tr>`;
     }
@@ -296,16 +347,18 @@ function renderAccount(force = false) {
           <div class="card"><div class="k">Para retirar en el bazar</div><div class="v">${coin(d.delivery?.coins ?? null)}</div><div class="h">${d.delivery ? `${d.delivery.items.length} items esperando` : 'sin permiso tradingpost'}</div></div>
         </div>
         ${d.warnings.length ? `<div class="explain">${d.warnings.map(esc).join('<br>')}</div>` : ''}
-        ${d.activeSells.length ? `<div class="section"><h3>Tus ventas activas ${und.length ? `<span class="pill bad">${und.length} superadas</span>` : '<span class="pill good">todas al mejor precio</span>'}</h3>
-          <div class="table-wrap"><table><thead><tr><th>Item</th><th>Tu precio</th><th>Precio más bajo</th><th>Cantidad</th><th>Estado</th></tr></thead><tbody>
-          ${d.activeSells.map((s) => `<tr data-id="${s.id}"><td>${itemCell(s, new Date(s.created).toLocaleString('es-AR', { hour12: false }))}</td><td>${coin(s.price)}</td><td>${coin(s.lowest)}</td><td class="num">${qty(s.quantity)}</td><td>${s.undercut ? '<span class="pill bad">te superaron</span>' : '<span class="pill good">ok</span>'}</td></tr>`).join('')}
-          </tbody></table></div></div>` : ''}
-        <div class="section"><h3>Qué vender de lo que tenés</h3>
-          <div class="table-wrap"><table><thead><tr><th>Item</th><th>Cantidad</th><th>Dónde</th><th>Publicando (total)</th><th>Al instante (total)</th><th>Vendidos 24h</th><th>Sugerencia</th></tr></thead><tbody>
-          ${d.items.length ? d.items.slice(0, 300).map((i) => `<tr data-id="${i.id}"><td>${itemCell(i)}</td><td class="num">${qty(i.count)}</td>
-            <td class="left small muted">${esc(Object.entries(i.where).map(([w, n]) => `${w} (${n})`).join(', '))}</td>
-            <td>${coin(i.listTotal)}</td><td>${coin(i.instantTotal)}</td><td class="num">${qty(i.s1)}</td><td class="left small">${esc(i.advice)}</td></tr>`).join('') : '<tr><td colspan="7" class="empty">No encontré items comerciables.</td></tr>'}
-          </tbody></table></div></div>`;
+        ${d.activeSells.length ? `<div class="section"><h3>Tus ventas activas ${und.length ? `<span class="pill bad">${und.length} superadas</span>` : '<span class="pill good">todas al mejor precio</span>'}</h3><div id="accSells"></div></div>` : ''}
+        <div class="section"><h3>Qué vender de lo que tenés</h3><div id="accItems"></div></div>`;
+      pagedTable($('#accSells'), {
+        head: ['Item', 'Tu precio', 'Precio más bajo', 'Cantidad', 'Estado'], rows: d.activeSells, label: 'ventas', limit: 25,
+        row: (s) => `<td>${itemCell(s, new Date(s.created).toLocaleString('es-AR', { hour12: false }))}</td><td>${coin(s.price)}</td><td>${coin(s.lowest)}</td><td class="num">${qty(s.quantity)}</td><td>${s.undercut ? '<span class="pill bad">te superaron</span>' : '<span class="pill good">ok</span>'}</td>`,
+      });
+      pagedTable($('#accItems'), {
+        head: ['Item', 'Cantidad', 'Dónde', 'Publicando (total)', 'Al instante (total)', 'Vendidos 24h', 'Sugerencia'], rows: d.items, label: 'items comerciables', limit: 50,
+        empty: 'No encontré items comerciables.',
+        row: (i) => `<td>${itemCell(i)}</td><td class="num">${qty(i.count)}</td><td class="left small muted">${esc(Object.entries(i.where).map(([w, n]) => `${w} (${n})`).join(', '))}</td>
+          <td>${coin(i.listTotal)}</td><td>${coin(i.instantTotal)}</td><td class="num">${qty(i.s1)}</td><td class="left small">${esc(i.advice)}</td>`,
+      });
     } catch (e) {
       box.innerHTML = `<div class="empty">${esc(e.message)}<br><br><button class="btn" id="openSet">Abrir ajustes</button></div>`;
       $('#openSet')?.addEventListener('click', openSettings);
@@ -319,6 +372,13 @@ function renderAccount(force = false) {
 // ---------- Ficha de item ----------
 const drawer = $('#drawer');
 let openId = null;
+// Un solo listener para los links internos de la ficha (sobrevive a cambios de página de las tablas).
+$('#drawerBody').addEventListener('click', (e) => {
+  const el = e.target.closest('[data-goto]');
+  if (!el || e.target.closest('.pager')) return;
+  e.preventDefault();
+  location.hash = `#/item/${el.dataset.goto}`;
+});
 function closeDrawer(updateHash = true) {
   if (!drawer.classList.contains('open')) return;
   drawer.classList.remove('open');
@@ -411,10 +471,7 @@ function itemHTML(d) {
     <div class="section" id="wikiSec"><h3>Farmeo, NPCs, drops y contenedores <span class="muted small">(wiki oficial)</span></h3><div id="wikiBox"><div class="skeleton"></div></div></div>
     ${d.hints.length ? `<div class="section"><h3>Guía general para este tipo de item</h3><ul class="hint-list">${d.hints.map((h) => `<li>${esc(h)}</li>`).join('')}</ul></div>` : ''}
     ${d.usedIn.total ? `<div class="section"><h3>Se usa para craftear (${d.usedIn.total})</h3>
-      <p class="muted small">Si se usa en muchas recetas que se venden bien, la demanda es estable.</p>
-      <div class="table-wrap"><table><thead><tr><th>Resultado</th><th>Necesita</th><th>Disciplina</th><th>Venta</th><th>Vendidos 24h</th></tr></thead><tbody>
-      ${d.usedIn.list.map((u) => `<tr data-goto="${u.id}"><td>${itemCell(u)}</td><td class="num">${qty(u.need)}</td><td class="left small">${esc((u.disciplines || []).map((x) => META.disciplines[x] || x).join(', '))}</td><td>${coin(u.sell || null)}</td><td class="num">${qty(u.s1)}</td></tr>`).join('')}
-      </tbody></table></div></div>` : ''}
+      <p class="muted small">Si se usa en muchas recetas que se venden bien, la demanda es estable.</p><div id="usedInBox"></div></div>` : ''}
     <div class="section"><h3>Enlaces</h3><div class="links">
       ${d.links.wiki ? `<a class="btn ghost small" target="_blank" rel="noopener" href="${esc(d.links.wiki)}">Wiki (inglés)</a>` : ''}
       <a class="btn ghost small" target="_blank" rel="noopener" href="${esc(d.links.wikiEs)}">Wiki (español)</a>
@@ -422,10 +479,13 @@ function itemHTML(d) {
     </div></div>`;
 }
 
-function wireItem(body) {
-  body.querySelectorAll('[data-goto]').forEach((el) =>
-    el.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); location.hash = `#/item/${el.dataset.goto}`; }),
-  );
+function wireItem(body, d) {
+  if (d?.usedIn?.total) {
+    pagedTable(body.querySelector('#usedInBox'), {
+      head: ['Resultado', 'Necesita', 'Disciplina', 'Venta', 'Vendidos 24h'], rows: d.usedIn.list, label: 'recetas', limit: 25, rowAttr: 'data-goto',
+      row: (u) => `<td>${itemCell(u)}</td><td class="num">${qty(u.need)}</td><td class="left small">${esc((u.disciplines || []).map((x) => META.disciplines[x] || x).join(', '))}</td><td>${coin(u.sell || null)}</td><td class="num">${qty(u.s1)}</td>`,
+    });
+  }
   body.querySelectorAll('[data-copy]').forEach((b) =>
     b.addEventListener('click', async () => { try { await navigator.clipboard.writeText(b.dataset.copy); toast('Código copiado: pegalo en el chat del juego'); } catch { toast(b.dataset.copy); } }),
   );

@@ -96,7 +96,7 @@ export async function itemDetail(id, { mode = 'instant' } = {}) {
     history: hist.map(([t, b, s]) => [t * 60_000, b, s]),
     tree,
     ways,
-    usedIn: usedIn(id),
+    usedIn: usedIn(id, Infinity),
     hints: GENERIC_HINTS[it?.type] || [],
     links: {
       wiki: it?.chat ? `https://wiki.guildwars2.com/index.php?search=${encodeURIComponent(it.chat)}` : null,
