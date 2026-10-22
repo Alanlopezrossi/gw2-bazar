@@ -54,7 +54,7 @@ async function findPage(item) {
   return item.nameEn || null;
 }
 
-function sanitize(html) {
+export function sanitize(html) {
   return html
     .replace(/<(script|style|noscript|iframe)[\s\S]*?<\/\1>/gi, '')
     .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '')

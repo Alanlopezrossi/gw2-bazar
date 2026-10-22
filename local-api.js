@@ -7,6 +7,7 @@ import { setGeoData, vendorMarkers } from './vendors.js';
 import { listItems, flips, demand, craftingProfits } from './analysis.js';
 import { itemDetail } from './sources.js';
 import { acquisition } from './wiki.js';
+import { achievementGuide } from './achguide.js';
 import { TYPES, RARITIES, RARITY_ORDER, DISCIPLINES, GAME_TYPES, RECIPE_FLAGS, SUBTYPES, WEIGHTS } from './i18n.js';
 
 export const localEvents = events;
@@ -38,6 +39,7 @@ const routes = {
   }),
   '/api/meta': () => ({ types: TYPES, rarities: RARITIES, rarityOrder: RARITY_ORDER, disciplines: DISCIPLINES, gameTypes: GAME_TYPES, recipeFlags: RECIPE_FLAGS, subtypes: SUBTYPES, weights: WEIGHTS }),
   '/api/vendors': () => vendorMarkers(),
+  '/api/ach-guide': (q) => achievementGuide(q.get('title') || '', { id: Number(q.get('id')) || 0, cat: q.get('cat') || '' }),
   '/api/equipment': (q) => listEquipment({ q: q.get('q') || '', rarity: q.get('rarity') || '', type: q.get('type') || '', sub: q.get('sub') || '', weight: q.get('weight') || '', source: q.get('source') || '', sort: q.get('sort') || 'name', dir: q.get('dir') || 'asc', page: num(q.get('page'), 1), limit: Math.min(1000, num(q.get('limit'), 100)), mode: q.get('mode') === 'order' ? 'order' : 'instant' }),
   '/api/items': (q) => listItems({
     q: q.get('q') || '', type: q.get('type') || '', rarity: q.get('rarity') || '', sort: q.get('sort') || 's1', dir: q.get('dir') || 'desc',

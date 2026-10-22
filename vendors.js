@@ -170,7 +170,8 @@ export function mapLabels() {
     byRegion.set(m.region, r);
   }
   const regions = [...byRegion].map(([en, r]) => ({ es: REGION_ES[en] || en, en, c: [Math.round(r.sx / r.w), Math.round(r.sy / r.w)] }));
-  labelsCache = { regions, maps, sectors };
+  const waypoints = GEO.waypoints.filter((w) => keptIds.has(w.map) && w.nameEn).map((w) => ({ es: w.name || w.nameEn, en: w.nameEn, c: w.coord, chat: w.chat }));
+  labelsCache = { regions, maps, sectors, waypoints };
   return labelsCache;
 }
 

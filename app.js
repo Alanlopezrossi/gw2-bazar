@@ -1,6 +1,7 @@
 import { localApi, localEvents } from './local-api.js';
 import { renderCalc } from './calc.js';
 import { renderMap } from './map.js';
+import { renderLogros, renderLogro } from './logros.js';
 const normalizeText = (s) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 // Bazar GW2 — frontend (vanilla JS, sin build).
 const $ = (s, el = document) => el.querySelector(s);
@@ -145,8 +146,8 @@ document.addEventListener('keydown', (e) => { if (current?.name === 'calc' && ca
 
 function route() {
   const h = location.hash.replace(/^#\/?/, '') || 'bazar';
-  const [a, b] = h.split('/');
-  $$('#tabs a').forEach((x) => x.classList.toggle('active', x.dataset.tab === (a === 'recs' ? 'recs' : a)));
+  const [a, b, c] = h.split('/');
+  $$('#tabs a').forEach((x) => x.classList.toggle('active', x.dataset.tab === (a === 'logro' ? 'logros' : a)));
   if (a !== 'calc' && a !== 'item') calcKeys = null;
   if (a === 'item' && b) {
     openItem(Number(b));
@@ -159,6 +160,8 @@ function route() {
   if (a === 'recs') renderRecs(b || 'vender');
   else if (a === 'cuenta' && !STATUS?.publicMode) renderAccount();
   else if (a === 'equipo') renderEquipo();
+  else if (a === 'logros') { current = { name: 'logros', refresh() {} }; renderLogros(view, { api, esc, toast, normalize: normalizeText, catId: b === 'c' && c ? Number(c) : null }); }
+  else if (a === 'logro' && b) { current = { name: 'logro', refresh() {} }; renderLogro(view, { api, esc, toast, normalize: normalizeText, id: Number(b) }); window.scrollTo(0, 0); }
   else if (a === 'mapa') { current = { name: 'mapa', refresh() {} }; renderMap(view, { api, esc, toast, normalize: normalizeText, focusKey: b ? decodeURIComponent(b) : null }); }
   else if (a === 'calc') { const c = renderCalc(view, { coin, esc, api, debounce, itemCell, setKeyHandler: (fn) => (calcKeys = fn) }); current = { name: 'calc', refresh: c.refresh }; }
   else renderBazar();
@@ -590,7 +593,7 @@ function itemHTML(d) {
       <div class="ways">${d.ways.map((w) => `<div class="way"><div class="ic">${WAY_ICON[w.kind] || '•'}</div><div><b>${esc(w.title)}</b><p>${coinText(w.text)}</p></div></div>`).join('')}</div>
     </div>
     ${d.sources?.length ? `<div class="section"><h3>Formas de conseguirlo</h3>${srcChips(d.sources)}</div>` : ''}
-    ${d.achievements?.length ? `<div class="section"><h3>Logros y colecciones que lo dan</h3><ul class="steps">${d.achievements.map((a) => `<li><b>${esc(a.name)}</b>${a.category ? ` <span class="muted small">— ${esc(a.category)}</span>` : ''}${a.type === 'ItemSet' ? ' <span class="pill">colección</span>' : ''}</li>`).join('')}</ul></div>` : ''}
+    ${d.achievements?.length ? `<div class="section"><h3>Logros y colecciones que lo dan</h3><ul class="steps">${d.achievements.map((a) => `<li><a href="#/logro/${a.id}"><b>${esc(a.name)}</b></a>${a.category ? ` <span class="muted small">— ${esc(a.category)}</span>` : ''}${a.type === 'ItemSet' ? ' <span class="pill">colección</span>' : ''}</li>`).join('')}</ul></div>` : ''}
     ${recipesHTML(d)}
     <div class="section" id="wikiSec"><h3>Dónde se consigue: NPC, mapa, drops y contenedores <span class="muted small">(wiki oficial)</span></h3>${wikiDataHTML(d.wiki)}<div id="wikiBox"><div class="skeleton"></div></div></div>
     ${d.hints.length ? `<div class="section"><h3>Guía general para este tipo de item</h3><ul class="hint-list">${d.hints.map((h) => `<li>${esc(h)}</li>`).join('')}</ul></div>` : ''}

@@ -138,6 +138,15 @@ export async function renderMap(view, { api, esc, toast, focusKey, normalize }) 
        ${un2.slice(0, 200).map((m) => `<tr><td class="left">${esc(m.vendor)}</td><td class="left small">${esc([m.area, m.zone].filter(Boolean).join(' · '))}</td><td class="left small">${m.items.slice(0, 6).map((i) => (i.id ? `<a href="#/item/${i.id}">${esc(i.name)}</a>` : esc(i.name))).join(', ')}${m.items.length > 6 ? '…' : ''}</td></tr>`).join('')}
        </tbody></table></div>`
     : '';
+  // #/mapa/@x,y,Nombre → marcar un lugar (por ejemplo, desde la guía de un logro).
+  if (focusKey && focusKey.startsWith('@')) {
+    const [x, y, ...rest] = focusKey.slice(1).split(',');
+    const name = rest.join(',');
+    const pin = L.marker(un([Number(x), Number(y)]), { title: name }).addTo(gmap).bindPopup(`<b>${esc(name)}</b>`);
+    gmap.setView(un([Number(x), Number(y)]), 5);
+    setTimeout(() => pin.openPopup(), 300);
+    focusKey = null;
+  }
   if (focusKey && !focus(focusKey)) {
     // Si estaba filtrado, limpiamos filtros y reintentamos.
     view.querySelector('#mq').value = '';
