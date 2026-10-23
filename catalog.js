@@ -19,6 +19,7 @@ export function setCatalog(data) {
     return [r[0], e.name, r[2] || e.nameEn, r[3], r[4], r[5], r[6]];
   }) };
   for (const r of data.rows) { r[1] = String(r[1] || '').trim(); r[2] = String(r[2] || '').trim(); }
+  byEnName = null;
   IDX = { at: data.at, rows: data.rows, hay: data.rows.map((r) => normalize(`${r[1]} ${r[2]}`)), byId: new Map(data.rows.map((r, i) => [r[0], i])) };
 }
 // Items que la API oficial no publica (quitados del juego o sin redescubrir), sacados de gw2treasures.
@@ -154,4 +155,13 @@ export function searchCatalog({ q = '', type = '', rarity = '', source = '', sor
   }
   const start = (Math.max(1, page) - 1) * limit;
   return { ready: true, total: rows.length, page, limit, rows: rows.slice(start, start + limit), at: IDX.at };
+}
+
+/** Item por nombre en inglés (exacto, sin mayúsculas ni acentos). */
+let byEnName = null;
+export function findByNameEn(name) {
+  if (!IDX) return null;
+  if (!byEnName) { byEnName = new Map(); for (const r of IDX.rows) { const k = normalize(r[2] || ''); if (k && !byEnName.has(k)) byEnName.set(k, r); } }
+  const r = byEnName.get(normalize(name || ''));
+  return r ? { id: r[0], name: r[1] || r[2], nameEn: r[2], type: r[3], rarity: r[5] } : null;
 }

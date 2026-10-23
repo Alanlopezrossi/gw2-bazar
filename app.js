@@ -228,7 +228,7 @@ function route() {
   if (current && h === lastView) return; // volvimos de la ficha: no re-renderizar
   lastView = h;
   if (a === 'recs') renderRecs(b || 'vender');
-  else if (a === 'cuenta' && !STATUS?.publicMode) renderAccount();
+  else if (a === 'cuenta' && (!STATUS?.publicMode || STATUS?.browserKey)) renderAccount();
   else if (a === 'equipo') renderEquipo();
   else if (a === 'items') renderItems();
   else if (a === 'eventos') { current = { name: 'eventos', refresh() {} }; renderEventos(view, { api, esc, toast, normalize: normalizeText }); }
@@ -683,6 +683,7 @@ async function openItem(id, { silent = false } = {}) {
     body.innerHTML = itemHTML(d);
     wireItem(body, d);
     loadWiki(id);
+    if (d.item?.type === 'Container') loadContents(id);
   } catch (e) {
     body.innerHTML = `<div class="empty">${esc(e.message)}</div>`;
   }
@@ -817,6 +818,7 @@ function itemHTML(d) {
     ${d.sources?.length ? `<div class="section"><h3>Formas de conseguirlo</h3>${srcChips(d.sources)}</div>` : ''}
     ${achList(d.achievements, 'recompensa', 'Logros y colecciones que lo dan como recompensa')}
     ${recipesHTML(d)}
+    ${it.type === 'Container' ? '<div class="section" id="contSec"><h3>Qué trae al abrirlo</h3><div id="contBox"><div class="skeleton"></div></div></div>' : ''}
     <div class="section" id="wikiSec"><h3>Dónde se consigue: NPC, mapa, drops y contenedores <span class="muted small">(wiki oficial)</span></h3>${wikiDataHTML(d.wiki)}<div id="wikiBox"><div class="skeleton"></div></div></div>
     ${d.hints.length ? `<div class="section"><h3>Guía general para este tipo de item</h3><ul class="hint-list">${d.hints.map((h) => `<li>${esc(h)}</li>`).join('')}</ul></div>` : ''}
     ${achList(d.achievements, 'parte', 'Colecciones y logros que lo piden')}
@@ -867,6 +869,38 @@ function wireItem(body, d) {
   body.querySelectorAll('[data-copy]').forEach((b) =>
     b.addEventListener('click', async () => { try { await navigator.clipboard.writeText(b.dataset.copy); toast('Código copiado: pegalo en el chat del juego'); } catch { toast(b.dataset.copy); } }),
   );
+}
+
+// Contenido de bolsas, cofres y cajas: qué puede salir, cuánto en promedio y cuánto vale abrirla.
+const KIND_PILL = { Guaranteed: 'good', Choice: 'warn', Chance: '', Rare: 'warn', SuperRare: 'bad' };
+async function loadContents(id, force = false) {
+  const box = $('#contBox');
+  if (!box) return;
+  try {
+    const d = await api(`/api/item/${id}/contents${force ? '?force=1' : ''}`);
+    if (openId !== id || !$('#contBox')) return;
+    if (!d.available) {
+      box.innerHTML = `<p class="muted">${STATUS?.publicMode ? 'Este contenedor no está en la copia incluida en el sitio (sólo se incluyen los que se venden en el bazar).' : 'No encontré qué trae este contenedor.'}</p>${STATUS?.publicMode ? '' : '<button class="btn ghost small" id="contRetry">Buscar de nuevo</button>'}`;
+      $('#contRetry')?.addEventListener('click', () => { box.innerHTML = '<div class="skeleton"></div>'; loadContents(id, true); });
+      return;
+    }
+    const kinds = new Set(d.items.map((c) => c.kind));
+    const hasAvg = d.items.some((c) => c.avg != null);
+    const choice = kinds.has('Choice') && kinds.size === 1;
+    const rows = [...d.items].sort((a, b) => (b.avg ?? -1) - (a.avg ?? -1) || (a.kind === 'Guaranteed' ? -1 : 0));
+    box.innerHTML = `
+      <p class="small">${choice ? '<b>Caja de elección:</b> al abrirla elegís <b>uno</b> de estos.' : hasAvg ? `Cada apertura da varias cosas de esta lista: en promedio salen <b>${d.items.reduce((a, c) => a + (c.avg || 0), 0).toLocaleString('es-AR', { maximumFractionDigits: 1 })}</b> por apertura.` : kinds.has('Guaranteed') ? 'Trae siempre lo marcado como <span class="pill good">garantizado</span> y, además, puede salir alguno de los <span class="pill">posibles</span>.' : 'Puede salir cualquiera de estos.'}
+        ${d.dropRate ? ` Promedios medidos por jugadores abriendo <b>${d.dropRate.opened ? d.dropRate.opened.toLocaleString('es-AR') : 'muchas'}</b> unidades (${d.dropRate.source === 'archivo' ? 'copia archivada de la wiki' : 'wiki'}).` : ' No hay promedios medidos por jugadores para este contenedor.'}</p>
+      ${d.expectedValue != null ? `<div class="cards"><div class="card"><div class="k">Valor promedio por apertura</div><div class="v">${coin(d.expectedValue)}</div><div class="h">vendiendo todo a la orden de compra (sólo lo comerciable)</div></div>${d.items.length ? '' : ''}</div>` : ''}
+      <div class="table-wrap"><table><thead><tr><th>Item</th><th>Cantidad</th><th>Tipo</th>${hasAvg ? '<th>Promedio por apertura</th>' : ''}<th>Precio en bazar</th>${hasAvg ? '<th>Valor promedio</th>' : ''}</tr></thead><tbody>
+        ${rows.map((c) => `<tr data-goto="${c.id}" class="clickable"><td>${itemCell(c)}</td><td class="num">${c.qty}</td><td><span class="pill ${KIND_PILL[c.kind] || ''}">${esc(c.kindEs)}</span></td>${hasAvg ? `<td class="num">${c.avg != null ? c.avg.toLocaleString('es-AR', { maximumFractionDigits: 3 }) : '—'}</td>` : ''}<td>${c.buy || c.sell ? coin(c.buy || c.sell) : '<span class="muted small">no se vende</span>'}</td>${hasAvg ? `<td>${c.avg != null && (c.buy || c.sell) ? coin(c.avg * (c.buy || c.sell)) : '<span class="muted">—</span>'}</td>` : ''}</tr>`).join('')}
+      </tbody></table></div>
+      ${d.currencies?.length ? `<p class="small">También da: ${d.currencies.map((c) => esc(`${c.name}${c.min ? ` (${c.min}${c.max && c.max !== c.min ? `–${c.max}` : ''})` : ''}`)).join(', ')}</p>` : ''}
+      ${d.dropRate?.unmatched?.length ? `<details class="small"><summary>Otros resultados medidos (${d.dropRate.unmatched.length})</summary><ul>${d.dropRate.unmatched.map((u) => `<li>${esc(u.nameEn)} — ${u.avg.toLocaleString('es-AR', { maximumFractionDigits: 3 })} por apertura</li>`).join('')}</ul></details>` : ''}
+      <p class="muted small">Contenido: ${d.contentsSource === 'gw2treasures' ? `<a target="_blank" rel="noopener" href="https://es.gw2treasures.com/item/${id}">gw2treasures</a>` : '—'}${d.dropRate?.page ? ` · Promedios: <a target="_blank" rel="noopener" href="https://wiki.guildwars2.com/wiki/${encodeURIComponent(d.dropRate.page.replace(/ /g, '_'))}">wiki: ${esc(d.dropRate.page)}</a>` : ''}${d.fromSnapshot ? ' · copia incluida en el sitio' : ''}</p>`;
+  } catch (e) {
+    box.innerHTML = `<p class="muted">No pude consultar el contenido: ${esc(e.message)}</p>`;
+  }
 }
 
 async function loadWiki(id, force = false) {
@@ -965,8 +999,13 @@ $('#btnRefresh').addEventListener('click', async () => { await api('/api/refresh
 (async () => {
   try { META = await api('/api/meta'); } catch {}
   await pollStatus();
-  if (STATUS?.publicMode) {
-    // Vista pública (link compartido): sin cuenta ni ajustes.
+  if (STATUS?.browserKey) {
+    // Versión pública (GitHub Pages): cada visitante usa su propia API key, guardada sólo en su navegador.
+    const p = document.querySelector('#settings p.muted');
+    if (p) p.innerHTML = 'La API key es opcional y sólo hace falta para <strong>Mi cuenta</strong> y el progreso de <strong>Logros</strong>. Se guarda <strong>sólo en este navegador</strong> y se envía únicamente a <code>api.guildwars2.com</code>.';
+    $('#btnRefresh')?.remove();
+  } else if (STATUS?.publicMode) {
+    // Servidor local visto desde afuera: sin cuenta ni ajustes.
     $('#tabs a[data-tab="cuenta"]')?.remove();
     $('#btnSettings')?.remove();
     if (location.hash.startsWith('#/cuenta')) location.hash = '#/bazar';

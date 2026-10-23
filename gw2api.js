@@ -123,6 +123,9 @@ export async function getAllPages(path, { concurrency = 6, onProgress } = {}) {
   return [first.data, ...rest].flat();
 }
 
-export async function getAuthed() {
-  throw new ApiError('No disponible en la versión pública', 403);
+/** Consulta autenticada con la API key del visitante (se manda sólo a api.guildwars2.com). */
+export async function getAuthed(path, apiKey) {
+  const sep = path.includes('?') ? '&' : '?';
+  const { data } = await getJSON(`${GW2_BASE}/v2/${path}${sep}access_token=${encodeURIComponent(apiKey)}`, { retries: 2, limited: false });
+  return data;
 }
