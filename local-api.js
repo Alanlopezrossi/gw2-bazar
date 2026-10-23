@@ -96,7 +96,7 @@ const routes = {
     const body = JSON.parse(opts?.body || '{}');
     const inv = new Map(Object.entries(body.inv || {}).map(([k, v]) => [Number(k), Number(v) || 0]).filter(([k, v]) => k && v > 0));
     const mode = body.mode === 'order' ? 'order' : 'instant';
-    return body.target ? planItem(Number(body.target), inv, { mode }) : planAll(inv, { mode, limit: Math.min(500, Number(body.limit) || 60) });
+    return body.target ? planItem(Number(body.target), inv, { mode, withTree: true }) : planAll(inv, { mode, limit: Math.min(500, Number(body.limit) || 60) });
   },
   '/api/account/inventory': async () => {
     const key = getKey();

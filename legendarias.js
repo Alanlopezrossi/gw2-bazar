@@ -118,6 +118,42 @@ export function renderLegendarias(view, { api, esc, coin, itemCell, toast, debou
     showDetail(selected);
   });
 
+  const fmt = (n) => Number(n).toLocaleString('es-AR', { maximumFractionDigits: 2 });
+  const HOW = { forja: '🔮 Forja Mística', crafteo: '⚒ crafteo', comprar: '⚖ bazar', conseguir: '✋ no se compra', tuyo: '✔ lo tenés' };
+  // Suma lo que falta en cada rama: oro y cantidad de cosas que no se compran.
+  function rollup(n) {
+    let gold = n.missing && n.unit != null ? n.missing * n.unit : 0;
+    let nobuy = n.missing && n.unit == null ? 1 : 0;
+    for (const c of n.children) { const r = rollup(c); gold += r.gold; nobuy += r.nobuy; }
+    n.rGold = gold; n.rNobuy = nobuy;
+    return { gold, nobuy };
+  }
+  function nodeHTML(n, parent, depth) {
+    const status = n.how === 'tuyo' ? '<span class="pill good">lo tenés</span>'
+      : n.missing ? (n.unit != null ? `<span class="pill warn">faltan ${fmt(n.missing)}</span> ${coin(n.unit)} c/u = ${coin(n.unit * n.missing)}` : `<span class="pill bad">faltan ${fmt(n.missing)}</span> <span class="muted">no se compra</span>`)
+      : n.crafts ? `${HOW[n.how]} <span class="muted">· hacer ${fmt(n.crafts)} ${n.crafts === 1 ? 'vez' : 'veces'}${n.out > 1 ? ` (da ${n.out} c/u)` : ''}</span>` : '';
+    const line = `<span class="tr-line">${n.icon ? `<img src="${esc(n.icon)}" alt="">` : '<span class="icon-ph"></span>'}
+      <a href="#/item/${n.id}" class="rar-${esc(n.rarity || '')}">${esc(n.name)}</a>
+      ${parent ? `<span class="tr-per" title="Cantidad que pide la receta de ${esc(parent.name)}">${fmt(n.per)} por cada ${esc(parent.name)}</span>` : ''}
+      <span class="tr-tot">necesitás <b>${fmt(n.total)}</b>${n.have ? ` · tenés ${fmt(n.have)}` : ''}</span>
+      <span class="tr-st">${status}</span>
+      ${n.children.length && (n.rGold || n.rNobuy) ? `<span class="tr-roll muted small">en esta rama falta ${n.rGold ? coin(n.rGold) : ''}${n.rGold && n.rNobuy ? ' + ' : ''}${n.rNobuy ? `${n.rNobuy} que no se compra${n.rNobuy === 1 ? '' : 'n'}` : ''}</span>` : ''}</span>`;
+    const cur = (n.cur || []).map((c) => `<li class="tr-leaf"><span class="tr-line">${c.type === 'Currency' && c.id === 1 ? `${coin(c.per)} por cada ${esc(n.name)} · total ${coin(c.total)}` : `${fmt(c.per)} × ${esc(c.type === 'Currency' ? `moneda #${c.id}` : c.type)} por cada ${esc(n.name)} · total ${fmt(c.total)}`}</span></li>`).join('');
+    if (!n.children.length && !cur) return `<li class="tr-leaf">${line}</li>`;
+    return `<li><details ${depth < 1 ? 'open' : ''}><summary>${line}</summary><ul class="tree">${n.children.map((c) => nodeHTML(c, n, depth + 1)).join('')}${cur}</ul></details></li>`;
+  }
+  function treeHTML(t) {
+    rollup(t);
+    return `<h4 class="sub-h">Árbol: qué se necesita para crearla (${t.children.length} componente${t.children.length === 1 ? '' : 's'} principal${t.children.length === 1 ? '' : 'es'})</h4>
+      <p class="small muted">Cada fila dice cuánto pide la receta del item de arriba («por cada…»), cuántos necesitás en total, cuántos tenés y cuánto falta. Tocá ▸ para abrir una rama. <button type="button" class="btn ghost small" data-tree="open">Abrir todo</button> <button type="button" class="btn ghost small" data-tree="close">Cerrar todo</button></p>
+      <ul class="tree tree-root">${nodeHTML(t, null, -1)}</ul>`;
+  }
+  view.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-tree]');
+    if (!b) return;
+    view.querySelectorAll('.leg-detail .tree details').forEach((d) => { d.open = b.dataset.tree === 'open'; });
+  });
+
   async function showDetail(id) {
     const box = view.querySelector('#lgDetail');
     box.innerHTML = '<div class="skeleton"></div>';
@@ -128,8 +164,10 @@ export function renderLegendarias(view, { api, esc, coin, itemCell, toast, debou
         <div class="cards"><div class="card"><div class="k">Falta comprar en el bazar</div><div class="v">${coin(p.missingCost)}</div><div class="h">${mode === 'order' ? 'con órdenes de compra' : 'comprando al instante'}</div></div>
           <div class="card"><div class="k">Items distintos que faltan</div><div class="v num">${p.missing.length}</div><div class="h">${p.untradableMissing} no se compra${p.untradableMissing === 1 ? '' : 'n'} en el bazar</div></div>
           <div class="card"><div class="k">De lo tuyo se usa</div><div class="v num">${p.used.length}</div><div class="h">items distintos</div></div></div>
-        ${p.missing.length ? `<div class="table-wrap"><table><thead><tr><th>Te falta</th><th>Cantidad</th><th>Precio c/u</th><th>Total</th><th>Si no se compra</th></tr></thead><tbody>
-          ${p.missing.map((m) => `<tr data-id="${m.id}" class="clickable"><td>${itemCell(m)}</td><td class="num">${m.qty.toLocaleString('es-AR')}</td><td>${m.unit != null ? coin(m.unit) : '<span class="pill warn">no se vende</span>'}</td><td>${m.total != null ? coin(m.total) : '—'}</td><td class="left small">${m.unit == null ? (m.vendor ? `${esc(m.vendor.vendor)} <span class="muted">— ${esc(m.vendor.zone || '')}${m.vendor.cost ? ` · ${esc(m.vendor.cost)}` : ''}</span>` : '<span class="muted">tocá para ver cómo se consigue</span>') : ''}</td></tr>`).join('')}
+        ${p.tree ? treeHTML(p.tree) : ''}
+        <h4 class="sub-h">Lista de compras: todo lo que te falta, sumado</h4>
+        ${p.missing.length ? `<div class="table-wrap"><table><thead><tr><th>Te falta</th><th>Cantidad</th><th>Se usa para</th><th>Precio c/u</th><th>Total</th><th>Si no se compra</th></tr></thead><tbody>
+          ${p.missing.map((m) => `<tr data-id="${m.id}" class="clickable"><td>${itemCell(m)}</td><td class="num">${m.qty.toLocaleString('es-AR')}</td><td class="left small">${(m.usedFor || []).map((u) => `${esc(u.name)} <span class="muted">(${fmt(u.per)} por cada ${u.out > 1 ? `${u.out} ` : ''}${u.out > 1 ? 'que hacés' : 'uno'})</span>`).join('<br>') || '—'}</td><td>${m.unit != null ? coin(m.unit) : '<span class="pill warn">no se vende</span>'}</td><td>${m.total != null ? coin(m.total) : '—'}</td><td class="left small">${m.unit == null ? (m.vendor ? `${esc(m.vendor.vendor)} <span class="muted">— ${esc(m.vendor.zone || '')}${m.vendor.cost ? ` · ${esc(m.vendor.cost)}` : ''}</span>` : '<span class="muted">tocá para ver cómo se consigue</span>') : ''}</td></tr>`).join('')}
         </tbody></table></div>` : '<div class="empty">¡Tenés todo! Ya podés hacerla.</div>'}
         ${p.currencies.length ? `<p class="small">Además: ${p.currencies.map(cur).join(' · ')}</p>` : ''}
         ${p.used.length ? `<details class="small" open><summary>De lo tuyo se usa (${p.used.length})</summary><ul class="steps">${p.used.map((u) => `<li><a href="#/item/${u.id}">${esc(u.name)}</a> × ${u.qty.toLocaleString('es-AR')}</li>`).join('')}</ul></details>` : ''}
