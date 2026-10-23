@@ -462,5 +462,61 @@ tr.ev-live td { background: rgba(127, 209, 139, 0.06); }
 .evt-wiki { font-size: 10px; font-weight: 400; color: #043277; margin-left: 4px; opacity: .7; }
 .evt-wiki:hover { opacity: 1; }
 
+/* ---------- celular ---------- */
+.m-sort, .m-filters-btn { display: none; }
+@media (max-width: 700px) {
+  html, body { overflow-x: hidden; }
+  .top { padding: 8px 12px; gap: 8px; }
+  .brand { font-size: 17px; }
+  .tabs { flex-wrap: nowrap; gap: 2px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tabs a { white-space: nowrap; flex: 0 0 auto; padding: 6px 10px; font-size: 14px; }
+  .view { padding: 12px; }
+  .page-head { flex-wrap: wrap; gap: 8px; }
+  .page-head h1 { font-size: 24px; }
+  .page-head p { font-size: 14px; }
+  .filters { gap: 8px; }
+  .filters label { flex-wrap: wrap; max-width: 100%; }
+  .filters select, .filters input[type="number"] { max-width: 100%; }
+  #mcur { width: 100%; }
+  .explain { font-size: 13px; }
+
+  /* Tablas → tarjetas: cada fila es una tarjeta con "etiqueta: valor". */
+  .table-wrap { overflow: visible; border: 0; background: transparent; }
+  .table-wrap table.m-cards, .table-wrap table.m-cards tbody, .table-wrap table.m-cards tr, .table-wrap table.m-cards td { display: block; width: 100%; }
+  .table-wrap table.m-cards thead { display: none; }
+  .table-wrap table.m-cards tr { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; margin: 0 0 8px; padding: 8px 10px; }
+  .table-wrap table.m-cards td { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 3px 0; border: 0; text-align: right; min-height: 0; }
+  .table-wrap table.m-cards td::before { content: attr(data-label); color: var(--muted); font-size: 12px; text-align: left; flex: 0 0 auto; max-width: 45%; }
+  .table-wrap table.m-cards td:first-child { display: block; text-align: left; padding-bottom: 6px; margin-bottom: 4px; border-bottom: 1px solid var(--line); }
+  .table-wrap table.m-cards td:first-child::before, .table-wrap table.m-cards td.empty::before, .table-wrap table.m-cards td[data-label=""]::before { content: none; }
+  .table-wrap table.m-cards td.empty { display: block; text-align: center; }
+  .table-wrap table.m-cards td.left { text-align: right; }
+  .table-wrap table.m-cards .chips { justify-content: flex-end; }
+  .m-sort { display: flex; align-items: center; gap: 8px; margin: 6px 0 8px; font-size: 13px; color: var(--muted); }
+  .m-filters-btn { display: inline-flex; }
+  .filters.m-collapsed > :not(input[type="search"]):not(.m-filters-btn) { display: none !important; }
+  .m-sort select { flex: 1; }
+
+  .pager .btns { flex-wrap: wrap; }
+  .cards { grid-template-columns: 1fr 1fr !important; gap: 8px; }
+  .card { padding: 10px 12px; }
+  .card .v { font-size: 18px; }
+  .drawer-panel { width: 100% !important; max-width: 100% !important; }
+  .d-head img { width: 44px; height: 44px; }
+
+  /* Eventos: la línea de tiempo se desplaza de costado con un ancho legible. */
+  .section:has(> #evTimeline) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .evt-wrapper { min-width: 860px; }
+  .clock { text-align: left; }
+  .clock #evClock { font-size: 22px; }
+  .ev-tools { flex-wrap: wrap; }
+
+  /* Logros */
+  .ach-bits { columns: 1; }
+  .ach-head img { width: 44px; height: 44px; }
+  .wiki-html { max-height: none; }
+}
+
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }

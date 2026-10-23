@@ -240,6 +240,52 @@ function route() {
 }
 window.addEventListener('hashchange', route);
 
+// ---------- celular: tablas como tarjetas ----------
+// Cada <td> lleva el nombre de su columna (data-label) y, si la tabla se ordena tocando el encabezado,
+// se agrega un selector "Ordenar por" (en el celular el encabezado no se ve).
+const SORT_TH = 'th[data-sort], th[data-col], th[data-eq], th[data-it]';
+function mobileTables(root) {
+  for (const table of root.querySelectorAll('.table-wrap table')) {
+    const heads = [...(table.tHead?.rows[0]?.cells || [])].map((th) => th.textContent.replace(/[▾▴]/g, '').trim());
+    if (!heads.length) continue;
+    table.classList.add('m-cards');
+    for (const tr of table.tBodies[0]?.rows || []) {
+      [...tr.cells].forEach((td, i) => { if (!td.hasAttribute('data-label')) td.setAttribute('data-label', td.colSpan > 1 ? '' : heads[i] || ''); });
+    }
+    const wrap = table.closest('.table-wrap');
+    const sortable = [...table.querySelectorAll(SORT_TH)];
+    if (!sortable.length || wrap.previousElementSibling?.classList.contains('m-sort')) continue;
+    const box = document.createElement('label');
+    box.className = 'm-sort';
+    const cur = sortable.find((th) => th.classList.contains('sorted'));
+    box.innerHTML = `Ordenar por <select>${sortable.map((th, i) => `<option value="${i}" ${th === cur ? 'selected' : ''}>${esc(th.textContent.replace(/[▾▴]/g, '').trim())}${th === cur ? (th.classList.contains('asc') ? ' ▴' : ' ▾') : ''}</option>`).join('')}${cur ? '' : '<option value="" selected>—</option>'}</select>`;
+    box.querySelector('select').addEventListener('change', (e) => { const th = sortable[Number(e.target.value)]; if (th) th.click(); });
+    wrap.before(box);
+  }
+}
+// En el celular los filtros arrancan plegados: queda a la vista el buscador y un botón "Filtros".
+function mobileFilters(root) {
+  for (const f of root.querySelectorAll('.filters')) {
+    if (f.dataset.mf) continue;
+    const extra = [...f.children].filter((el) => !(el.matches('input[type="search"]')));
+    if (extra.length < 2) continue;
+    f.dataset.mf = '1';
+    f.classList.add('m-collapsed');
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn ghost small m-filters-btn';
+    btn.textContent = `Filtros (${extra.length}) ▾`;
+    btn.addEventListener('click', () => { const c = f.classList.toggle('m-collapsed'); btn.textContent = `Filtros (${extra.length}) ${c ? '▾' : '▴'}`; });
+    const search = f.querySelector('input[type="search"]');
+    if (search) search.after(btn); else f.prepend(btn);
+  }
+}
+let mtTimer = null;
+const mtObserver = new MutationObserver(() => { clearTimeout(mtTimer); mtTimer = setTimeout(() => { mobileTables(document); mobileFilters(document); }, 60); });
+mtObserver.observe(document.body, { childList: true, subtree: true });
+// La pestaña activa queda a la vista en la barra (que en el celular se desplaza de costado).
+window.addEventListener('hashchange', () => setTimeout(() => document.querySelector('#tabs a.active')?.scrollIntoView({ inline: 'center', block: 'nearest' }), 50));
+
 // ---------- Bazar ----------
 const BAZAR_COLS = [
   ['name', 'Item'],
