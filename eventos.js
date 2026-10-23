@@ -66,8 +66,8 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
 
   let saved = {};
   try { saved = JSON.parse(localStorage.getItem('gw2-eventos') || '{}'); } catch {}
-  const st = { cat: saved.cat || '', q: '', hidden: new Set(saved.hidden || [...HIDE_BY_DEFAULT]), window: saved.window || 180 };
-  const save = () => { try { localStorage.setItem('gw2-eventos', JSON.stringify({ cat: st.cat, hidden: [...st.hidden], window: st.window })); } catch {} };
+  const st = { cat: saved.cat || '', q: '', hidden: new Set(saved.hidden || [...HIDE_BY_DEFAULT]), window: saved.window || 180, range: saved.range || '1,3', zoom: saved.zoom || 5 };
+  const save = () => { try { localStorage.setItem('gw2-eventos', JSON.stringify({ cat: st.cat, hidden: [...st.hidden], window: st.window, range: st.range, zoom: st.zoom })); } catch {} };
 
   view.innerHTML = `
     <div class="page-head"><div><h1>Eventos</h1><p>Metaeventos y jefes de mundo con sus horarios en <b>tu hora local</b>. Arriba, lo que está pasando y lo que empieza pronto; abajo, la línea de tiempo de cada mapa. Tocá un evento para copiar su waypoint o verlo en el mapa.</p></div>
@@ -75,11 +75,16 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
     <div class="filters">
       <input type="search" id="evQ" placeholder="Buscar evento o mapa… (ej: Tequatl, Octoparra, Arco del León)">
       <label>Expansión <select id="evCat"><option value="">Todas</option>${cats.map((c) => `<option value="${esc(c)}" ${st.cat === c ? 'selected' : ''}>${esc(CAT_ES[c] || c)}</option>`).join('')}</select></label>
-      <label>Mostrar las próximas <select id="evWin">${[60, 120, 180, 360, 720].map((m) => `<option value="${m}" ${st.window === m ? 'selected' : ''}>${m / 60} h</option>`).join('')}</select></label>
+      <label>Lista: próximas <select id="evWin">${[60, 120, 180, 360, 720].map((m) => `<option value="${m}" ${st.window === m ? 'selected' : ''}>${m / 60} h</option>`).join('')}</select></label>
     </div>
-    <div class="section"><h3>Ahora y próximos</h3><div id="evNext"></div></div>
-    <div class="section"><h3>Línea de tiempo <span class="muted small">(desde hace 30 min)</span></h3><div id="evTimeline" class="ev-timeline"></div>
+    <div class="section"><h3>Horario <span class="muted small">(tu hora local · pasá el mouse por un evento para ver el detalle, tocalo para copiar el waypoint)</span></h3>
+      <div class="ev-tools">
+        <label>Rango <select id="evRange"><option value="1,3">1 h antes · 3 h después</option><option value="2,2">2 h antes · 2 h después</option><option value="1,7">1 h antes · 7 h después</option><option value="day">Todo el día de hoy</option></select></label>
+        <label>Tamaño <select id="evZoom"><option value="3">compacto</option><option value="5">normal</option><option value="8">amplio</option></select></label>
+      </div>
+      <div id="evTimeline" class="ev-wiki"></div>
       <p class="muted small" id="evHiddenNote"></p></div>
+    <div class="section"><h3>Ahora y próximos</h3><div id="evNext"></div></div>
     <p class="muted small">Horarios: temporizador de la wiki oficial (${esc(data.v || '')}, copia del ${esc(data.at || '')}). Los eventos que dependen de que los jugadores los completen pueden adelantarse o atrasarse unos minutos. Los festivales sólo ocurren mientras el festival está activo en el juego.</p>`;
 
   const fmt = (min) => new Date(min * 60000).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -121,21 +126,48 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
         </tr>`;
       }).join('')}</tbody></table></div>` : '<div class="empty">Nada en ese rango con esos filtros.</div>';
 
-    // Línea de tiempo por grupo
-    const from = nowMin - 30, to = nowMin + st.window;
-    const pct = (m) => ((m - from) / (to - from)) * 100;
+    // Tabla estilo wiki: filas agrupadas por expansión, bloques de color con nombre y hora de inicio.
+    let from, to;
+    if (st.range === 'day') {
+      const d0 = new Date(); d0.setHours(0, 0, 0, 0);
+      from = Math.floor(d0.getTime() / 60000); to = from + DAY;
+    } else {
+      const [bef, aft] = st.range.split(',').map(Number);
+      from = Math.floor((nowMin - bef * 60) / 15) * 15; to = nowMin + aft * 60;
+    }
+    const ppm = st.zoom;
+    const W = (to - from) * ppm;
+    const x = (m) => (m - from) * ppm;
+    const rgb = (c) => `rgb(${c.join(',')})`;
+    const bgOf = (b) => (!b ? 'rgb(200,200,200)' : Array.isArray(b[0]) ? `linear-gradient(90deg, ${b.map(rgb).join(', ')})` : rgb(b));
     const ticks = [];
-    for (let m = Math.ceil(from / 30) * 30; m < to; m += 30) ticks.push(m);
+    for (let m = Math.ceil(from / 15) * 15; m <= to; m += 15) ticks.push(m);
     const shown = events.filter((ev) => match(ev) && !st.hidden.has(ev.key));
-    view.querySelector('#evTimeline').innerHTML = `
-      <div class="ev-row ev-axis"><div class="ev-label"></div><div class="ev-bar">${ticks.map((m) => `<span class="ev-tick" style="left:${pct(m)}%">${fmt(m)}</span>`).join('')}<span class="ev-now" style="left:${pct(nowMin)}%"></span></div></div>
-      ${shown.map((ev) => `<div class="ev-row"><div class="ev-label" title="${esc(ev.n)}"><b>${esc(es(ev.n))}</b><span class="muted small">${esc(CAT_ES[ev.c] || ev.c)}</span><button class="ev-hide" data-hide="${ev.key}" title="Ocultar de la línea de tiempo">✕</button></div>
-        <div class="ev-bar">${segmentsBetween(ev, from, to).map((seg) => {
-          const name = ev.s[seg.r]?.[0] || '';
-          const l = Math.max(0, pct(seg.start)), r = Math.min(100, pct(seg.end));
-          const { chat } = where(ev, seg);
-          return `<span class="ev-seg ev-c${seg.r % 6} ${seg.start <= nowMin && seg.end > nowMin ? 'on' : ''}" style="left:${l}%;width:${r - l}%" title="${esc(es(name))} (${esc(name)}) · ${fmt(seg.start)}–${fmt(seg.end)}${chat ? ` · ${chat}` : ''}" ${chat ? `data-copy="${esc(chat)}"` : ''}>${esc(es(name))}</span>`;
-        }).join('')}<span class="ev-now" style="left:${pct(nowMin)}%"></span></div></div>`).join('')}`;
+    const byCat = new Map();
+    for (const ev of shown) { if (!byCat.has(ev.c)) byCat.set(ev.c, []); byCat.get(ev.c).push(ev); }
+    let html = `<div class="evw-inner" style="width:${W + 210}px">
+      <div class="evw-row evw-axis"><div class="evw-label"><span class="muted small">${new Date(nowMin * 60000).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'short' })}</span></div>
+        <div class="evw-track" style="width:${W}px">${ticks.map((m) => `<span class="evw-tick ${m % 60 === 0 ? 'h' : ''}" style="left:${x(m)}px">${m % 30 === 0 ? fmt(m) : ''}</span>`).join('')}</div></div>`;
+    for (const [cat, list] of byCat) {
+      html += `<div class="evw-row evw-cat"><div class="evw-label">${esc(CAT_ES[cat] || cat)}</div><div class="evw-track" style="width:${W}px"></div></div>`;
+      for (const ev of list) {
+        const segs = segmentsBetween(ev, from, to);
+        html += `<div class="evw-row"><div class="evw-label" title="${esc(ev.n)}">${esc(es(ev.n))}<button class="ev-hide" data-hide="${ev.key}" title="Ocultar esta fila">✕</button></div>
+          <div class="evw-track" style="width:${W}px">${segs.map((seg) => {
+            const g = ev.s[seg.r] || [];
+            const name = g[0] || '';
+            const l = Math.max(0, x(seg.start)), r = Math.min(W, x(seg.end));
+            const on = seg.start <= nowMin && seg.end > nowMin;
+            const past = seg.end <= nowMin;
+            return `<span class="evw-seg ${on ? 'on' : ''} ${past ? 'past' : ''}" style="left:${l}px;width:${Math.max(0, r - l - 1)}px;background:${bgOf(g[3])}" title="${esc(es(name))}${es(name) !== name ? ` (${esc(name)})` : ''}\n${fmt(seg.start)} – ${fmt(seg.end)} · ${seg.end - seg.start} min${g[2] ? `\nWaypoint ${esc(g[2])} (clic para copiar)` : ''}" ${g[2] ? `data-copy="${esc(g[2])}"` : ''}><b>${esc(es(name))}</b><i>${fmt(seg.start)}</i></span>`;
+          }).join('')}</div></div>`;
+      }
+    }
+    html += `<span class="evw-now" style="left:${210 + x(nowMin)}px"><span>${fmt(nowMin)}</span></span></div>`;
+    const tl = view.querySelector('#evTimeline');
+    const keepScroll = tl.scrollLeft;
+    tl.innerHTML = html;
+    if (!tl.dataset.scrolled) { tl.scrollLeft = Math.max(0, x(nowMin) - 120); tl.dataset.scrolled = '1'; } else tl.scrollLeft = keepScroll;
     const hiddenList = events.filter((e) => st.hidden.has(e.key));
     view.querySelector('#evHiddenNote').innerHTML = hiddenList.length ? `Ocultos: ${hiddenList.map((e) => `<button class="btn ghost small" data-show="${e.key}">${esc(es(e.n))} ＋</button>`).join(' ')}` : '';
   }
@@ -151,6 +183,10 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
   view.querySelector('#evQ').addEventListener('input', (e) => { st.q = e.target.value; paint(); });
   view.querySelector('#evCat').addEventListener('change', (e) => { st.cat = e.target.value; save(); paint(); });
   view.querySelector('#evWin').addEventListener('change', (e) => { st.window = Number(e.target.value); save(); paint(); });
+  const rangeSel = view.querySelector('#evRange'); rangeSel.value = st.range;
+  const zoomSel = view.querySelector('#evZoom'); zoomSel.value = String(st.zoom);
+  rangeSel.addEventListener('change', (e) => { st.range = e.target.value; save(); delete view.querySelector('#evTimeline').dataset.scrolled; paint(); });
+  zoomSel.addEventListener('change', (e) => { st.zoom = Number(e.target.value); save(); delete view.querySelector('#evTimeline').dataset.scrolled; paint(); });
   paint();
   const timer = setInterval(() => { if (!view.querySelector('#evClock')) clearInterval(timer); else paint(); }, 15000);
   const clock = setInterval(() => { const el = view.querySelector('#evClock'); if (!el) clearInterval(clock); else el.textContent = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }); }, 1000);
