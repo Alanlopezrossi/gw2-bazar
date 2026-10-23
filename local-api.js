@@ -6,7 +6,8 @@ import { setEquipmentData, listEquipment } from './equipment.js';
 import { setGeoData, vendorMarkers } from './vendors.js';
 import { setCatalog, setAchItems, setExtraItems, searchCatalog, indexItem } from './catalog.js';
 import { syncItems } from './sync.js';
-import { accountSummary, tokenInfo } from './account.js';
+import { accountSummary, tokenInfo, accountInventory } from './account.js';
+import { planAll, planItem } from './planner.js';
 import { getAuthed } from './gw2api.js';
 import { containerContents, setContainersSnapshot } from './containers.js';
 import { listItems, flips, demand, craftingProfits } from './analysis.js';
@@ -91,6 +92,17 @@ const routes = {
     return { progress: await getAuthed('account/achievements', key) };
   },
   '/api/refresh': () => ({ ok: true }),
+  '/api/planner': (_q, opts) => {
+    const body = JSON.parse(opts?.body || '{}');
+    const inv = new Map(Object.entries(body.inv || {}).map(([k, v]) => [Number(k), Number(v) || 0]).filter(([k, v]) => k && v > 0));
+    const mode = body.mode === 'order' ? 'order' : 'instant';
+    return body.target ? planItem(Number(body.target), inv, { mode }) : planAll(inv, { mode, limit: Math.min(500, Number(body.limit) || 60) });
+  },
+  '/api/account/inventory': async () => {
+    const key = getKey();
+    if (!key) return [400, { error: 'Cargá tu API key en ⚙ Ajustes para importar tu inventario.' }];
+    try { return await accountInventory(key); } catch (e) { return [502, { error: `La API de GW2 rechazó la consulta: ${e.message}` }]; }
+  },
   '/api/catalog': async (q) => {
     await loadCatalog();
     return searchCatalog({ q: q.get('q') || '', type: q.get('type') || '', rarity: q.get('rarity') || '', source: q.get('source') || '', sort: q.get('sort') || '', dir: q.get('dir') || 'asc', page: num(q.get('page'), 1), limit: Math.min(1000, num(q.get('limit'), 50)) });

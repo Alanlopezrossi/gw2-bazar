@@ -143,3 +143,29 @@ export async function accountSummary(apiKey, { force = false } = {}) {
   cache = { key: apiKey, at: Date.now(), data };
   return data;
 }
+
+/** Todo lo que tiene la cuenta (también lo ligado), id → cantidad. Para el planificador de legendarias. */
+export async function accountInventory(apiKey) {
+  const info = await tokenInfo(apiKey);
+  const perms = new Set(info.permissions || []);
+  const owned = new Map();
+  const put = (id, n) => { if (id && n) owned.set(id, (owned.get(id) || 0) + n); };
+  const warnings = [];
+  const tasks = [];
+  if (perms.has('inventories')) {
+    tasks.push(
+      getAuthed('account/materials', apiKey).then((l) => { for (const m of l || []) put(m.id, m.count); }),
+      getAuthed('account/bank', apiKey).then((l) => { for (const s of l || []) if (s) put(s.id, s.count); }),
+      getAuthed('account/inventory', apiKey).then((l) => { for (const s of l || []) if (s) put(s.id, s.count); }),
+    );
+  } else warnings.push('La API key no tiene permiso "inventories" (banco y materiales).');
+  if (perms.has('characters') && perms.has('inventories')) {
+    tasks.push(getAuthed('characters?ids=all', apiKey).then((chars) => {
+      for (const c of chars || []) for (const bag of c.bags || []) { if (!bag) continue; for (const s of bag.inventory || []) if (s) put(s.id, s.count); }
+    }));
+  } else warnings.push('Para sumar los inventarios de los personajes hacen falta "characters" + "inventories".');
+  const res = await Promise.allSettled(tasks);
+  for (const r of res) if (r.status === 'rejected') warnings.push(`Error leyendo la cuenta: ${r.reason?.message || r.reason}`);
+  try { await syncItems([...owned.keys()]); } catch { /* nombres faltantes */ }
+  return { account: info.name, warnings, items: [...owned].map(([id, count]) => ({ id, count, name: state.items.get(id)?.name || `#${id}`, icon: state.items.get(id)?.icon || null, rarity: state.items.get(id)?.rarity || null })) };
+}

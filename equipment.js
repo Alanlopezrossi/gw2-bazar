@@ -18,6 +18,11 @@ export function setEquipmentData(data) {
   }
 }
 
+/** Ids de todas las legendarias del índice de equipo. */
+export function legendaryIds() {
+  return (EQ?.items || []).filter((i) => i.rarity === 'Legendary').map((i) => i.id);
+}
+
 export function equipmentMeta() {
   return EQ ? { at: EQ.at, count: EQ.items.length } : null;
 }

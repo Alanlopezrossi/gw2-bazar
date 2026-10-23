@@ -518,5 +518,28 @@ tr.ev-live td { background: rgba(127, 209, 139, 0.06); }
   .wiki-html { max-height: none; }
 }
 
+/* Legendarias */
+.leg-grid { display: grid; grid-template-columns: 340px 1fr; gap: 16px; align-items: start; }
+.leg-inv { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; position: sticky; top: 70px; max-height: calc(100vh - 90px); overflow: auto; }
+.leg-inv h3 { margin: 0 0 8px; }
+.leg-add { position: relative; }
+.leg-add input { width: 100%; }
+.ac-item { display: block; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 6px 8px; cursor: pointer; color: var(--text); }
+.ac-item:hover { background: var(--panel); }
+.leg-row { display: grid; grid-template-columns: 1fr 74px 30px; gap: 6px; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--line); }
+.leg-row input { width: 100%; }
+.leg-row .icon-btn { width: 28px; height: 28px; }
+.leg-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; }
+.leg-card { display: flex; gap: 10px; align-items: center; text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; cursor: pointer; color: var(--text); }
+.leg-card:hover, .leg-card.on { border-color: var(--accent); }
+.leg-card img { width: 40px; height: 40px; border-radius: 6px; }
+.leg-main { flex: 1; min-width: 0; }
+.leg-main b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.leg-bar { height: 6px; background: var(--panel-2); border-radius: 4px; margin: 5px 0; overflow: hidden; }
+.leg-bar span { display: block; height: 100%; background: linear-gradient(90deg, #b07cd8, #e0b84f); }
+.leg-detail { margin-top: 16px; }
+@media (max-width: 860px) { .leg-grid { grid-template-columns: 1fr; } .leg-inv { position: static; max-height: none; } }
+.warn-t { color: var(--accent-2); }
+
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }
