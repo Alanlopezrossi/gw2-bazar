@@ -1,7 +1,8 @@
 // Historial completo de precio de un item (desde que existe en el bazar, 2012 en adelante).
 // Datos diarios de DataWars2 (api.datawars2.ie), consultados directo desde el navegador.
+import { analysisHTML } from './price-why.js';
 const cache = new Map();
-const FIELDS = 'date,buy_price_avg,sell_price_avg,buy_price_min,buy_price_max,sell_price_min,sell_price_max,buy_sold,sell_sold';
+const FIELDS = 'date,buy_price_avg,sell_price_avg,buy_price_min,buy_price_max,sell_price_min,sell_price_max,buy_sold,sell_sold,sell_quantity_avg,sell_quantity_min,sell_quantity_max,buy_quantity_avg,buy_quantity_min,buy_quantity_max';
 const RANGES = [['1m', '1 mes', 31], ['3m', '3 meses', 92], ['1a', '1 año', 366], ['5a', '5 años', 1827], ['todo', 'Todo', Infinity]];
 const DAY = 86_400_000;
 
@@ -18,6 +19,8 @@ async function load(id) {
       buy: mid(x.buy_price_avg, x.buy_price_min, x.buy_price_max),
       sold: x.sell_sold ?? null,
       bought: x.buy_sold ?? null,
+      supply: mid(x.sell_quantity_avg, x.sell_quantity_min, x.sell_quantity_max),
+      demand: mid(x.buy_quantity_avg, x.buy_quantity_min, x.buy_quantity_max),
     })).filter((x) => Number.isFinite(x.t) && (x.sell || x.buy)).sort((a, b) => a.t - b.t);
   })();
   cache.set(id, p);
@@ -67,6 +70,7 @@ export function renderHistory(box, id, { coin, esc }) {
     const ch = startR && endR ? (endR.sell - startR.sell) / startR.sell : null;
     const avgSold = sel.reduce((a, r) => a + (r.sold || 0), 0) / Math.max(1, sel.length);
 
+    const an = analysisHTML(sel, all, { coin });
     // --- SVG ---
     const W = 820, H = 260, PL = 62, PR = 10, PT = 10, PB = 26, VH = 46;
     const t0 = pts[0].t, t1 = pts[pts.length - 1].t;
@@ -107,16 +111,23 @@ export function renderHistory(box, id, { coin, esc }) {
           <g class="h-vol">${bars}</g>
           <path d="${path('buy')}" class="h-buy"/>
           <path d="${path('sell')}" class="h-sell"/>
+          <g class="h-marks">${an.moves.map((m, k) => { const mx = x(m.t); return mx >= PL && mx <= W - PR ? `<g data-mark="${m.t}"><line x1="${mx}" x2="${mx}" y1="${PT}" y2="${vbase}" class="h-mark"/><circle cx="${mx}" cy="${PT + 9}" r="8" class="h-mark-c ${m.ch > 0 ? 'up' : 'down'}"/><text x="${mx}" y="${PT + 13}" text-anchor="middle">${k + 1}</text></g>` : ''; }).join('')}</g>
           <line class="h-cross" y1="${PT}" y2="${vbase}" x1="-10" x2="-10"/>
           <circle class="h-dot-s" r="3.5" cx="-10" cy="-10"/><circle class="h-dot-b" r="3.5" cx="-10" cy="-10"/>
         </svg>
         <div class="h-tip" hidden></div>
       </div>
-      <p class="small muted"><span class="h-key sell"></span> precio de venta · <span class="h-key buy"></span> orden de compra · barras: unidades vendidas por día. ${pts[0].grouped ? 'Cada punto es el promedio de varios días. ' : ''}Precios diarios de <a href="https://datawars2.ie" target="_blank" rel="noopener">DataWars2</a>${first.t < Date.parse('2019-07-13') ? ' (antes de 2019 se usa el punto medio entre mínimo y máximo del día)' : ''}.</p>`;
+      <p class="small muted"><span class="h-key sell"></span> precio de venta · <span class="h-key buy"></span> orden de compra · barras: unidades vendidas por día. ${pts[0].grouped ? 'Cada punto es el promedio de varios días. ' : ''}Precios diarios de <a href="https://datawars2.ie" target="_blank" rel="noopener">DataWars2</a>${first.t < Date.parse('2019-07-13') ? ' (antes de 2019 se usa el punto medio entre mínimo y máximo del día)' : ''}.</p>
+      <div class="why"><h4 class="sub-h">¿Por qué subió o bajó? Análisis del período</h4>${an.html}</div>`;
 
     box.querySelectorAll('[data-hr]').forEach((b) => b.addEventListener('click', () => { range = b.dataset.hr; try { localStorage.setItem('gw2-bazar-hist-range', range); } catch {} paint(all); }));
     box.querySelector('[data-hlog]').addEventListener('change', (e) => { log = e.target.checked; paint(all); });
 
+    box.querySelectorAll('[data-mark]').forEach((g) => g.addEventListener('click', () => {
+      const li = box.querySelector(`[data-why="${g.dataset.mark}"]`);
+      box.querySelectorAll('.why-list > li').forEach((x) => x.classList.toggle('hl', x === li));
+      li?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }));
     // Tooltip al pasar el mouse / el dedo
     const svg = box.querySelector('svg');
     const tip = box.querySelector('.h-tip');
