@@ -109,6 +109,14 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
 
   const fmt = (min) => new Date(min * 60000).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
   const rel = (m) => (m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${m % 60 ? `${m % 60} min` : ''}`.trim());
+  const placeOf = (ev, r) => {
+    const g = ev.s[r] || [];
+    const wp = g[2] ? wpByChat.get(g[2]) : null;
+    if (wp) return { c: wp.c, label: `${es(g[0])} · ${wp.es}` };
+    const m = mapByEn.get(normalize(ev.n)) || mapByEn.get(normalize(g[0] || ''));
+    if (m) return { c: m.c, label: `${es(g[0] || ev.n)} · ${m.es}` };
+    return null;
+  };
   const where = (ev, seg) => {
     const chat = ev.s[seg.r]?.[2];
     const wp = chat ? wpByChat.get(chat) : null;
@@ -170,7 +178,9 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
         const name = g[0] || '';
         const w = ((r - l) / span) * 100;
         const cls = ['evt-seg', sg.r ? '' : 'evt-empty', sg.start >= limit ? 'future' : '', sg.start <= nowMin && sg.end > nowMin && sg.r ? 'on' : ''].join(' ');
-        parts.push(`<div class="${cls}" style="width:${w}%;${sg.r ? `background:${bgOf(g[3])}` : ''}" ${sg.r ? `title="${esc(es(name))}${es(name) !== name ? ` (${esc(name)})` : ''} · ${fmt(sg.start)}–${fmt(sg.end)} (${sg.end - sg.start} min)${g[2] ? ` · ${esc(g[2])}` : ''}"` : ''}>${sg.r ? `<span class="evt-time">${fmt(sg.start)}</span><span class="evt-name">${g[1] ? `<a target="_blank" rel="noopener" href="https://wiki.guildwars2.com/wiki/${encodeURIComponent(g[1].replace(/ /g, '_'))}">${esc(es(name))}</a>` : esc(es(name))}</span>${g[2] ? `<span class="evt-chat" data-copy="${esc(g[2])}" title="Copiar waypoint">${esc(g[2])}</span>` : ''}` : ''}</div>`);
+        const pl = sg.r ? placeOf(ev, sg.r) : null;
+        const goto = pl ? `#/mapa/@${pl.c[0]},${pl.c[1]},${encodeURIComponent(`${pl.label} (${fmt(sg.start)})`)}` : '';
+        parts.push(`<div class="${cls}${pl ? ' has-map' : ''}" style="width:${w}%;${sg.r ? `background:${bgOf(g[3])}` : ''}" ${goto ? `data-goto="${esc(goto)}"` : ''} ${sg.r ? `title="${esc(es(name))}${es(name) !== name ? ` (${esc(name)})` : ''} · ${fmt(sg.start)}–${fmt(sg.end)} (${sg.end - sg.start} min)${pl ? '\nClic: ver en el mapa' : ''}${g[2] ? `\nWaypoint ${esc(g[2])}` : ''}"` : ''}>${sg.r ? `<span class="evt-time">${fmt(sg.start)}${pl ? ' <span class="evt-pin">📍</span>' : ''}${g[1] ? ` <a class="evt-wiki" target="_blank" rel="noopener" href="https://wiki.guildwars2.com/wiki/${encodeURIComponent(g[1].replace(/ /g, '_'))}" title="Abrir en la wiki">wiki ↗</a>` : ''}</span><span class="evt-name">${esc(es(name))}</span>${g[2] ? `<span class="evt-chat" data-copy="${esc(g[2])}" title="Copiar waypoint">${esc(g[2])}</span>` : ''}` : ''}</div>`);
       }
       return parts.join('');
     };
@@ -196,6 +206,9 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
   view.addEventListener('click', async (e) => {
     const c = e.target.closest('[data-copy]');
     if (c) { try { await navigator.clipboard.writeText(c.dataset.copy); toast?.('Waypoint copiado: pegalo en el chat del juego'); } catch { toast?.(c.dataset.copy); } return; }
+    if (e.target.closest('a')) return;
+    const go = e.target.closest('[data-goto]');
+    if (go) { location.hash = go.dataset.goto; return; }
     const h = e.target.closest('[data-hide]');
     if (h) { st.hidden.add(h.dataset.hide); save(); paint(); return; }
     const s = e.target.closest('[data-show]');

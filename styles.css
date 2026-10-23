@@ -456,6 +456,11 @@ tr.ev-live td { background: rgba(127, 209, 139, 0.06); }
 .evt-bar.notimes .evt-time { display: none; }
 .evt-exit { position: absolute; right: 4px; top: 2px; opacity: .25; cursor: pointer; color: #fff; font-family: Tahoma, sans-serif; }
 .evt-exit:hover { opacity: .8; }
+.evt-seg.has-map { cursor: pointer; }
+.evt-seg.has-map:hover { filter: brightness(1.08); box-shadow: inset 0 0 0 2px rgba(0,0,0,.45); }
+.evt-pin { font-size: 11px; }
+.evt-wiki { font-size: 10px; font-weight: 400; color: #043277; margin-left: 4px; opacity: .7; }
+.evt-wiki:hover { opacity: 1; }
 
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }
