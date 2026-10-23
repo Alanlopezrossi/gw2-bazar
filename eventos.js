@@ -51,6 +51,26 @@ function segmentsBetween(ev, fromMin, toMin) {
   return merged;
 }
 
+/** Todos los tramos (también los vacíos) que tocan [desde, hasta). */
+function segmentsAll(ev, fromMin, toMin) {
+  const out = [];
+  for (let day = Math.floor(fromMin / DAY) - 1; day <= Math.floor(toMin / DAY) + 1; day++) {
+    let t = day * DAY;
+    const end = t + DAY;
+    const push = (r, d) => { if (t + d > fromMin && t < toMin) out.push({ r, start: t, end: t + d }); t += d; };
+    for (const [r, d] of ev.p) { if (t >= end) break; push(r, Math.min(d, end - t)); }
+    if (ev.q.length) while (t < end) for (const [r, d] of ev.q) { if (t >= end) break; push(r, Math.min(d, end - t)); }
+  }
+  out.sort((a, b) => a.start - b.start);
+  const merged = [];
+  for (const sg of out) {
+    const last = merged[merged.length - 1];
+    if (last && last.r === sg.r && last.end === sg.start && (sg.start % DAY === 0 || sg.r === 0)) last.end = sg.end;
+    else merged.push({ ...sg });
+  }
+  return merged;
+}
+
 export async function renderEventos(view, { api, esc, toast, normalize }) {
   view.innerHTML = '<div class="skeleton"></div>';
   let data, labels = null;
@@ -66,8 +86,8 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
 
   let saved = {};
   try { saved = JSON.parse(localStorage.getItem('gw2-eventos') || '{}'); } catch {}
-  const st = { cat: saved.cat || '', q: '', hidden: new Set(saved.hidden || [...HIDE_BY_DEFAULT]), window: saved.window || 180, range: saved.range || '1,3', zoom: saved.zoom || 5 };
-  const save = () => { try { localStorage.setItem('gw2-eventos', JSON.stringify({ cat: st.cat, hidden: [...st.hidden], window: st.window, range: st.range, zoom: st.zoom })); } catch {} };
+  const st = { cat: saved.cat || '', q: '', hidden: new Set(saved.hidden || [...HIDE_BY_DEFAULT]), window: saved.window || 180, range: ['2', '4', '8'].includes(saved.range) ? saved.range : '2', top: !!saved.top };
+  const save = () => { try { localStorage.setItem('gw2-eventos', JSON.stringify({ cat: st.cat, hidden: [...st.hidden], window: st.window, range: st.range, top: st.top })); } catch {} };
 
   view.innerHTML = `
     <div class="page-head"><div><h1>Eventos</h1><p>Metaeventos y jefes de mundo con sus horarios en <b>tu hora local</b>. Arriba, lo que está pasando y lo que empieza pronto; abajo, la línea de tiempo de cada mapa. Tocá un evento para copiar su waypoint o verlo en el mapa.</p></div>
@@ -79,10 +99,10 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
     </div>
     <div class="section"><h3>Horario <span class="muted small">(tu hora local · pasá el mouse por un evento para ver el detalle, tocalo para copiar el waypoint)</span></h3>
       <div class="ev-tools">
-        <label>Rango <select id="evRange"><option value="1,3">1 h antes · 3 h después</option><option value="2,2">2 h antes · 2 h después</option><option value="1,7">1 h antes · 7 h después</option><option value="day">Todo el día de hoy</option></select></label>
-        <label>Tamaño <select id="evZoom"><option value="3">compacto</option><option value="5">normal</option><option value="8">amplio</option></select></label>
+        <label>Mostrar <select id="evRange"><option value="2">las próximas 2 horas</option><option value="4">las próximas 4 horas</option><option value="8">las próximas 8 horas</option></select></label>
+        <label><input type="checkbox" id="evTop"> Horas arriba (en vez de en cada evento)</label>
       </div>
-      <div id="evTimeline" class="ev-wiki"></div>
+      <div id="evTimeline" class="evt-wrapper"></div>
       <p class="muted small" id="evHiddenNote"></p></div>
     <div class="section"><h3>Ahora y próximos</h3><div id="evNext"></div></div>
     <p class="muted small">Horarios: temporizador de la wiki oficial (${esc(data.v || '')}, copia del ${esc(data.at || '')}). Los eventos que dependen de que los jugadores los completen pueden adelantarse o atrasarse unos minutos. Los festivales sólo ocurren mientras el festival está activo en el juego.</p>`;
@@ -126,48 +146,49 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
         </tr>`;
       }).join('')}</tbody></table></div>` : '<div class="empty">Nada en ese rango con esos filtros.</div>';
 
-    // Tabla estilo wiki: filas agrupadas por expansión, bloques de color con nombre y hora de inicio.
-    let from, to;
-    if (st.range === 'day') {
-      const d0 = new Date(); d0.setHours(0, 0, 0, 0);
-      from = Math.floor(d0.getTime() / 60000); to = from + DAY;
-    } else {
-      const [bef, aft] = st.range.split(',').map(Number);
-      from = Math.floor((nowMin - bef * 60) / 15) * 15; to = nowMin + aft * 60;
-    }
-    const ppm = st.zoom;
-    const W = (to - from) * ppm;
-    const x = (m) => (m - from) * ppm;
+    // Formato de la wiki: título de cada evento arriba y una barra a todo el ancho con los segmentos seguidos
+    // (hora en negrita, nombre y waypoint). Ventana: desde 15 min antes hasta las próximas N horas (+15 min de margen).
+    const H = Number(st.range) * 60;
+    const from = Math.floor((nowMin - 15) / 15) * 15;
+    const to = nowMin + H + 15;
+    const span = to - from;
+    const pctOf = (m) => ((m - from) / span) * 100;
+    const limit = nowMin + H;
     const rgb = (c) => `rgb(${c.join(',')})`;
-    const bgOf = (b) => (!b ? 'rgb(200,200,200)' : Array.isArray(b[0]) ? `linear-gradient(90deg, ${b.map(rgb).join(', ')})` : rgb(b));
-    const ticks = [];
-    for (let m = Math.ceil(from / 15) * 15; m <= to; m += 15) ticks.push(m);
+    const bgOf = (b) => (!b ? '#EED' : Array.isArray(b[0]) ? `linear-gradient(90deg, ${b.map(rgb).join(', ')})` : rgb(b));
     const shown = events.filter((ev) => match(ev) && !st.hidden.has(ev.key));
     const byCat = new Map();
     for (const ev of shown) { if (!byCat.has(ev.c)) byCat.set(ev.c, []); byCat.get(ev.c).push(ev); }
-    let html = `<div class="evw-inner" style="width:${W + 210}px">
-      <div class="evw-row evw-axis"><div class="evw-label"><span class="muted small">${new Date(nowMin * 60000).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'short' })}</span></div>
-        <div class="evw-track" style="width:${W}px">${ticks.map((m) => `<span class="evw-tick ${m % 60 === 0 ? 'h' : ''}" style="left:${x(m)}px">${m % 30 === 0 ? fmt(m) : ''}</span>`).join('')}</div></div>`;
-    for (const [cat, list] of byCat) {
-      html += `<div class="evw-row evw-cat"><div class="evw-label">${esc(CAT_ES[cat] || cat)}</div><div class="evw-track" style="width:${W}px"></div></div>`;
-      for (const ev of list) {
-        const segs = segmentsBetween(ev, from, to);
-        html += `<div class="evw-row"><div class="evw-label" title="${esc(ev.n)}">${esc(es(ev.n))}<button class="ev-hide" data-hide="${ev.key}" title="Ocultar esta fila">✕</button></div>
-          <div class="evw-track" style="width:${W}px">${segs.map((seg) => {
-            const g = ev.s[seg.r] || [];
-            const name = g[0] || '';
-            const l = Math.max(0, x(seg.start)), r = Math.min(W, x(seg.end));
-            const on = seg.start <= nowMin && seg.end > nowMin;
-            const past = seg.end <= nowMin;
-            return `<span class="evw-seg ${on ? 'on' : ''} ${past ? 'past' : ''}" style="left:${l}px;width:${Math.max(0, r - l - 1)}px;background:${bgOf(g[3])}" title="${esc(es(name))}${es(name) !== name ? ` (${esc(name)})` : ''}\n${fmt(seg.start)} – ${fmt(seg.end)} · ${seg.end - seg.start} min${g[2] ? `\nWaypoint ${esc(g[2])} (clic para copiar)` : ''}" ${g[2] ? `data-copy="${esc(g[2])}"` : ''}><b>${esc(es(name))}</b><i>${fmt(seg.start)}</i></span>`;
-          }).join('')}</div></div>`;
+    // Barra con todos los tramos (incluidos los vacíos, que van rayados) recortada a la ventana.
+    const bar = (ev) => {
+      const parts = [];
+      const steps = segmentsAll(ev, from, to);
+      for (const sg of steps) {
+        const l = Math.max(sg.start, from), r = Math.min(sg.end, to);
+        if (r <= l) continue;
+        const g = ev.s[sg.r] || [];
+        const name = g[0] || '';
+        const w = ((r - l) / span) * 100;
+        const cls = ['evt-seg', sg.r ? '' : 'evt-empty', sg.start >= limit ? 'future' : '', sg.start <= nowMin && sg.end > nowMin && sg.r ? 'on' : ''].join(' ');
+        parts.push(`<div class="${cls}" style="width:${w}%;${sg.r ? `background:${bgOf(g[3])}` : ''}" ${sg.r ? `title="${esc(es(name))}${es(name) !== name ? ` (${esc(name)})` : ''} · ${fmt(sg.start)}–${fmt(sg.end)} (${sg.end - sg.start} min)${g[2] ? ` · ${esc(g[2])}` : ''}"` : ''}>${sg.r ? `<span class="evt-time">${fmt(sg.start)}</span><span class="evt-name">${g[1] ? `<a target="_blank" rel="noopener" href="https://wiki.guildwars2.com/wiki/${encodeURIComponent(g[1].replace(/ /g, '_'))}">${esc(es(name))}</a>` : esc(es(name))}</span>${g[2] ? `<span class="evt-chat" data-copy="${esc(g[2])}" title="Copiar waypoint">${esc(g[2])}</span>` : ''}` : ''}</div>`);
       }
+      return parts.join('');
+    };
+    let html = `<div class="evt-pointer" style="left:${pctOf(nowMin)}%"><span>${fmt(nowMin)}</span></div>
+      <div class="evt-limit" style="left:${pctOf(limit)}%"><span>Próximas ${st.range} h</span></div>`;
+    if (st.top) {
+      const ticks = [];
+      for (let m = Math.ceil(from / 30) * 30; m < to; m += 30) ticks.push(m);
+      html += `<div class="evt-toptimes">${ticks.map((m) => `<span style="left:${pctOf(m)}%">${fmt(m)}</span>`).join('')}</div>`;
     }
-    html += `<span class="evw-now" style="left:${210 + x(nowMin)}px"><span>${fmt(nowMin)}</span></span></div>`;
-    const tl = view.querySelector('#evTimeline');
-    const keepScroll = tl.scrollLeft;
-    tl.innerHTML = html;
-    if (!tl.dataset.scrolled) { tl.scrollLeft = Math.max(0, x(nowMin) - 120); tl.dataset.scrolled = '1'; } else tl.scrollLeft = keepScroll;
+    for (const [cat, list] of byCat) {
+      html += `<div class="evt-cat"><h3>${esc(CAT_ES[cat] || cat)}</h3>`;
+      for (const ev of list) {
+        html += `<div class="evt-container"><h4 title="${esc(ev.n)}">${esc(es(ev.n))}</h4><div class="evt-bar ${st.top ? 'notimes' : ''}">${bar(ev)}<span class="evt-exit" data-hide="${ev.key}" title="Ocultar">✕</span></div></div>`;
+      }
+      html += '</div>';
+    }
+    view.querySelector('#evTimeline').innerHTML = html;
     const hiddenList = events.filter((e) => st.hidden.has(e.key));
     view.querySelector('#evHiddenNote').innerHTML = hiddenList.length ? `Ocultos: ${hiddenList.map((e) => `<button class="btn ghost small" data-show="${e.key}">${esc(es(e.n))} ＋</button>`).join(' ')}` : '';
   }
@@ -184,9 +205,9 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
   view.querySelector('#evCat').addEventListener('change', (e) => { st.cat = e.target.value; save(); paint(); });
   view.querySelector('#evWin').addEventListener('change', (e) => { st.window = Number(e.target.value); save(); paint(); });
   const rangeSel = view.querySelector('#evRange'); rangeSel.value = st.range;
-  const zoomSel = view.querySelector('#evZoom'); zoomSel.value = String(st.zoom);
-  rangeSel.addEventListener('change', (e) => { st.range = e.target.value; save(); delete view.querySelector('#evTimeline').dataset.scrolled; paint(); });
-  zoomSel.addEventListener('change', (e) => { st.zoom = Number(e.target.value); save(); delete view.querySelector('#evTimeline').dataset.scrolled; paint(); });
+  const topChk = view.querySelector('#evTop'); topChk.checked = st.top;
+  rangeSel.addEventListener('change', (e) => { st.range = e.target.value; save(); paint(); });
+  topChk.addEventListener('change', (e) => { st.top = e.target.checked; save(); paint(); });
   paint();
   const timer = setInterval(() => { if (!view.querySelector('#evClock')) clearInterval(timer); else paint(); }, 15000);
   const clock = setInterval(() => { const el = view.querySelector('#evClock'); if (!el) clearInterval(clock); else el.textContent = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }); }, 1000);
