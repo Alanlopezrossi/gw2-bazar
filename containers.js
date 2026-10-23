@@ -13,6 +13,7 @@ let disk = null; // { read(id), write(id, data) } — sólo en la versión local
 
 export function setContainersSnapshot(data) { SNAP = data?.containers ? data : null; }
 export function setContainersDisk(d) { disk = d; }
+export function snapshotContainer(id) { return SNAP?.containers?.[id] || null; }
 export function snapshotIds() { return Object.keys(SNAP?.containers || {}).map(Number); }
 
 const KIND = { Guaranteed: 'garantizado', Chance: 'posible', Choice: 'a elegir', Rare: 'raro', SuperRare: 'muy raro' };

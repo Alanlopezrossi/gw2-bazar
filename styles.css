@@ -541,5 +541,14 @@ tr.ev-live td { background: rgba(127, 209, 139, 0.06); }
 @media (max-width: 860px) { .leg-grid { grid-template-columns: 1fr; } .leg-inv { position: static; max-height: none; } }
 .warn-t { color: var(--accent-2); }
 
+/* Dónde se consigue (sin wiki) */
+.ob-list { display: grid; gap: 10px; }
+.ob-way p { margin: 2px 0 4px; }
+.ob-ings { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.ob-ings li { font-size: 13px; }
+.ob-ings img { width: 20px; height: 20px; vertical-align: middle; margin-right: 4px; border-radius: 3px; }
+.ob-way .table-wrap { margin-top: 4px; }
+details.wiki-opt > summary { cursor: pointer; list-style: revert; }
+
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }

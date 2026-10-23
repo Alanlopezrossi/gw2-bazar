@@ -684,7 +684,7 @@ async function openItem(id, { silent = false } = {}) {
     if (openId !== id) return;
     body.innerHTML = itemHTML(d);
     wireItem(body, d);
-    loadWiki(id);
+    body.querySelector('#wikiSec')?.addEventListener('toggle', (e) => { if (e.target.open && !e.target.dataset.loaded) { e.target.dataset.loaded = '1'; loadWiki(id); } });
     if (d.item?.type === 'Container') loadContents(id);
   } catch (e) {
     body.innerHTML = `<div class="empty">${esc(e.message)}</div>`;
@@ -785,6 +785,25 @@ function wikiDataHTML(w) {
   return `<div class="wiki-data">${body}<p class="muted small">Datos de la wiki oficial (copia archivada${w.snapshot ? ` del ${esc(w.snapshot)}` : ''}). Los nombres de NPC y mapas están en inglés, como en la wiki.</p></div>`;
 }
 
+/** "Dónde se consigue": todo con datos que vienen con la página (no hace falta que la wiki esté en línea). */
+const OB_IC = { tp: '⚖', craft: '⚒', forge: '🔮', vendor: '🧑‍💼', container: '🎁', achievement: '🏆', track: '🎖', gather: '⛏', reward: '🏅', desc: '📜', note: 'ℹ' };
+function obtainSecHTML(d) {
+  const ob = d.obtain || [];
+  const ingList = (ings) => `<ul class="ob-ings">${ings.map((g) => g.currency ? `<li>${g.name === 'monedas' ? coin(g.count) : `${qty(g.count)} × ${esc(g.name)}`}</li>` : `<li><a href="#/item/${g.id}">${g.icon ? `<img src="${esc(g.icon)}" alt="">` : ''}<span class="rar-${esc(g.rarity || '')}">${esc(g.name)}</span></a> × ${qty(g.count)}</li>`).join('')}</ul>`;
+  const body = ob.map((o) => {
+    let inner = '';
+    if (o.ings) inner = `<p>${esc(o.text)}</p>${ingList(o.ings)}`;
+    else if (o.vendors) inner = `<div class="table-wrap"><table class="ing"><thead><tr><th>NPC</th><th>Zona</th><th>Mapa</th><th>Costo</th><th></th></tr></thead><tbody>${o.vendors.slice(0, 30).map((v) => `<tr><td class="left">${esc(v.vendor)}</td><td class="left">${esc(v.area)}</td><td class="left">${esc(v.zone)}</td><td class="left">${esc(v.cost)}</td><td class="left small"><a href="#/mapa/${encodeURIComponent(v.map)}">📍 mapa</a>${v.notes ? ` <span class="muted">${esc(v.notes)}</span>` : ''}</td></tr>`).join('')}</tbody></table></div>${o.vendors.length > 30 ? `<p class="muted small">y ${o.vendors.length - 30} más…</p>` : ''}`;
+    else if (o.items) inner = `<ul class="ob-ings">${o.items.map((c) => `<li><a href="#/item/${c.id}">${c.icon ? `<img src="${esc(c.icon)}" alt="">` : ''}<span class="rar-${esc(c.rarity || '')}">${esc(c.name)}</span></a>${c.note ? ` <span class="muted small">— ${esc(c.note)}</span>` : ''}${c.tradable ? ' <span class="pill">se vende</span>' : ''}</li>`).join('')}${(o.extra || []).map((n) => `<li>${esc(n)}</li>`).join('')}</ul>${o.more ? `<p class="muted small">y ${o.more} más…</p>` : ''}`;
+    else if (o.achievements) inner = `<ul class="ob-ings">${o.achievements.map((a) => `<li><a href="#/logro/${a.id}">${esc(a.name)}</a>${a.category ? ` <span class="muted small">— ${esc(a.category)}</span>` : ''}</li>`).join('')}</ul>`;
+    else if (o.list) inner = `<ul class="ob-ings">${o.list.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`;
+    else inner = `<p>${esc(o.text || '')}</p>`;
+    return `<div class="way ob-way"><div class="ic">${OB_IC[o.kind] || '•'}</div><div><b>${esc(o.title)}</b>${inner}</div></div>`;
+  }).join('');
+  return `<div class="section"><h3>Dónde se consigue</h3>${body ? `<div class="ways ob-list">${body}</div>` : `<p class="muted">No tengo registrada ninguna fuente para este item (puede salir de drops al azar, eventos o historia).</p>`}
+    <p class="muted small">Armado con la API oficial y datos incluidos en el sitio (recetas, Forja Mística, NPC, contenedores y logros); no depende de que la wiki esté en línea.</p></div>`;
+}
+
 const WAY_ICON = { tp: '⚖', craft: '⚒', 'npc-sell': '🪙', notp: '✋' };
 
 function itemHTML(d) {
@@ -817,11 +836,11 @@ function itemHTML(d) {
     <div class="section"><h3>Cómo conseguirlo</h3>
       <div class="ways">${d.ways.map((w) => `<div class="way"><div class="ic">${WAY_ICON[w.kind] || '•'}</div><div><b>${esc(w.title)}</b><p>${coinText(w.text)}</p></div></div>`).join('')}</div>
     </div>
-    ${d.sources?.length ? `<div class="section"><h3>Formas de conseguirlo</h3>${srcChips(d.sources)}</div>` : ''}
+    ${obtainSecHTML(d)}
     ${achList(d.achievements, 'recompensa', 'Logros y colecciones que lo dan como recompensa')}
     ${recipesHTML(d)}
     ${it.type === 'Container' ? '<div class="section" id="contSec"><h3>Qué trae al abrirlo</h3><div id="contBox"><div class="skeleton"></div></div></div>' : ''}
-    <div class="section" id="wikiSec"><h3>Dónde se consigue: NPC, mapa, drops y contenedores <span class="muted small">(wiki oficial)</span></h3>${wikiDataHTML(d.wiki)}<div id="wikiBox"><div class="skeleton"></div></div></div>
+    <details class="section wiki-opt" id="wikiSec"><summary><h3 style="display:inline">Página de la wiki <span class="muted small">(opcional, en línea)</span></h3></summary><div id="wikiBox"><div class="skeleton"></div></div></details>
     ${d.hints.length ? `<div class="section"><h3>Guía general para este tipo de item</h3><ul class="hint-list">${d.hints.map((h) => `<li>${esc(h)}</li>`).join('')}</ul></div>` : ''}
     ${achList(d.achievements, 'parte', 'Colecciones y logros que lo piden')}
     ${d.usedIn.total ? `<div class="section"><h3>Qué se puede hacer con él: se usa para craftear (${d.usedIn.total})</h3>
@@ -858,7 +877,7 @@ function summaryHTML(d) {
   if (it.vendor) use.push(`venderlo a un NPC por ${coin(it.vendor)}`);
   if (m.sell || m.buy) use.push('venderlo en el bazar');
   if (!get.length && !use.length) return '';
-  return `<div class="explain d-summary">${get.length ? `<div><b>Cómo se consigue:</b> ${get.join(' · ')}</div>` : '<div><b>Cómo se consigue:</b> mirá la sección de la wiki más abajo.</div>'}${use.length ? `<div><b>Para qué sirve:</b> ${use.join(' · ')}</div>` : ''}</div>`;
+  return `<div class="explain d-summary">${get.length ? `<div><b>Cómo se consigue:</b> ${get.join(' · ')}</div>` : (d.obtain?.length ? `<div><b>Cómo se consigue:</b> ${esc(d.obtain.map((o) => o.title.toLowerCase()).join(' · '))}</div>` : '')}${use.length ? `<div><b>Para qué sirve:</b> ${use.join(' · ')}</div>` : ''}</div>`;
 }
 
 function wireItem(body, d) {

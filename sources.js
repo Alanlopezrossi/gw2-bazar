@@ -5,6 +5,7 @@ import { row, net, craftTree, bestRecipe, tpBuyPrice, vol } from './analysis.js'
 import { GENERIC_HINTS } from './i18n.js';
 import { wikiEntry, wikiMeta } from './wikidata.js';
 import { achievementsFor, sourcesOf } from './equipment.js';
+import { howToObtain } from './obtain.js';
 
 /** Resumen corto de cómo se obtiene un item según la wiki (para hojas del árbol). */
 export function obtainSummary(id) {
@@ -178,7 +179,7 @@ export async function itemDetail(id, { mode = 'instant' } = {}) {
       cost: it.vendor,
     });
   }
-  if (!p) ways.push({ kind: 'notp', title: 'No se vende en el bazar', text: 'Este item no es comerciable (ligado a cuenta/alma o de divisa). Mirá la wiki para ver dónde conseguirlo.' });
+  if (!p) ways.push({ kind: 'notp', title: 'No se vende en el bazar', text: 'Este item no es comerciable (ligado a cuenta/alma o de divisa). Más abajo, en «Dónde se consigue», tenés de dónde sale.' });
 
   const hist = state.history.get(id) || [];
   return {
@@ -194,6 +195,7 @@ export async function itemDetail(id, { mode = 'instant' } = {}) {
     shopping: tree ? shoppingList(tree) : null,
     wiki: w ? { soldBy: w.soldBy || [], containedIn: w.containedIn || [], gathered: w.gathered || [], rewardTracks: w.rewardTracks || [], rewardedBy: w.rewardedBy || [], note: w.note || '', title: w.title, snapshot: wikiMeta()?.at } : null,
     ways,
+    obtain: howToObtain(id, { desc: it?.desc }),
     achievements: achievementsFor(id),
     sources: sourcesOf(id),
     usedIn: usedIn(id, Infinity),
