@@ -139,11 +139,22 @@ export async function renderMap(view, { api, esc, toast, focusKey, normalize }) 
        </tbody></table></div>`
     : '';
   // #/mapa/@x,y,Nombre → marcar un lugar (por ejemplo, desde la guía de un logro).
+  // Formato: @x,y,Nombre|código de waypoint|xWp;yWp;nombre del waypoint (las dos últimas partes son opcionales).
   if (focusKey && focusKey.startsWith('@')) {
     const [x, y, ...rest] = focusKey.slice(1).split(',');
-    const name = rest.join(',');
-    const pin = L.marker(un([Number(x), Number(y)]), { title: name }).addTo(gmap).bindPopup(`<b>${esc(name)}</b>`);
-    gmap.setView(un([Number(x), Number(y)]), 5);
+    const [name, chat, wpRaw] = rest.join(',').split('|');
+    const pos = un([Number(x), Number(y)]);
+    let wpLine = '';
+    if (wpRaw) {
+      const [wx, wy, ...wn] = wpRaw.split(';');
+      const wpos = un([Number(wx), Number(wy)]);
+      L.circleMarker(wpos, { radius: 6, color: '#1a1407', weight: 1.5, fillColor: '#5aa9e6', fillOpacity: 0.95 }).addTo(gmap).bindTooltip(`Punto de ruta: ${esc(wn.join(';'))}`, { direction: 'top' });
+      L.polyline([wpos, pos], { color: '#5aa9e6', weight: 2, dashArray: '5 5' }).addTo(gmap);
+      wpLine = `<div class="small">Punto de ruta más cercano: <b>${esc(wn.join(';'))}</b></div>`;
+    }
+    const pin = L.marker(pos, { title: name }).addTo(gmap)
+      .bindPopup(`<div class="mpop"><b>${esc(name)}</b>${wpLine}${chat ? `<div class="small"><button class="btn ghost small" data-copy="${esc(chat)}">Copiar waypoint ${esc(chat)}</button></div>` : ''}</div>`);
+    gmap.setView(pos, 6);
     setTimeout(() => pin.openPopup(), 300);
     focusKey = null;
   }

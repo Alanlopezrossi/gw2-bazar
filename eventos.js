@@ -112,7 +112,9 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
   const placeOf = (ev, r) => {
     const g = ev.s[r] || [];
     const wp = g[2] ? wpByChat.get(g[2]) : null;
-    if (wp) return { c: wp.c, label: `${es(g[0])} · ${wp.es}` };
+    // Punto exacto del evento (API oficial de eventos); si no, el waypoint del evento.
+    if (Array.isArray(g[4])) return { c: g[4], label: `${es(g[0])} — ${es(ev.n)}`, exact: true, wp };
+    if (wp) return { c: wp.c, label: `${es(g[0])} · ${wp.es}`, wp };
     const m = mapByEn.get(normalize(ev.n)) || mapByEn.get(normalize(g[0] || ''));
     if (m) return { c: m.c, label: `${es(g[0] || ev.n)} · ${m.es}` };
     return null;
@@ -179,8 +181,8 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
         const w = ((r - l) / span) * 100;
         const cls = ['evt-seg', sg.r ? '' : 'evt-empty', sg.start >= limit ? 'future' : '', sg.start <= nowMin && sg.end > nowMin && sg.r ? 'on' : ''].join(' ');
         const pl = sg.r ? placeOf(ev, sg.r) : null;
-        const goto = pl ? `#/mapa/@${pl.c[0]},${pl.c[1]},${encodeURIComponent(`${pl.label} (${fmt(sg.start)})`)}` : '';
-        parts.push(`<div class="${cls}${pl ? ' has-map' : ''}" style="width:${w}%;${sg.r ? `background:${bgOf(g[3])}` : ''}" ${goto ? `data-goto="${esc(goto)}"` : ''} ${sg.r ? `title="${esc(es(name))}${es(name) !== name ? ` (${esc(name)})` : ''} · ${fmt(sg.start)}–${fmt(sg.end)} (${sg.end - sg.start} min)${pl ? '\nClic: ver en el mapa' : ''}${g[2] ? `\nWaypoint ${esc(g[2])}` : ''}"` : ''}>${sg.r ? `<span class="evt-time">${fmt(sg.start)}${pl ? ' <span class="evt-pin">📍</span>' : ''}${g[1] ? ` <a class="evt-wiki" target="_blank" rel="noopener" href="https://wiki.guildwars2.com/wiki/${encodeURIComponent(g[1].replace(/ /g, '_'))}" title="Abrir en la wiki">wiki ↗</a>` : ''}</span><span class="evt-name">${esc(es(name))}</span>${g[2] ? `<span class="evt-chat" data-copy="${esc(g[2])}" title="Copiar waypoint">${esc(g[2])}</span>` : ''}` : ''}</div>`);
+        const goto = pl ? `#/mapa/@${pl.c[0]},${pl.c[1]},${encodeURIComponent(`${pl.label} · ${fmt(sg.start)}–${fmt(sg.end)}${pl.exact ? '' : ' (punto de ruta)'}|${g[2] || ''}|${pl.wp && pl.exact ? `${pl.wp.c[0]};${pl.wp.c[1]};${pl.wp.es}` : ''}`)}` : '';
+        parts.push(`<div class="${cls}${pl ? ' has-map' : ''}" style="width:${w}%;${sg.r ? `background:${bgOf(g[3])}` : ''}" ${goto ? `data-goto="${esc(goto)}"` : ''} ${sg.r ? `title="${esc(es(name))}${es(name) !== name ? ` (${esc(name)})` : ''} · ${fmt(sg.start)}–${fmt(sg.end)} (${sg.end - sg.start} min)${pl ? (pl.exact ? '\nClic: ver el lugar exacto en el mapa' : '\nClic: ver su punto de ruta en el mapa') : ''}${g[2] ? `\nWaypoint ${esc(g[2])}` : ''}"` : ''}>${sg.r ? `<span class="evt-time">${fmt(sg.start)}${pl ? ' <span class="evt-pin">📍</span>' : ''}${g[1] ? ` <a class="evt-wiki" target="_blank" rel="noopener" href="https://wiki.guildwars2.com/wiki/${encodeURIComponent(g[1].replace(/ /g, '_'))}" title="Abrir en la wiki">wiki ↗</a>` : ''}</span><span class="evt-name">${esc(es(name))}</span>${g[2] ? `<span class="evt-chat" data-copy="${esc(g[2])}" title="Copiar waypoint">${esc(g[2])}</span>` : ''}` : ''}</div>`);
       }
       return parts.join('');
     };
