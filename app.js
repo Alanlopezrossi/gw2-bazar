@@ -4,6 +4,7 @@ import { renderMap } from './map.js';
 import { renderLogros, renderLogro } from './logros.js';
 import { renderEventos } from './eventos.js';
 import { renderLegendarias } from './legendarias.js';
+import { renderHistory } from './history.js';
 const normalizeText = (s) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 // Bazar GW2 — frontend (vanilla JS, sin build).
 const $ = (s, el = document) => el.querySelector(s);
@@ -684,6 +685,7 @@ async function openItem(id, { silent = false } = {}) {
     if (openId !== id) return;
     body.innerHTML = itemHTML(d);
     wireItem(body, d);
+    if (body.querySelector('#histBox')) renderHistory(body.querySelector('#histBox'), id, { coin, esc });
     body.querySelector('#wikiSec')?.addEventListener('toggle', (e) => { if (e.target.open && !e.target.dataset.loaded) { e.target.dataset.loaded = '1'; loadWiki(id); } });
     if (d.item?.type === 'Container') loadContents(id);
   } catch (e) {
@@ -831,6 +833,7 @@ function itemHTML(d) {
       <div class="card"><div class="k">Margen de flipeo</div><div class="v">${coin(m.profit)}</div><div class="h">ROI ${pct(m.roi)}</div></div>
     </div>
     <div class="section"><h3>Precio últimas 24 h</h3>${sparkline(d.history)}</div>` : ''}
+    ${m && (m.sell || m.buy) ? '<div class="section"><h3>Historial de precio: desde que salió hasta hoy</h3><div id="histBox"></div></div>' : ''}
     ${L ? `<div class="section"><h3>Libro de órdenes en vivo <span class="muted small">(${new Date(L.at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })})</span></h3><div class="two">${depth(L.sells, 'Vendiendo a')}${depth(L.buys, 'Comprando a')}</div></div>` : ''}
 
     <div class="section"><h3>Cómo conseguirlo</h3>
