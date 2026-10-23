@@ -2,6 +2,7 @@ import { localApi, localEvents } from './local-api.js';
 import { renderCalc } from './calc.js';
 import { renderMap } from './map.js';
 import { renderLogros, renderLogro } from './logros.js';
+import { renderEventos } from './eventos.js';
 const normalizeText = (s) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 // Bazar GW2 — frontend (vanilla JS, sin build).
 const $ = (s, el = document) => el.querySelector(s);
@@ -230,6 +231,7 @@ function route() {
   else if (a === 'cuenta' && !STATUS?.publicMode) renderAccount();
   else if (a === 'equipo') renderEquipo();
   else if (a === 'items') renderItems();
+  else if (a === 'eventos') { current = { name: 'eventos', refresh() {} }; renderEventos(view, { api, esc, toast, normalize: normalizeText }); }
   else if (a === 'logros') { current = { name: 'logros', refresh() {} }; renderLogros(view, { api, esc, toast, normalize: normalizeText, catId: b === 'c' && c ? Number(c) : null }); }
   else if (a === 'logro' && b) { current = { name: 'logro', refresh() {} }; renderLogro(view, { api, esc, toast, normalize: normalizeText, id: Number(b) }); window.scrollTo(0, 0); }
   else if (a === 'mapa') { current = { name: 'mapa', refresh() {} }; renderMap(view, { api, esc, toast, normalize: normalizeText, focusKey: b ? decodeURIComponent(b) : null }); }

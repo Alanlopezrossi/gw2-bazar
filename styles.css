@@ -387,5 +387,24 @@ a.chip { text-decoration: none; display: inline-block; margin: 2px; }
 thead th { cursor: pointer; user-select: none; }
 thead th:hover { color: var(--text); }
 
+/* Eventos */
+.clock { text-align: right; }
+.clock #evClock { font-size: 28px; color: var(--accent); }
+tr.ev-live td { background: rgba(127, 209, 139, 0.06); }
+.ev-timeline { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 6px 10px; overflow-x: auto; }
+.ev-row { display: grid; grid-template-columns: 220px 1fr; gap: 10px; align-items: center; min-width: 720px; padding: 3px 0; border-bottom: 1px solid var(--line); }
+.ev-row:last-child { border-bottom: 0; }
+.ev-label { display: flex; flex-direction: column; position: relative; padding-right: 18px; font-size: 13px; line-height: 1.2; }
+.ev-hide { position: absolute; right: 0; top: 0; background: none; border: 0; color: var(--muted); cursor: pointer; opacity: 0; }
+.ev-row:hover .ev-hide { opacity: 1; }
+.ev-bar { position: relative; height: 26px; }
+.ev-axis .ev-bar { height: 18px; }
+.ev-tick { position: absolute; top: 0; transform: translateX(-50%); font-size: 11px; color: var(--muted); white-space: nowrap; }
+.ev-now { position: absolute; top: -3px; bottom: -3px; width: 2px; background: #e35d5d; }
+.ev-seg { position: absolute; top: 2px; bottom: 2px; border-radius: 4px; font-size: 11px; line-height: 22px; padding: 0 5px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: #111; cursor: pointer; border: 1px solid rgba(0,0,0,.35); }
+.ev-seg.on { outline: 2px solid #fff; }
+.ev-c0 { background: #c9a35b; } .ev-c1 { background: #d98a8a; } .ev-c2 { background: #8fbbe0; } .ev-c3 { background: #9ed49b; } .ev-c4 { background: #c7a4e0; } .ev-c5 { background: #e0c78f; }
+@media (max-width: 860px) { .ev-row { grid-template-columns: 140px 1fr; } }
+
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }
