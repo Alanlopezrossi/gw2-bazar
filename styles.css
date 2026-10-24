@@ -633,5 +633,24 @@ details.wiki-opt > summary { cursor: pointer; list-style: revert; }
 .ch-choices li { break-inside: avoid; margin-bottom: 3px; font-size: 12px; }
 @media (max-width: 700px) { .ch-row { grid-template-columns: 1fr; gap: 2px; } .ch-choices ul { columns: 1; } }
 
+/* Columnas redimensionables */
+thead th { position: sticky; }
+.col-grip { position: absolute; top: 0; right: -4px; width: 9px; height: 100%; cursor: col-resize; z-index: 3; touch-action: none; }
+.col-grip::after { content: ''; position: absolute; top: 25%; bottom: 25%; left: 4px; width: 1px; background: rgba(217,170,76,.25); }
+th:hover .col-grip::after, .col-grip:hover::after { background: var(--accent); width: 2px; }
+th:last-child .col-grip { right: 0; width: 6px; }
+table.cr-fixed { table-layout: fixed; }
+table.cr-fixed td, table.cr-fixed th { overflow: hidden; text-overflow: ellipsis; }
+table.cr-fixed td { white-space: normal; overflow-wrap: anywhere; }
+body.cr-dragging, body.cr-dragging * { cursor: col-resize !important; user-select: none !important; }
+
+/* Tablas de la ficha: los textos largos bajan de renglón en vez de estirar la tabla */
+.drawer-panel td.left, .drawer-panel td.small { white-space: normal; min-width: 90px; }
+.drawer-panel td .item-cell, .drawer-panel td .it { white-space: normal; }
+.drawer-panel table { font-size: 13px; }
+.drawer-panel th, .drawer-panel td { padding: 6px 8px; }
+.drawer-panel td:first-child { white-space: normal; min-width: 150px; }
+table.cr-fixed td .coin { white-space: normal; }
+
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }
