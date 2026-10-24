@@ -611,5 +611,19 @@ details.wiki-opt > summary { cursor: pointer; list-style: revert; }
 .pf-ing img { width: 18px; height: 18px; border-radius: 3px; }
 @media (max-width: 700px) { .prof-cards { grid-template-columns: repeat(2, 1fr); } .pf-ing { white-space: normal; } }
 
+/* Características del item */
+.ch-sec { margin-top: 6px; }
+.ch-grid { display: grid; gap: 6px; }
+.ch-row { display: grid; grid-template-columns: 190px 1fr; gap: 10px; padding: 6px 10px; border-radius: 8px; background: rgba(255,255,255,.03); font-size: 13px; }
+.ch-row .k { color: var(--muted); }
+.ch-attr { display: inline-block; margin-right: 12px; color: #7fd18b; font-weight: 600; }
+.ch-buff { color: #cfe3ff; }
+.ch-up { display: inline-flex; align-items: center; gap: 6px; }
+.ch-up img { width: 24px; height: 24px; border-radius: 4px; }
+.ch-bonus { margin: 4px 0 0; padding-left: 20px; }
+.ch-choices ul { margin: 6px 0 0; padding-left: 18px; columns: 2; column-gap: 24px; }
+.ch-choices li { break-inside: avoid; margin-bottom: 3px; font-size: 12px; }
+@media (max-width: 700px) { .ch-row { grid-template-columns: 1fr; gap: 2px; } .ch-choices ul { columns: 1; } }
+
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }

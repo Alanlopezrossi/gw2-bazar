@@ -6,6 +6,7 @@ import { renderEventos } from './eventos.js';
 import { renderLegendarias } from './legendarias.js';
 import { renderHistory } from './history.js';
 import { renderProfesiones } from './profesiones.js';
+import { renderDetails } from './item-details.js';
 const normalizeText = (s) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 // Bazar GW2 — frontend (vanilla JS, sin build).
 const $ = (s, el = document) => el.querySelector(s);
@@ -687,6 +688,7 @@ async function openItem(id, { silent = false } = {}) {
     if (openId !== id) return;
     body.innerHTML = itemHTML(d);
     wireItem(body, d);
+    if (body.querySelector('#charBox')) renderDetails(body.querySelector('#charBox'), id, { esc });
     if (body.querySelector('#histBox')) renderHistory(body.querySelector('#histBox'), id, { coin, esc });
     body.querySelector('#wikiSec')?.addEventListener('toggle', (e) => { if (e.target.open && !e.target.dataset.loaded) { e.target.dataset.loaded = '1'; loadWiki(id); } });
     if (d.item?.type === 'Container') loadContents(id);
@@ -825,6 +827,7 @@ function itemHTML(d) {
     ${it.removed ? `<div class="explain">Este item <b>ya no está en la API oficial</b> (lo quitaron del juego o hay que volver a descubrirlo). Los datos son la última versión conocida, de <a href="https://es.gw2treasures.com/item/${it.id}" target="_blank" rel="noopener">gw2treasures</a>.</div>` : ''}
     ${it.desc ? `<p class="d-desc">${esc(it.desc)}</p>` : ''}
     ${d.props?.length ? `<div class="chips">${d.props.map((x) => `<span class="pill">${esc(x)}</span>`).join('')}</div>` : ''}
+    <div class="section ch-sec"><h3>Características</h3><div id="charBox"></div></div>
     ${summaryHTML(d)}
     ${m && (m.sell || m.buy) ? `<div class="cards">
       <div class="card"><div class="k">Orden de compra</div><div class="v">${coin(m.buy)}</div><div class="h">${qty(m.buyQty)} pedidas</div></div>
