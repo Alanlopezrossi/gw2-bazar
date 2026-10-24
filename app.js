@@ -665,8 +665,48 @@ $('#drawerBody').addEventListener('click', (e) => {
   e.preventDefault();
   location.hash = `#/item/${el.dataset.goto}`;
 });
+// Historial de items abiertos en el panel (para la flecha ←) y ancho del panel.
+let drawerStack = []; // [{ id, name }]
+function paintDrawerBar() {
+  const back = $('#drawerBack');
+  const prev = drawerStack[drawerStack.length - 2];
+  back.hidden = !prev;
+  back.title = prev ? `Volver a: ${prev.name || `#${prev.id}`}` : '';
+  $('#drawerCrumb').textContent = prev ? `← ${prev.name || `#${prev.id}`}` : '';
+}
+$('#drawerBack').addEventListener('click', () => history.back());
+$('#drawerCrumb').addEventListener('click', () => { if (drawerStack.length > 1) history.back(); });
+const panel = drawer.querySelector('.drawer-panel');
+const PANEL_KEY = 'gw2-bazar-panel-w';
+function setPanelWidth(w, persist = true) {
+  if (w) panel.style.width = `${Math.round(Math.min(window.innerWidth, Math.max(420, w)))}px`;
+  else panel.style.width = '';
+  drawer.classList.toggle('wide', !!w && w > 900);
+  placeHandle();
+  if (persist) { try { w ? localStorage.setItem(PANEL_KEY, String(Math.round(w))) : localStorage.removeItem(PANEL_KEY); } catch {} }
+}
+function placeHandle() { requestAnimationFrame(() => { $('#drawerResize').style.right = `${panel.getBoundingClientRect().width - 4}px`; }); }
+window.addEventListener('resize', placeHandle);
+try { const w = Number(localStorage.getItem(PANEL_KEY)); if (w) setPanelWidth(w, false); } catch {}
+$('#drawerExpand').addEventListener('click', () => {
+  const cur = panel.getBoundingClientRect().width;
+  setPanelWidth(cur < window.innerWidth * 0.8 ? window.innerWidth * 0.94 : 0);
+});
+// Arrastrar el borde izquierdo para cambiar el ancho.
+$('#drawerResize').addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  const el = e.currentTarget;
+  el.setPointerCapture(e.pointerId);
+  panel.style.transition = 'none';
+  const move = (ev) => setPanelWidth(window.innerWidth - ev.clientX, false);
+  const up = (ev) => { el.removeEventListener('pointermove', move); el.removeEventListener('pointerup', up); panel.style.transition = ''; setPanelWidth(window.innerWidth - ev.clientX); };
+  el.addEventListener('pointermove', move);
+  el.addEventListener('pointerup', up);
+});
+
 function closeDrawer(updateHash = true) {
   if (!drawer.classList.contains('open')) return;
+  drawerStack = [];
   drawer.classList.remove('open');
   drawer.setAttribute('aria-hidden', 'true');
   openId = null;
@@ -678,6 +718,15 @@ drawer.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) 
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
 
 async function openItem(id, { silent = false } = {}) {
+  if (!silent) {
+    const top = drawerStack[drawerStack.length - 1];
+    const prev = drawerStack[drawerStack.length - 2];
+    if (!drawer.classList.contains('open')) drawerStack = [{ id }];
+    else if (prev?.id === id) drawerStack.pop(); // volvimos con ←
+    else if (top?.id !== id) drawerStack.push({ id });
+    paintDrawerBar();
+    placeHandle();
+  }
   openId = id;
   drawer.classList.add('open');
   drawer.setAttribute('aria-hidden', 'false');
@@ -687,6 +736,10 @@ async function openItem(id, { silent = false } = {}) {
     const d = await api(`/api/item/${id}?mode=${S.crafteo.mode}`);
     if (openId !== id) return;
     body.innerHTML = itemHTML(d);
+    const me = drawerStack.find((x) => x.id === id);
+    if (me) me.name = d.item?.name;
+    paintDrawerBar();
+    if (!silent) drawer.querySelector('.drawer-panel').scrollTop = 0;
     wireItem(body, d);
     if (body.querySelector('#charBox')) renderDetails(body.querySelector('#charBox'), id, { esc });
     if (body.querySelector('#histBox')) renderHistory(body.querySelector('#histBox'), id, { coin, esc });

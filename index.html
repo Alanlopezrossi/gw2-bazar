@@ -45,9 +45,16 @@
   <aside class="drawer" id="drawer" aria-hidden="true">
     <div class="drawer-scrim" data-close></div>
     <div class="drawer-panel" role="dialog" aria-label="Detalle del item">
-      <button class="icon-btn close" data-close aria-label="Cerrar">✕</button>
+      <div class="drawer-bar">
+        <button class="icon-btn" id="drawerBack" title="Volver al item anterior" aria-label="Volver al item anterior" hidden>←</button>
+        <span class="drawer-crumb muted small" id="drawerCrumb"></span>
+        <span class="spacer"></span>
+        <button class="icon-btn" id="drawerExpand" title="Expandir / achicar el panel" aria-label="Expandir panel">⤢</button>
+        <button class="icon-btn" data-close aria-label="Cerrar" title="Cerrar">✕</button>
+      </div>
       <div id="drawerBody"></div>
     </div>
+    <div class="drawer-resize" id="drawerResize" title="Arrastrá para cambiar el ancho del panel"></div>
   </aside>
 
   <dialog id="settings">
