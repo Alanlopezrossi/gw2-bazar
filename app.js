@@ -7,8 +7,9 @@ import { renderLegendarias } from './legendarias.js';
 import { renderHistory } from './history.js';
 import { renderProfesiones } from './profesiones.js';
 import { renderDetails } from './item-details.js';
-import { initColumnResize } from './colresize.js';
+import { initColumnResize, initHScroll } from './colresize.js';
 initColumnResize();
+initHScroll();
 const normalizeText = (s) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 // Bazar GW2 — frontend (vanilla JS, sin build).
 const $ = (s, el = document) => el.querySelector(s);
