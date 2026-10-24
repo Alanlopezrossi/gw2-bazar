@@ -659,6 +659,8 @@ table.cr-fixed td .coin { white-space: normal; }
 .hscroll > div { height: 1px; }
 .hscroll[hidden] { display: none; }
 .prof-table td { white-space: normal; } .prof-table td .coin { white-space: nowrap; }
+.table-wrap.hs-on { scrollbar-width: none; }
+.table-wrap.hs-on::-webkit-scrollbar { height: 0; display: none; }
 
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }

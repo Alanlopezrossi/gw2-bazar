@@ -102,6 +102,7 @@ function addHScroll(wrap) {
     // Sólo hace falta si la tabla es más alta que la pantalla (si no, la barra propia ya se ve).
     const tall = wrap.getBoundingClientRect().height > window.innerHeight * 0.6;
     bar.hidden = !(over && tall);
+    wrap.classList.toggle('hs-on', !bar.hidden); // ocultamos la barra propia de la tabla: queda una sola
     inner.style.width = `${wrap.scrollWidth}px`;
     bar.style.width = `${wrap.clientWidth}px`;
     bar.scrollLeft = wrap.scrollLeft;
