@@ -5,6 +5,7 @@ import { renderLogros, renderLogro } from './logros.js';
 import { renderEventos } from './eventos.js';
 import { renderLegendarias } from './legendarias.js';
 import { renderHistory } from './history.js';
+import { renderProfesiones } from './profesiones.js';
 const normalizeText = (s) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 // Bazar GW2 — frontend (vanilla JS, sin build).
 const $ = (s, el = document) => el.querySelector(s);
@@ -233,6 +234,7 @@ function route() {
   else if (a === 'cuenta' && (!STATUS?.publicMode || STATUS?.browserKey)) renderAccount();
   else if (a === 'equipo') renderEquipo();
   else if (a === 'items') renderItems();
+  else if (a === 'profesiones') { current = { name: 'profesiones', refresh() {} }; renderProfesiones(view, { api, esc, coin, itemCell, debounce, meta: META, fillIcons }); }
   else if (a === 'legendarias') { const r = renderLegendarias(view, { api, esc, coin, itemCell, toast, debounce }); current = { name: 'legendarias', refresh() {} }; }
   else if (a === 'eventos') { current = { name: 'eventos', refresh() {} }; renderEventos(view, { api, esc, toast, normalize: normalizeText }); }
   else if (a === 'logros') { current = { name: 'logros', refresh() {} }; renderLogros(view, { api, esc, toast, normalize: normalizeText, catId: b === 'c' && c ? Number(c) : null }); }

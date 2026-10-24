@@ -8,6 +8,7 @@ import { setCatalog, setAchItems, setExtraItems, searchCatalog, indexItem } from
 import { syncItems } from './sync.js';
 import { accountSummary, tokenInfo, accountInventory } from './account.js';
 import { planAll, planItem } from './planner.js';
+import { listRecipes, professionsSummary } from './professions.js';
 import { getAuthed } from './gw2api.js';
 import { containerContents, setContainersSnapshot } from './containers.js';
 import { listItems, flips, demand, craftingProfits } from './analysis.js';
@@ -65,6 +66,7 @@ const routes = {
   }),
   '/api/meta': () => ({ types: TYPES, rarities: RARITIES, rarityOrder: RARITY_ORDER, disciplines: DISCIPLINES, gameTypes: GAME_TYPES, recipeFlags: RECIPE_FLAGS, subtypes: SUBTYPES, weights: WEIGHTS }),
   '/api/vendors': () => vendorMarkers(),
+  '/api/professions': (q) => q.get('summary') === '1' ? professionsSummary() : listRecipes({ disc: q.get('disc') || '', q: q.get('q') || '', cat: q.get('cat') || '', rarity: q.get('rarity') || '', type: q.get('type') || '', minR: Number(q.get('minR')) || 0, maxR: Number(q.get('maxR')) || 500, sort: q.get('sort') || '', dir: q.get('dir') || 'asc', page: Number(q.get('page')) || 1, limit: Math.min(500, Number(q.get('limit')) || 50), mode: q.get('mode') === 'order' ? 'order' : 'instant' }),
   // "Mi cuenta" en la versión pública: la API key queda guardada sólo en el navegador de quien la carga.
   '/api/config': async (_q, opts) => {
     if ((opts?.method || 'GET') === 'POST') {
