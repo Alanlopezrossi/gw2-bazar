@@ -658,6 +658,562 @@
      ]
     }
    ]
+  },
+  "armor_raid": {
+   "title": "Armadura legendaria de incursiones (Enviado perfeccionado)",
+   "items": [
+    80111,
+    80131,
+    80145,
+    80161,
+    80190,
+    80205,
+    80248,
+    80252,
+    80254,
+    80277,
+    80281,
+    80296,
+    80356,
+    80384,
+    80399,
+    80435,
+    80557,
+    80578,
+    77302
+   ],
+   "intro": "La armadura del Enviado perfeccionado se hace con {{77302}} de las incursiones de Heart of Thorns y las colecciones de Armadura legendaria. El primer juego pide 150 conocimientos (el precursor de una clase de peso es gratis); los siguientes, 300 cada uno.",
+   "requires": [
+    "Heart of Thorns.",
+    "Tiempo: para el primer juego hay que matar a Gorseval en 5 semanas distintas (Hilo espiritual → Tejido espiritual). Los siguientes juegos llevan al menos 4 semanas de conocimientos (50 por pieza: 25 para el Don de destreza y 25 para la insignia del precursor).",
+    "Un {{77451}} por pieza (depende de cómo consigas las fichas de abastecedor)."
+   ],
+   "needs": [
+    [
+     77302,
+     150
+    ]
+   ],
+   "sections": [
+    {
+     "title": "Paso a paso",
+     "items": [
+      80111,
+      80131,
+      80145,
+      80161,
+      80190,
+      80205,
+      80248,
+      80252,
+      80254,
+      80277,
+      80281,
+      80296,
+      80356,
+      80384,
+      80399,
+      80435,
+      80557,
+      80578
+     ],
+     "steps": [
+      "Completá {{a:2646}}: juntá los objetos de las alas de incursión.",
+      "Completá {{a:3012}}: te da el precursor (Armadura del enviado refinada) de la clase de peso que elijas.",
+      "Para cada pieza: Don de destreza + {{77451}} + {{70867}} + {{76530}} y el precursor, en la [[forge]]. Mirá la guía automática de cada pieza para las cantidades exactas.",
+      "Los precursores de las otras clases de peso se craftean con más conocimientos legendarios."
+     ]
+    }
+   ]
+  },
+  "armor_pvp": {
+   "title": "Armadura legendaria de PvP (Héroe glorioso / Gloriosa ardiente)",
+   "items": [
+    82098,
+    82214,
+    82245,
+    82268,
+    82272,
+    82334,
+    82401,
+    82410,
+    82423,
+    82465,
+    82512,
+    82519,
+    82670,
+    82698,
+    83113,
+    83127,
+    83162,
+    83240,
+    83323,
+    83348,
+    83595,
+    83676,
+    83729,
+    83921,
+    83929,
+    83957,
+    84341,
+    84427,
+    84461,
+    84546,
+    84561,
+    84633,
+    84643,
+    84655,
+    84723,
+    84748,
+    89093,
+    89094,
+    89101,
+    89117,
+    89126,
+    89134,
+    89152,
+    89158,
+    89167,
+    89174,
+    89183,
+    89209,
+    89234,
+    89235,
+    89245,
+    89252,
+    89260,
+    89266
+   ],
+   "intro": "Se hace a partir de la versión ascendida de la armadura de PvP y los dones de PvP. Cuesta 300 Esquirlas ascendidas de gloria (con el tope de 120 por temporada son al menos 3 temporadas) y otras 3.200 de la moneda de liga para la Estrella de gloria y la armadura ascendida.",
+   "requires": [
+    "Heart of Thorns para varios componentes.",
+    "Jugar partidas clasificatorias de la liga de PvP (cofres de la pista de liga)."
+   ],
+   "needs": [],
+   "sections": [
+    {
+     "title": "Paso a paso",
+     "items": [
+      82098,
+      82214,
+      82245,
+      82268,
+      82272,
+      82334,
+      82401,
+      82410,
+      82423,
+      82465,
+      82512,
+      82519,
+      82670,
+      82698,
+      83113,
+      83127,
+      83162,
+      83240,
+      83323,
+      83348,
+      83595,
+      83676,
+      83729,
+      83921,
+      83929,
+      83957,
+      84341,
+      84427,
+      84461,
+      84546,
+      84561,
+      84633,
+      84643,
+      84655,
+      84723,
+      84748,
+      89093,
+      89094,
+      89101,
+      89117,
+      89126,
+      89134,
+      89152,
+      89158,
+      89167,
+      89174,
+      89183,
+      89209,
+      89234,
+      89235,
+      89245,
+      89252,
+      89260,
+      89266
+     ],
+     "steps": [
+      "Comprá la pieza ascendida (Lambdin el Tardío, en el [[heartofmists]]).",
+      "Juntá las Esquirlas ascendidas de gloria jugando la liga: 100 de los cofres no repetibles de la temporada, 10 del logro de temporada y 10 convirtiendo la caja de minis llama.",
+      "Ruta rápida: 3 temporadas completando los cofres de liga y 20 veces el cofre repetible final.",
+      "Forjá cada pieza con su ascendida + los dones (guía automática en cada pieza)."
+     ]
+    }
+   ]
+  },
+  "armor_wvw": {
+   "title": "Armadura legendaria de McM (Héroe triunfal)",
+   "items": [
+    82093,
+    82109,
+    82173,
+    82180,
+    82196,
+    82348,
+    82437,
+    82456,
+    82502,
+    82552,
+    82801,
+    82902,
+    82903,
+    82925,
+    82963,
+    82994,
+    83036,
+    83087,
+    83094,
+    83289,
+    83308,
+    83394,
+    83482,
+    83497,
+    83699,
+    83702,
+    83862,
+    84110,
+    84176,
+    84181,
+    84301,
+    84578,
+    84629
+   ],
+   "intro": "Primero se compra la armadura ascendida del Héroe triunfal con boletos de escaramuza de McM y después se convierte en legendaria con los dones de McM en la Forja.",
+   "requires": [
+    "Heart of Thorns para varios componentes.",
+    "Boletos de escaramuza de McM: un juego exótico/ascendido de un peso cuesta 1.310 (unas 4 semanas a 365 por semana).",
+    "Marcas de gran maestro de Sastre (ligera), Peletero (media) o Forjador de armaduras (pesada): 4 para pecho y piernas, 3 para el resto."
+   ],
+   "needs": [],
+   "sections": [
+    {
+     "title": "Paso a paso",
+     "items": [
+      82093,
+      82109,
+      82173,
+      82180,
+      82196,
+      82348,
+      82437,
+      82456,
+      82502,
+      82552,
+      82801,
+      82902,
+      82903,
+      82925,
+      82963,
+      82994,
+      83036,
+      83087,
+      83094,
+      83289,
+      83308,
+      83394,
+      83482,
+      83497,
+      83699,
+      83702,
+      83862,
+      84110,
+      84176,
+      84181,
+      84301,
+      84578,
+      84629
+     ],
+     "steps": [
+      "Comprá cada pieza ascendida al Supervisor de escaramuzas en la zona de inicio de cualquier mapa de McM.",
+      "No le cambies las estadísticas en la Forja: deja de servir como precursor.",
+      "Juntá los dones de McM ({{81371}}, Memorias de batalla, etc.) y forjá cada pieza (mirá la guía automática de cada pieza)."
+     ]
+    }
+   ]
+  },
+  "armor_obsidian": {
+   "title": "Armadura legendaria Obsidiana (Secrets of the Obscure)",
+   "items": [
+    19925,
+    76158,
+    95101,
+    101460,
+    101462,
+    101499,
+    101501,
+    101516,
+    101521,
+    101535,
+    101536,
+    101544,
+    101551,
+    101556,
+    101568,
+    101570,
+    101579,
+    101602,
+    101609,
+    101614,
+    101645
+   ],
+   "intro": "La armadura Obsidiana sale del mundo abierto de Secrets of the Obscure: caza de grietas, monedas y exploración. Cada pieza pide un arcano astral y dones de la expansión; se puede mejorar después a Obsidiana imbuida.",
+   "requires": [
+    "Secrets of the Obscure."
+   ],
+   "needs": [],
+   "sections": [
+    {
+     "title": "Colecciones",
+     "items": [],
+     "steps": [
+      "{{a:7128}} (dones astrales).",
+      "Una colección por pieza: {{a:7096}}, {{a:7098}}, {{a:7214}}, {{a:7219}}, {{a:7051}} y {{a:7240}}."
+     ]
+    }
+   ]
+  },
+  "conflux": {
+   "title": "Confluencia (anillo legendario de McM)",
+   "items": [
+    93105
+   ],
+   "intro": "{{93105}} se hace en la [[forge]] con el {{93190}}, una {{79982}}, un {{71820}} y el {{81371}}. Es el anillo legendario de McM.",
+   "requires": [
+    "Pistas de recompensa de McM (Don de la batalla y otros), boletos de escaramuza.",
+    "Desde el Arsenal legendario se pueden guardar dos Confluencias."
+   ],
+   "needs": [],
+   "sections": []
+  },
+  "transcendence": {
+   "title": "Trascendencia (amuleto legendario de PvP)",
+   "items": [
+    92991
+   ],
+   "intro": "{{92991}} se hace en la [[forge]] con el {{93036}}, un {{79980}}, un {{71820}} y el {{77485}}.",
+   "requires": [
+    "1 Emblema de victoria: ganar 120 partidas clasificatorias durante temporadas de PvP.",
+    "1 {{19678}} (pista de recompensa) y 4 Fragmentos de núcleo de la Niebla (pista de recompensa gloriosa).",
+    "Del bazar: 250 {{71581}} y 2.250 {{70820}}; además 100 esquirlas espirituales y 100 tomos de conocimiento."
+   ],
+   "needs": [
+    [
+     71581,
+     250
+    ],
+    [
+     70820,
+     2250
+    ]
+   ],
+   "sections": []
+  },
+  "warbringer": {
+   "title": "Vientos de Guerra (mochila legendaria de McM)",
+   "items": [
+    81462,
+    81467
+   ],
+   "intro": "{{81462}} se hace en la [[forge]] con su precursor {{81467}}, el {{81478}}, el {{19626}} y el {{81371}}.",
+   "requires": [
+    "2.800 boletos de escaramuza de McM en total: al máximo de 365 + 90 por semana son al menos 7 semanas."
+   ],
+   "needs": [],
+   "sections": [
+    {
+     "title": "Paso a paso",
+     "items": [],
+     "steps": [
+      "Comprá las alas de McM en orden (Recluta → Soldado → General → Comandante → {{81467}}) con boletos de escaramuza.",
+      "Hacé el {{19626}} (mirá su guía) y el {{81478}}.",
+      "Forjá {{81462}}."
+     ]
+    }
+   ]
+  },
+  "ascension": {
+   "title": "La Ascensión (mochila legendaria de PvP)",
+   "items": [
+    77474,
+    77536
+   ],
+   "intro": "{{77474}} se hace en la [[forge]] con el {{77509}}, el {{77485}}, el {{19626}} y las {{77536}}.",
+   "requires": [
+    "Sólo se puede hacer una vez: el Don del competidor sale de logros que dan su recompensa una sola vez (camino de la Ascensión en la liga de PvP).",
+    "Ganar una partida clasificatoria con una profesión avanza todos los niveles de liga desbloqueados de esa profesión."
+   ],
+   "needs": [],
+   "sections": []
+  },
+  "runesigil": {
+   "title": "Runas y sellos legendarios",
+   "items": [
+    77451,
+    70867,
+    76530
+   ],
+   "intro": "Una runa legendaria se hace con el Don de runas + {{77451}} + {{70867}} + {{76530}}; un sello legendario, igual pero con el Don de sellos. Las runas legendarias se combinan con runas exóticas del mismo tipo (2 legendarias + 4 exóticas dan los 6 bonos).",
+   "requires": [
+    "Con 7 runas y 8 sellos legendarios alcanza para todo (logros «Coleccionista de runas/sellos legendarios»); hacer más no sirve.",
+    "Las runas legendarias piden equipo de nivel 80."
+   ],
+   "needs": [],
+   "sections": []
+  },
+  "relic": {
+   "title": "Reliquia legendaria",
+   "items": [
+    101582
+   ],
+   "intro": "La {{101582}} desbloquea en el Arsenal legendario todas las reliquias que tengas registradas en las colecciones de reliquias. Primero se hace la reliquia, después se completan las colecciones.",
+   "requires": [
+    "Secrets of the Obscure para algunas reliquias (por ejemplo la Reliquia del Fractal) aunque se consigan en otras expansiones."
+   ],
+   "needs": [],
+   "sections": [
+    {
+     "title": "Paso a paso",
+     "items": [],
+     "steps": [
+      "Completá {{a:7829}} para los componentes.",
+      "Registrá reliquias en las colecciones raras (Conjuntos básicos 1 y 2, Secrets of the Obscure, Janthir Wilds y Visions of Eternity): crafteándolas, comprándolas o con las pistas de recompensa de cada expansión. Las del ascenso a nivel 80 no cuentan."
+     ]
+    }
+   ]
+  },
+  "orrax": {
+   "title": "Orrax Manifestado (mochila legendaria de Janthir Wilds)",
+   "items": [
+    104857,
+    104690
+   ],
+   "intro": "Orrax Manifestado se hace en la [[forge]] con el Don de las Islas de Pavesas de Niebla, el Don de las sombras, el Don del banquete y el precursor Orrax Contenido.",
+   "requires": [
+    "Janthir Wilds."
+   ],
+   "needs": [],
+   "sections": [
+    {
+     "title": "Colecciones",
+     "items": [],
+     "steps": [
+      "{{a:8761}} (para empezar).",
+      "{{a:8730}} (precursor).",
+      "{{a:8723}}, {{a:8750}} y {{a:8743}} (un don cada una).",
+      "{{a:8714}}."
+     ]
+    }
+   ]
+  },
+  "klobjarne": {
+   "title": "Klobjarne Geirr (lanza legendaria)",
+   "items": [
+    103815
+   ],
+   "intro": "Klobjarne Geirr se hace en la [[forge]] con el Don de Janthir Wilds, el Don del hacendado, el Don de Klobjarne Geirr y el precursor Nyr Hrammr.",
+   "requires": [
+    "Janthir Wilds."
+   ],
+   "needs": [],
+   "sections": [
+    {
+     "title": "Colecciones",
+     "items": [],
+     "steps": [
+      "{{a:8278}}.",
+      "{{a:8449}}, {{a:8505}} y {{a:8442}}."
+     ]
+    }
+   ]
+  },
+  "endless_summer": {
+   "title": "Verano Infinito (anillo legendario)",
+   "items": [
+    107022
+   ],
+   "intro": "{{107022}} se hace en la [[forge]] con el Don de rayos, el Don de los supervivientes, el Don del pueblo y el Don de los hylek (Janthir Wilds).",
+   "requires": [
+    "Janthir Wilds.",
+    "Las Esencias de grieta amalgamadas conviene craftearlas (receta de 50 en cualquier disciplina a 400)."
+   ],
+   "needs": [],
+   "sections": []
+  },
+  "stella": {
+   "title": "Estela radiante (accesorio legendario)",
+   "items": [
+    109070
+   ],
+   "intro": "{{109070}} se hace en la [[forge]] con un {{71820}}, el Don de Galdra, el Don de las piedras sombrías y un Vial de piedra sombría líquida.",
+   "requires": [
+    "Visions of Eternity."
+   ],
+   "needs": [],
+   "sections": []
+  },
+  "strife": {
+   "title": "Conflicto Interminable (accesorio legendario de McM)",
+   "items": [
+    109012
+   ],
+   "intro": "{{109012}} sale de la investigación de la Niebla «Conflicto Interminable» (Visions of Eternity: El único camino). Su efecto cambia según la racha de muertes en McM.",
+   "requires": [
+    "Visions of Eternity."
+   ],
+   "needs": [],
+   "sections": []
+  },
+  "prismatic": {
+   "title": "Insignia de Campeón Prismático (amuleto legendario)",
+   "items": [
+    95380
+   ],
+   "intro": "{{95380}} es el amuleto legendario de mundo abierto: es la recompensa final del Regreso del Mundo Viviente (logros de las temporadas 2 a 4 e Icebrood Saga).",
+   "requires": [
+    "Las temporadas del Mundo Viviente correspondientes."
+   ],
+   "needs": [],
+   "sections": []
+  },
+  "gen3": {
+   "title": "Armas legendarias de 3.ª generación (Aurene) y sus variantes",
+   "items": [],
+   "intro": "Las armas de 3.ª generación (End of Dragons) tienen una versión de Aurene y variantes con el estilo de cada dragón anciano. Cada variante pide tener la de Aurene desbloqueada y completar una colección repetible.",
+   "requires": [
+    "End of Dragons. Algunas variantes piden además Heart of Thorns o la temporada 4 del Mundo Viviente."
+   ],
+   "needs": [],
+   "sections": [
+    {
+     "title": "Facetas de Aurene (variantes)",
+     "items": [],
+     "steps": [
+      "Zhaitan: {{a:6562}} → Fragmento de sombras prismáticas. Recuerdos: {{a:6576}}.",
+      "Mordremoth: {{a:6590}} (pide Heart of Thorns). Recuerdos: {{a:6658}}.",
+      "Kralkatorrik: {{a:6702}} (pide los episodios 5 y 6 de la temporada 4). Recuerdos: {{a:6699}}.",
+      "Jormag: {{a:6771}}. Recuerdos: {{a:6772}}.",
+      "Primordus: {{a:6813}}. Recuerdos: {{a:6814}}.",
+      "Vida: {{a:6878}}. Recuerdos: {{a:6848}}."
+     ]
+    }
+   ]
   }
  },
  "places": {
@@ -828,6 +1384,14 @@
     32137
    ],
    "wp": "Aerodrome Waypoint"
+  },
+  "heartofmists": {
+   "name": "Corazón de la Niebla (lobby de PvP; se entra desde el panel de PvP)",
+   "coord": [
+    49399,
+    31823
+   ],
+   "wp": "Fort Marriner Waypoint"
   }
  }
 }

@@ -50,6 +50,7 @@ export function extraItem(id) {
 export function setAchItems(data) {
   ACH = data?.items ? data : null;
 }
+export function achAll() { return Object.entries(ACH?.achievements || {}).map(([id, a]) => ({ id: Number(id), name: a[0] || '', category: a[1] || '', type: a[2] ? 'ItemSet' : 'Default' })); }
 export function achName(id) { return ACH?.achievements?.[id]?.[0] || `Logro ${id}`; }
 export function catalogMeta() {
   return IDX ? { at: IDX.at, count: IDX.rows.length } : null;

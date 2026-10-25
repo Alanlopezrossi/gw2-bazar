@@ -1,3 +1,4 @@
+import { curatedHTML, wireGuide } from './guide-ui.js';
 // Pestaña "Guía": guías para subir profesiones (propias, con precios en vivo), acceso a gw2crafts y guías especiales.
 const STORE = 'gw2-bazar-guia';
 const DISCS = [['Armorsmith', 'Forjador de armaduras', '🛡'], ['Artificer', 'Artífice', '🔮'], ['Chef', 'Cocinero', '🍲'], ['Huntsman', 'Cazador', '🏹'], ['Jeweler', 'Joyero', '💍'], ['Leatherworker', 'Peletero', '🧥'], ['Scribe', 'Escriba', '📜'], ['Tailor', 'Sastre', '🧵'], ['Weaponsmith', 'Armero', '⚔']];
@@ -76,11 +77,28 @@ export function renderGuia(view, { api, esc, coin, itemCell }) {
   api('/api/guides').then((d) => {
     const box = view.querySelector('#gCur');
     if (!box) return;
-    box.innerHTML = d.guides.length ? `<div class="cur-list">${d.guides.map((g) => `<a class="cur-card" href="#/item/${g.items[0]?.id}">
+    const list = [...d.guides].sort((x, y) => x.title.localeCompare(y.title, 'es'));
+    box.innerHTML = list.length ? `<input type="search" id="gCurQ" placeholder="Buscar guía… (ej: trébol, armadura, Aurora)" style="width:100%;max-width:420px;margin-bottom:10px">
+      <div class="cur-list">${list.map((g) => `<button type="button" class="cur-card" data-key="${esc(g.key)}" data-hay="${esc((g.title + ' ' + g.intro).toLowerCase())}">
       <div class="cur-icons">${g.items.map((i) => (i.icon ? `<img src="${esc(i.icon)}" alt="">` : '')).join('')}</div>
-      <b>${esc(g.title)}</b><p class="small muted">${esc(g.intro.slice(0, 220))}${g.intro.length > 220 ? '…' : ''}</p>
-      <span class="small">${g.sections.map((s) => esc(s)).join(' · ')}</span></a>`).join('')}</div>
-      <p class="muted small">Cada guía especial aparece también en la ficha de todos los items que participan.</p>` : '<p class="muted">Todavía no hay guías especiales.</p>';
+      <b>${esc(g.title)}</b><p class="small muted">${esc(g.intro.slice(0, 180))}${g.intro.length > 180 ? '…' : ''}</p>
+      ${g.sections.length ? `<span class="small">${g.sections.map((s) => esc(s)).join(' · ')}</span>` : ''}</button>`).join('')}</div>
+      <div id="gCurOpen"></div>
+      <p class="muted small">${list.length} guías. Cada una aparece también en la ficha de los items que participan.</p>` : '<p class="muted">Todavía no hay guías especiales.</p>';
+    box.querySelector('#gCurQ')?.addEventListener('input', (e) => { const t = e.target.value.trim().toLowerCase(); box.querySelectorAll('.cur-card').forEach((c) => { c.hidden = !!t && !c.dataset.hay.includes(t); }); });
+    box.addEventListener('click', async (e) => {
+      const c = e.target.closest('.cur-card');
+      if (!c) return;
+      box.querySelectorAll('.cur-card').forEach((x) => x.classList.toggle('on', x === c));
+      const open = box.querySelector('#gCurOpen');
+      open.innerHTML = '<div class="skeleton"></div>';
+      try {
+        const gd = await api(`/api/guides?key=${encodeURIComponent(c.dataset.key)}&mode=${st.mode}`);
+        open.innerHTML = curatedHTML(gd, { esc, coin, openAll: true });
+        wireGuide(open);
+        open.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) { open.innerHTML = `<div class="empty">${esc(err.message)}</div>`; }
+    });
   }).catch(() => {});
 
   paintCrafts();

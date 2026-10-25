@@ -6,7 +6,7 @@ import { isGated } from './analysis.js';
 import { planItem } from './planner.js';
 import { achievementsFor } from './equipment.js';
 import { howToObtain } from './obtain.js';
-import { indexItem, achName } from './catalog.js';
+import { indexItem, achName, achievementsOfItem, achAll } from './catalog.js';
 import { geoRaw } from './vendors.js';
 
 let GUIDES = null;
@@ -45,20 +45,28 @@ function parts(text) {
   return out;
 }
 
-/** Guías escritas a mano donde participa este item (puede haber varias). */
-function curated(id, mode) {
-  const keys = byItem.get(id) || [];
-  if (!keys.length) return null;
-  // Primero la guía propia del item (la que tiene menos items), después las generales.
-  return keys.map((k) => ({ k, g: GUIDES.guides[k] })).sort((a, b) => (a.g.items?.length || 0) - (b.g.items?.length || 0)).map(({ k, g }) => ({
+function shapeGuide(k, g, id, mode) {
+  return {
     key: k,
     title: g.title,
     intro: parts(g.intro || ''),
     requires: (g.requires || []).map(parts),
     needs: (g.needs || []).map(([nid, qty]) => { const p = state.prices.get(nid); const unit = p ? (mode === 'order' && p.buy ? p.buy + 1 : p.sell || null) : null; return { ...info(nid), qty, unit, total: unit != null ? unit * qty : null }; }),
-    sections: (g.sections || []).map((s) => ({ title: s.title, here: (s.items || []).includes(id), steps: s.steps.map(parts) })),
+    sections: (g.sections || []).map((s) => ({ title: s.title, here: id != null && (s.items || []).includes(id), steps: s.steps.map(parts) })),
     source: g.source || GUIDES.source,
-  }));
+  };
+}
+/** Guías escritas a mano donde participa este item (puede haber varias). */
+function curated(id, mode) {
+  const keys = byItem.get(id) || [];
+  if (!keys.length) return null;
+  // Primero la guía propia del item (la que tiene menos items), después las generales.
+  return keys.map((k) => ({ k, g: GUIDES.guides[k] })).sort((a, b) => (a.g.items?.length || 0) - (b.g.items?.length || 0)).map(({ k, g }) => shapeGuide(k, g, id, mode));
+}
+/** Una guía escrita a mano completa, por su clave (pestaña Guía). */
+export function guideByKey(key, { mode = 'instant' } = {}) {
+  const g = GUIDES?.guides?.[key];
+  return g ? shapeGuide(key, g, null, mode) : null;
 }
 
 /** Pasos de crafteo en orden (primero lo más profundo del árbol), sumando repetidos. */
@@ -146,6 +154,25 @@ export function itemGuide(id, { mode = 'instant' } = {}) {
     }
     out.achievements.components = out.achievements.components.slice(0, 20);
   }
+  // Colecciones del precursor (legendarias): logros que dan alguno de sus ingredientes y sus colecciones anteriores (I, II, III…).
+  const it0 = state.items.get(id) || indexItem(id);
+  if (it0?.rarity === 'Legendary' && state.byOutput.has(id)) {
+    const all = achAll();
+    const found = new Map();
+    const roman = /\s(?:I{1,3}|IV|V)(?::|$)/;
+    const addFam = (pre, forItem) => { if (!pre) return; for (const x of all) if (x.name.startsWith(`${pre} `) && roman.test(x.name)) found.set(x.id, { ...x, forItem }); };
+    // 1) Colecciones con el nombre de la legendaria ("Crepúsculo I/II/III…")
+    addFam(it0.name, info(id));
+    for (const r of state.byOutput.get(id)) for (const gi of r.ingredients || []) {
+      if (gi.type !== 'Item') continue;
+      // 2) Logros que dan un ingrediente (precursor) y su familia I, II, III
+      for (const a of achievementsOfItem(gi.id).filter((x) => x.role === 'recompensa')) {
+        const pre = a.name.split(/\s+(?:I{1,3}|IV|V)(?::|$)/)[0].trim();
+        if (pre && pre !== a.name) addFam(pre, info(gi.id)); else found.set(a.id, { ...a, forItem: info(gi.id) });
+      }
+    }
+    out.collections = [...found.values()].sort((a, b) => a.name.localeCompare(b.name, 'es', { numeric: true }));
+  }
   // Para qué sirve
   const usedIn = new Set();
   for (const rid of state.byInput.get(id) || []) { const r = state.recipes.get(rid); if (r) usedIn.add(r.output_item_id); }
@@ -156,5 +183,5 @@ export function itemGuide(id, { mode = 'instant' } = {}) {
 
 /** Índice de guías escritas a mano (apartado Guía del menú). */
 export function guidesList() {
-  return Object.entries(GUIDES?.guides || {}).map(([k, g]) => ({ key: k, title: g.title, intro: parts(g.intro || '').map((p) => (p.t != null ? p.t : p.name || p.place?.name || p.ach?.name || '')).join(''), items: (g.items || []).slice(0, 3).map(info), sections: (g.sections || []).map((s) => s.title) }));
+  return Object.entries(GUIDES?.guides || {}).map(([k, g]) => ({ key: k, count: (g.items || []).length, title: g.title, intro: parts(g.intro || '').map((p) => (p.t != null ? p.t : p.name || p.place?.name || p.ach?.name || '')).join(''), items: (g.items || []).slice(0, 3).map(info), sections: (g.sections || []).map((s) => s.title) }));
 }

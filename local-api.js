@@ -9,7 +9,7 @@ import { syncItems } from './sync.js';
 import { accountSummary, tokenInfo, accountInventory } from './account.js';
 import { planAll, planItem } from './planner.js';
 import { listRecipes, professionsSummary } from './professions.js';
-import { itemGuide, setGuides, guidesList } from './guide.js';
+import { itemGuide, setGuides, guidesList, guideByKey } from './guide.js';
 import { levelingPlan } from './leveling.js';
 import { getAuthed } from './gw2api.js';
 import { containerContents, setContainersSnapshot } from './containers.js';
@@ -70,7 +70,7 @@ const routes = {
   '/api/meta': () => ({ types: TYPES, rarities: RARITIES, rarityOrder: RARITY_ORDER, disciplines: DISCIPLINES, gameTypes: GAME_TYPES, recipeFlags: RECIPE_FLAGS, subtypes: SUBTYPES, weights: WEIGHTS }),
   '/api/vendors': () => vendorMarkers(),
   '/api/leveling': (q) => levelingPlan(q.get('disc') || 'Artificer', { mode: q.get('mode') === 'order' ? 'order' : 'instant', from: Number(q.get('from')) || 0, to: Number(q.get('to')) || 0 }),
-  '/api/guides': async () => { if (!guidesP) guidesP = fetch('guides.json').then((r) => (r.ok ? r.json() : null)).then(setGuides).catch(() => {}); await guidesP; return { guides: guidesList() }; },
+  '/api/guides': async (q) => { if (!guidesP) guidesP = fetch('guides.json').then((r) => (r.ok ? r.json() : null)).then(setGuides).catch(() => {}); await guidesP; return q.get('key') ? guideByKey(q.get('key'), { mode: q.get('mode') === 'order' ? 'order' : 'instant' }) || [404, { error: 'No existe esa guía' }] : { guides: guidesList() }; },
   '/api/professions': (q) => q.get('summary') === '1' ? professionsSummary() : listRecipes({ disc: q.get('disc') || '', q: q.get('q') || '', cat: q.get('cat') || '', rarity: q.get('rarity') || '', type: q.get('type') || '', minR: Number(q.get('minR')) || 0, maxR: Number(q.get('maxR')) || 500, sort: q.get('sort') || '', dir: q.get('dir') || 'asc', page: Number(q.get('page')) || 1, limit: Math.min(500, Number(q.get('limit')) || 50), mode: q.get('mode') === 'order' ? 'order' : 'instant' }),
   // "Mi cuenta" en la versión pública: la API key queda guardada sólo en el navegador de quien la carga.
   '/api/config': async (_q, opts) => {
