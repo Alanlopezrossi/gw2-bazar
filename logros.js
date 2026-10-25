@@ -231,7 +231,7 @@ export async function renderLogros(view, { api, esc, normalize, catId = null, to
       const ids = [...P.values()].filter((p) => !p.done && p.current > 0).map((p) => p.id);
       rows = ids.length ? await many('achievements', ids) : [];
       rows.sort((a, b) => (P.get(b.id).current / (P.get(b.id).max || 1)) - (P.get(a.id).current / (P.get(a.id).max || 1)));
-      view.querySelector('#alist').insertAdjacentHTML('beforebegin', '<p class="muted small" id="ahint">Mostrando los logros que <b>empezaste y te faltan terminar</b>, los más avanzados primero. Elegí una categoría o buscá para ver todos.</p>');
+      view.querySelector('#alist')?.insertAdjacentHTML('beforebegin', '<p class="muted small" id="ahint">Mostrando los logros que <b>empezaste y te faltan terminar</b>, los más avanzados primero. Elegí una categoría o buscá para ver todos.</p>');
       paintList();
     } else {
       view.querySelector('#alist').innerHTML = '<div class="empty">Elegí una categoría a la izquierda o escribí en el buscador para buscar entre todos los logros.</div>';

@@ -6,7 +6,7 @@ import { isGated } from './analysis.js';
 import { planItem } from './planner.js';
 import { achievementsFor } from './equipment.js';
 import { howToObtain } from './obtain.js';
-import { indexItem } from './catalog.js';
+import { indexItem, achName } from './catalog.js';
 import { geoRaw } from './vendors.js';
 
 let GUIDES = null;
@@ -14,7 +14,7 @@ let byItem = new Map();
 export function setGuides(data) {
   GUIDES = data?.guides ? data : null;
   byItem = new Map();
-  for (const [k, g] of Object.entries(GUIDES?.guides || {})) for (const id of g.items || []) if (!byItem.has(id)) byItem.set(id, k);
+  for (const [k, g] of Object.entries(GUIDES?.guides || {})) for (const id of g.items || []) { if (!byItem.has(id)) byItem.set(id, []); byItem.get(id).push(k); }
 }
 
 const info = (id) => { const it = state.items.get(id) || indexItem(id); return { id, name: it?.name || `#${id}`, icon: it?.icon || null, rarity: it?.rarity || null }; };
@@ -34,9 +34,10 @@ function place(key) {
 function parts(text) {
   const out = [];
   let last = 0;
-  for (const m of String(text).matchAll(/\{\{(?:(\d+)×)?(\d+)\}\}|\[\[(\w+)\]\]/g)) {
+  for (const m of String(text).matchAll(/\{\{(?:(\d+)×)?(\d+)\}\}|\[\[(\w+)\]\]|\{\{a:(\d+)\}\}/g)) {
     if (m.index > last) out.push({ t: text.slice(last, m.index) });
-    if (m[3]) out.push(place(m[3]));
+    if (m[4]) out.push({ ach: { id: Number(m[4]), name: achName(Number(m[4])) } });
+    else if (m[3]) out.push(place(m[3]));
     else out.push({ ...info(Number(m[2])), qty: m[1] ? Number(m[1]) : null });
     last = m.index + m[0].length;
   }
@@ -44,19 +45,20 @@ function parts(text) {
   return out;
 }
 
+/** Guías escritas a mano donde participa este item (puede haber varias). */
 function curated(id, mode) {
-  const k = byItem.get(id);
-  if (!k) return null;
-  const g = GUIDES.guides[k];
-  return {
+  const keys = byItem.get(id) || [];
+  if (!keys.length) return null;
+  // Primero la guía propia del item (la que tiene menos items), después las generales.
+  return keys.map((k) => ({ k, g: GUIDES.guides[k] })).sort((a, b) => (a.g.items?.length || 0) - (b.g.items?.length || 0)).map(({ k, g }) => ({
     key: k,
     title: g.title,
     intro: parts(g.intro || ''),
     requires: (g.requires || []).map(parts),
     needs: (g.needs || []).map(([nid, qty]) => { const p = state.prices.get(nid); const unit = p ? (mode === 'order' && p.buy ? p.buy + 1 : p.sell || null) : null; return { ...info(nid), qty, unit, total: unit != null ? unit * qty : null }; }),
     sections: (g.sections || []).map((s) => ({ title: s.title, here: (s.items || []).includes(id), steps: s.steps.map(parts) })),
-    source: GUIDES.source,
-  };
+    source: g.source || GUIDES.source,
+  }));
 }
 
 /** Pasos de crafteo en orden (primero lo más profundo del árbol), sumando repetidos. */
@@ -154,5 +156,5 @@ export function itemGuide(id, { mode = 'instant' } = {}) {
 
 /** Índice de guías escritas a mano (apartado Guía del menú). */
 export function guidesList() {
-  return Object.entries(GUIDES?.guides || {}).map(([k, g]) => ({ key: k, title: g.title, intro: parts(g.intro || '').map((p) => (p.t != null ? p.t : p.name || p.place?.name || '')).join(''), items: (g.items || []).slice(0, 3).map(info), sections: (g.sections || []).map((s) => s.title) }));
+  return Object.entries(GUIDES?.guides || {}).map(([k, g]) => ({ key: k, title: g.title, intro: parts(g.intro || '').map((p) => (p.t != null ? p.t : p.name || p.place?.name || p.ach?.name || '')).join(''), items: (g.items || []).slice(0, 3).map(info), sections: (g.sections || []).map((s) => s.title) }));
 }

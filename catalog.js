@@ -50,6 +50,7 @@ export function extraItem(id) {
 export function setAchItems(data) {
   ACH = data?.items ? data : null;
 }
+export function achName(id) { return ACH?.achievements?.[id]?.[0] || `Logro ${id}`; }
 export function catalogMeta() {
   return IDX ? { at: IDX.at, count: IDX.rows.length } : null;
 }

@@ -9,7 +9,7 @@ import { findByNameEn, indexItem } from './catalog.js';
 import { snapshotIds, snapshotContainer } from './containers.js';
 import { costEs } from './vendors.js';
 
-const DISC = { Armorsmith: 'Forjador de armaduras', Artificer: 'Artífice', Chef: 'Cocinero', Huntsman: 'Cazador', Jeweler: 'Joyero', Leatherworker: 'Peletero', Tailor: 'Sastre', Weaponsmith: 'Forjador de armas', Scribe: 'Escriba', Homesteader: 'Hogareño' };
+import { DISCIPLINES as DISC } from './i18n.js';
 
 // Índices inversos (se rehacen si cambian los datos).
 let IDX = null;

@@ -76,7 +76,7 @@ export function renderGuia(view, { api, esc, coin, itemCell }) {
   api('/api/guides').then((d) => {
     const box = view.querySelector('#gCur');
     if (!box) return;
-    box.innerHTML = d.guides.length ? `<div class="cur-list">${d.guides.map((g) => `<a class="cur-card" href="#/item/${g.items[g.items.length - 1]?.id || g.items[0]?.id}">
+    box.innerHTML = d.guides.length ? `<div class="cur-list">${d.guides.map((g) => `<a class="cur-card" href="#/item/${g.items[0]?.id}">
       <div class="cur-icons">${g.items.map((i) => (i.icon ? `<img src="${esc(i.icon)}" alt="">` : '')).join('')}</div>
       <b>${esc(g.title)}</b><p class="small muted">${esc(g.intro.slice(0, 220))}${g.intro.length > 220 ? '…' : ''}</p>
       <span class="small">${g.sections.map((s) => esc(s)).join(' · ')}</span></a>`).join('')}</div>

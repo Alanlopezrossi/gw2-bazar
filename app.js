@@ -838,19 +838,6 @@ function recipesHTML(d) {
 const OBTAIN_ICON = { npc: '🧑‍💼', track: '🎖', reward: '🏆', container: '🎁', gather: '⛏', note: 'ℹ' };
 const obtainHTML = (list) => `<span class="obtain">${list.map((o) => `<span class="ob ob-${o.kind}">${OBTAIN_ICON[o.kind] || '•'} ${esc(o.text)}</span>`).join('')}</span>`;
 
-/** Bloque "Dónde se consigue" con datos de la wiki ya extraídos (no depende de que la wiki esté en línea). */
-function wikiDataHTML(w) {
-  if (!w) return '';
-  const list = (title, arr) => (arr?.length ? `<h4 class="sub-h">${title}</h4><ul class="steps">${arr.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : '');
-  const vendors = w.soldBy?.length
-    ? `<h4 class="sub-h">Lo venden estos NPC</h4><div class="table-wrap"><table class="ing"><thead><tr><th>NPC</th><th>Zona</th><th>Mapa</th><th>Costo</th><th>Notas</th></tr></thead><tbody>
-       ${w.soldBy.map((v) => `<tr><td class="left">${esc(v.vendor)}</td><td class="left">${esc(v.area)}</td><td class="left">${esc(v.zone)}</td><td class="left">${esc(v.cost)}</td><td class="left small"><a href="#/mapa/${encodeURIComponent(`${v.vendor}|${v.area}|${v.zone}`)}">📍 ver en el mapa</a> <span class="muted">${esc(v.notes)}</span></td></tr>`).join('')}
-       </tbody></table></div>` : '';
-  const body = vendors + list('Sale de estos contenedores / bolsas', w.containedIn) + list('Reward tracks (PvP / WvW)', w.rewardTracks) + list('Recolección', w.gathered) + list('Recompensa de', w.rewardedBy) + (w.note ? `<p class="muted small">${esc(w.note)}</p>` : '');
-  if (!body) return '';
-  return `<div class="wiki-data">${body}<p class="muted small">Datos de la wiki oficial (copia archivada${w.snapshot ? ` del ${esc(w.snapshot)}` : ''}). Los nombres de NPC y mapas están en inglés, como en la wiki.</p></div>`;
-}
-
 /** "Dónde se consigue": todo con datos que vienen con la página (no hace falta que la wiki esté en línea). */
 const OB_IC = { tp: '⚖', craft: '⚒', forge: '🔮', vendor: '🧑‍💼', container: '🎁', achievement: '🏆', track: '🎖', gather: '⛏', reward: '🏅', desc: '📜', note: 'ℹ' };
 function obtainSecHTML(d) {
@@ -902,7 +889,7 @@ function itemHTML(d) {
     ${m && (m.sell || m.buy) ? '<div class="section"><h3>Historial de precio: desde que salió hasta hoy</h3><div id="histBox"></div></div>' : ''}
     ${L ? `<div class="section"><h3>Libro de órdenes en vivo <span class="muted small">(${new Date(L.at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })})</span></h3><div class="two">${depth(L.sells, 'Vendiendo a')}${depth(L.buys, 'Comprando a')}</div></div>` : ''}
 
-    <div class="section"><h3>Cómo conseguirlo</h3>
+    <div class="section"><h3>Comprar, craftear o vender</h3>
       <div class="ways">${d.ways.map((w) => `<div class="way"><div class="ic">${WAY_ICON[w.kind] || '•'}</div><div><b>${esc(w.title)}</b><p>${coinText(w.text)}</p></div></div>`).join('')}</div>
     </div>
     ${obtainSecHTML(d)}

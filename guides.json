@@ -1,6 +1,6 @@
 {
  "at": "2026-10-24",
- "source": "Guild Wars 2 Wiki (copia archivada): Mawdrey/Walkthrough, Mysterious Vine, Cultivated Vine, Mawdrey",
+ "source": "Guild Wars 2 Wiki (copia archivada) y API oficial",
  "guides": {
   "mawdrey": {
    "title": "Cadena de Mawdrey: Hiedra misteriosa → Hiedra cultivada → Mawdrey",
@@ -313,6 +313,351 @@
      ]
     }
    ]
+  },
+  "gen1": {
+   "title": "Arma legendaria de 1.ª generación: los 4 componentes",
+   "items": [
+    19626,
+    19674,
+    19673,
+    19672,
+    19677,
+    19678,
+    20797,
+    19925,
+    19675,
+    19676
+   ],
+   "intro": "Toda legendaria de 1.ª generación (Crepúsculo, Amanecer, El Bifrost, Meteorológico, etc.) se hace en la [[forge]] con 4 cosas: el precursor del arma, el {{19674}}, el {{19626}} y el don propio del arma (por ejemplo Don del Crepúsculo). El planificador de la pestaña Legendarias te calcula exactamente qué te falta para cada una.",
+   "requires": [
+    "Nivel 400 en la disciplina del don propio del arma (Armero, Cazador, Artífice, etc.) y aprender su receta.",
+    "Exploración completa del mundo (Tyria central) para el {{19677}}.",
+    "Jugar McM para el {{19678}} (pista de recompensa)."
+   ],
+   "needs": [
+    [
+     19675,
+     77
+    ],
+    [
+     19721,
+     250
+    ],
+    [
+     19925,
+     250
+    ],
+    [
+     20797,
+     1
+    ],
+    [
+     19677,
+     1
+    ],
+    [
+     19678,
+     1
+    ]
+   ],
+   "sections": [
+    {
+     "title": "1. Don de la suerte",
+     "items": [
+      19626,
+      19673,
+      19672,
+      19675
+     ],
+     "steps": [
+      "Conseguí el {{19673}}: en la Forja, {{250×24295}} + {{250×24283}} + {{250×24300}} + {{250×24277}}.",
+      "Conseguí el {{19672}}: en la Forja, {{250×24357}} + {{250×24289}} + {{250×24351}} + {{250×24358}}.",
+      "Juntá {{77×19675}} (mirá la guía del trébol: se forjan con suerte o se compran semanalmente) y {{250×19721}}.",
+      "En la [[forge]]: {{77×19675}} + {{250×19721}} + {{19673}} + {{19672}} = {{19626}}."
+     ]
+    },
+    {
+     "title": "2. Don del dominio",
+     "items": [
+      19674,
+      19677,
+      19678,
+      20797,
+      19925
+     ],
+     "steps": [
+      "{{19677}}: completá el 100% de exploración de Tyria central con un personaje (te da 2).",
+      "{{19678}}: completá la pista de recompensa «Don de la batalla» en McM (pestaña de pistas de recompensa de McM).",
+      "{{20797}}: comprala a [[miyani]] por 200 {{69910}}.",
+      "{{250×19925}}: comprá con karma en [[balthazar]] (o en pistas de recompensa de PvP/McM).",
+      "En la [[forge]]: {{20797}} + {{250×19925}} + {{19677}} + {{19678}} = {{19674}}."
+     ]
+    },
+    {
+     "title": "3. Precursor y don del arma",
+     "items": [],
+     "steps": [
+      "El precursor (por ejemplo {{29185}} para Crepúsculo) se compra en el bazar o se consigue con su colección de precursor.",
+      "El don propio del arma se hace en la Forja con un don de material, uno temático, {{100×19676}} y un sello superior (lo ves en la guía automática de cada don).",
+      "Final en la [[forge]]: precursor + don del arma + {{19626}} + {{19674}}."
+     ]
+    }
+   ]
+  },
+  "clover": {
+   "title": "Trébol místico: todas las formas de conseguirlo",
+   "items": [
+    19675
+   ],
+   "intro": "Necesitás 77 {{19675}} para cada {{19626}}. Hay tres caminos: forjarlos (con suerte), comprarlos con límite semanal o sacarlos de pistas de recompensa.",
+   "requires": [],
+   "needs": [],
+   "sections": [
+    {
+     "title": "Forjarlos",
+     "items": [
+      19675
+     ],
+     "steps": [
+      "En la [[forge]]: {{19925}} + {{19976}} + {{19721}} + {{6×20796}} da 1 trébol o, si no hay suerte, otros materiales al azar (en promedio ~1 de cada 3 intentos).",
+      "Variante en lote: {{10×19925}} + {{10×19976}} + {{10×19721}} + {{10×20799}} (más chances de varios tréboles por intento).",
+      "Las {{20796}} y los {{20799}} los vende [[miyani]] por esquirlas espirituales."
+     ]
+    },
+    {
+     "title": "Comprarlos (límite semanal)",
+     "items": [],
+     "steps": [
+      "A [[miyani]] o a los asistentes de la Forja: 3 monedas místicas + 5 ectoplasmas + 3 obsidianas + 3 esquirlas espirituales c/u (hasta 10 por semana).",
+      "BUY-4373 (Fractales, en el Santuario de Mistlock): 2 monedas + 2 ectos + 2 esquirlas espirituales + 150 reliquias fractales (10 por semana).",
+      "[[aerodrome]] (incursiones): 2 monedas + 2 ectos + 2 esquirlas + 30 magnetitas (15 por semana).",
+      "Vendedor de liga de PvP: 5 por semana. Dugan (McM): 5 por semana (no pide esquirla espiritual).",
+      "Bóveda del Mago: 60 aclamaciones astrales c/u (20 por temporada)."
+     ]
+    },
+    {
+     "title": "Recompensas",
+     "items": [],
+     "steps": [
+      "Cofres finales de las pistas de recompensa de PvP y McM (2 tréboles por pista completa).",
+      "Logros «Glory to the Legions» y los 5 logros «Strike Back» (cofre con 35 tréboles, una sola vez)."
+     ]
+    }
+   ]
+  },
+  "bloodstoneshard": {
+   "title": "Esquirla de hematites",
+   "items": [
+    20797
+   ],
+   "intro": "La {{20797}} no se craftea: se compra por 200 {{69910}} a [[miyani]] (o a cualquier asistente/guardián de la Forja Mística, por ejemplo en el Santuario de Mistlock).",
+   "requires": [
+    "Tener 200 esquirlas espirituales (salen al subir de nivel ya en 80, de la Bóveda del Mago y de cofres diarios)."
+   ],
+   "needs": [
+    [
+     69910,
+     200
+    ]
+   ],
+   "sections": []
+  },
+  "obsidian": {
+   "title": "Esquirla de obsidiana",
+   "items": [
+    19925
+   ],
+   "intro": "Hacen falta 250 {{19925}} para el {{19674}} (y varias más para tréboles). Formas más comunes:",
+   "requires": [],
+   "needs": [],
+   "sections": [
+    {
+     "title": "Dónde conseguirlas",
+     "items": [
+      19925
+     ],
+     "steps": [
+      "Con karma: vendedores de los templos de Orr, por ejemplo [[balthazar]] (2.100 de karma c/u, sólo con el templo en manos del Pacto).",
+      "En la Bóveda del Mago y en pistas de recompensa de PvP/McM.",
+      "Vendedores de mapas: BUY-4373 (Fractales), vendedores de dominio Exaltado (Corazón de Espinas) y vendedores de mapas de Path of Fire (96 de karma + moneda del mapa).",
+      "Cofres de mapas de HoT/PoF (cofres enterrados, cofres de bandidos)."
+     ]
+    }
+   ]
+  },
+  "explore": {
+   "title": "Don de la exploración",
+   "items": [
+    19677
+   ],
+   "intro": "Te dan 2 {{19677}} al completar la exploración de Tyria central (100% de los mapas: corazones, puntos de interés, vistas, waypoints y desafíos de héroe). Cada personaje lo puede hacer una sola vez.",
+   "requires": [
+    "Algunos mapas de McM cuentan para la exploración completa: tenés que visitarlos también."
+   ],
+   "needs": [],
+   "sections": []
+  },
+  "battle": {
+   "title": "Don de la batalla",
+   "items": [
+    19678
+   ],
+   "intro": "El {{19678}} sale de la pista de recompensa de McM «Don de la batalla» (último premio de la pista, nivel 8). Activala desde el panel de McM y jugá McM hasta completarla.",
+   "requires": [
+    "Nivel 80 para usar las pistas de recompensa de McM."
+   ],
+   "needs": [],
+   "sections": []
+  },
+  "icy": {
+   "title": "Piedra rúnica helada",
+   "items": [
+    19676
+   ],
+   "intro": "Cada don de arma de 1.ª generación pide {{100×19676}}. Se compran a 1 de oro c/u a [[rojan]].",
+   "requires": [
+    "Rojan sólo vende si ese mapa ganó el último meta evento «Romper la Garra de Jormag»: si no está, esperá al próximo meta o cambiá de mapa."
+   ],
+   "needs": [],
+   "sections": []
+  },
+  "knowledge": {
+   "title": "Don del conocimiento",
+   "items": [
+    19671
+   ],
+   "intro": "El {{19671}} (para Don de las almas, Don del clima y Don del sigilo) se compra por 500 relatos de exploración de mazmorras en los [[dungeonvendor]], sección «Crisol de la Eternidad: armas».",
+   "requires": [
+    "Haber completado 5 veces el modo explorable del Crisol de la Eternidad."
+   ],
+   "needs": [],
+   "sections": []
+  },
+  "mysticcoin": {
+   "title": "Moneda mística",
+   "items": [
+    19976
+   ],
+   "intro": "La {{19976}} se compra en el bazar, pero también sale gratis o barata de varios lados:",
+   "requires": [],
+   "needs": [],
+   "sections": [
+    {
+     "title": "Fuentes",
+     "items": [
+      19976
+     ],
+     "steps": [
+      "Recompensas de inicio de sesión mensuales (bolsas de monedas místicas).",
+      "Bóveda del Mago: 9 aclamaciones c/u (60 por temporada).",
+      "[[aerodrome]]: 1 moneda por 10 magnetitas (10 por semana).",
+      "Cofres de Fractales (Adepto, Experto, Maestro) y bolsas de materiales del León Negro."
+     ]
+    }
+   ]
+  },
+  "aurora": {
+   "title": "Aurora (accesorio legendario)",
+   "items": [
+    81908
+   ],
+   "intro": "{{81908}} se hace en la [[forge]] con la Chispa de consciencia, un Tributo místico, el Don de la consciencia y el Don de la maestría dracónica. Los componentes salen de colecciones de la temporada 3 del Mundo Viviente.",
+   "requires": [
+    "Tener la temporada 3 del Mundo Viviente (mapas Bloodstone Fen, Ember Bay, Bitterfrost Frontier, Lake Doric, Draconis Mons y Siren's Landing).",
+    "250 de cada moneda de esos mapas para el Don de la maestría dracónica."
+   ],
+   "needs": [],
+   "sections": [
+    {
+     "title": "Paso a paso",
+     "items": [
+      81908
+     ],
+     "steps": [
+      "Completá estos 4 logros para conseguir los convertidores: {{a:3053}} (Bloodstone Fen), {{a:3129}} (Ember Bay), {{a:3383}} (Lake Doric) y {{a:3429}} (Draconis Mons).",
+      "Combiná los 4 convertidores en la [[forge]]: te da el Destello de consciencia. Con él comprá la Semilla consciente por 1.000 de magia desatada: eso desbloquea {{a:3522}}.",
+      "Completá {{a:3522}} (Don del valor → Don de la consciencia) y después {{a:3489}} (Chispa de consciencia). Cada logro tiene su guía en la pestaña Logros.",
+      "Hacé el Don de la maestría dracónica y el Tributo místico (guía automática en sus fichas) y forjá {{81908}}."
+     ]
+    }
+   ]
+  },
+  "vision": {
+   "title": "Visión (accesorio legendario)",
+   "items": [
+    91048
+   ],
+   "intro": "{{91048}} se hace en la [[forge]] con Atisbo, un Tributo místico, el Don de la presciencia y el Don de la maestría árida. Sus colecciones recorren los mapas de la temporada 4 del Mundo Viviente.",
+   "requires": [
+    "Tener la temporada 4 del Mundo Viviente.",
+    "Magia volátil para la Piedra de trance."
+   ],
+   "needs": [],
+   "sections": [
+    {
+     "title": "Paso a paso",
+     "items": [
+      91048
+     ],
+     "steps": [
+      "Comprá la Piedra de trance a cualquier recolector de magia volátil: desbloquea {{a:4762}}.",
+      "Completá {{a:4762}} y las «Visiones» de cada mapa: {{a:4765}}, {{a:4774}}, {{a:4760}}, {{a:4770}}, {{a:4764}} y {{a:4757}}.",
+      "Completá {{a:4771}} para conseguir Atisbo.",
+      "Hacé el Don de la maestría árida y el Tributo místico y forjá {{91048}}."
+     ]
+    }
+   ]
+  },
+  "coalescence": {
+   "title": "Coalescencia (anillo legendario)",
+   "items": [
+    91234
+   ],
+   "intro": "{{91234}} se hace en la [[forge]] con el Remolino odioso, el Don de la paciencia, un Tributo místico y el Don de la compasión. Es el anillo legendario de incursiones.",
+   "requires": [
+    "Haber matado a cualquier jefe de incursión (desbloquea la primera colección)."
+   ],
+   "needs": [],
+   "sections": [
+    {
+     "title": "Paso a paso",
+     "items": [
+      91234
+     ],
+     "steps": [
+      "{{a:4035}}: se desbloquea al matar cualquier jefe de incursión.",
+      "{{a:4412}} y después {{a:4805}}.",
+      "El Don de la compasión se compra a la Erudita Glenna en cualquier ala de incursión.",
+      "Forjá {{91234}}."
+     ]
+    }
+   ]
+  },
+  "adinfinitum": {
+   "title": "Ad Infinitum (mochila legendaria de Fractales)",
+   "items": [
+    74155
+   ],
+   "intro": "{{74155}} se hace en la [[forge]] con su precursor (Variable independiente), el Don del infinito, el {{19626}} y el {{37070}}. El precursor sale de tres colecciones de Fractales.",
+   "requires": [
+    "Cualquier expansión (el dominio de Sintonía fractal desbloquea varias compras).",
+    "4 Diarios fractales: cada uno lleva entre 4 y 5 días en el mejor caso."
+   ],
+   "needs": [],
+   "sections": [
+    {
+     "title": "Paso a paso",
+     "items": [
+      74155
+     ],
+     "steps": [
+      "{{a:2351}} (11 componentes fractales).",
+      "{{a:2557}} (11 componentes de nivel 2).",
+      "{{a:2368}} (11 componentes de nivel 3: te da el precursor).",
+      "{{a:2295}} (13 componentes de nivel 4) y forjá {{74155}}."
+     ]
+    }
+   ]
   }
  },
  "places": {
@@ -429,12 +774,12 @@
    "wp": "Vine Bridge Waypoint"
   },
   "forge": {
-   "name": "Forja Mística (Plaza Mística) — Arco del León",
+   "name": "Forja Mística (Foro de los Comerciantes) — Arco del León",
    "coord": [
-    48987,
-    30985
+    49005,
+    31022
    ],
-   "wp": "Fort Marriner Waypoint"
+   "wp": "Trader's Forum Waypoint"
   },
   "thaumanova_core": {
    "name": "Consola junto a la barrera azul del agujero central del Reactor Thaumanova — Provincia de Métrica",
@@ -443,6 +788,46 @@
     33802
    ],
    "wp": "Muridian Waypoint"
+  },
+  "miyani": {
+   "name": "Miyani, junto a la Forja Mística (Foro de los Comerciantes) — Arco del León",
+   "coord": [
+    49005,
+    31022
+   ],
+   "wp": "Trader's Forum Waypoint"
+  },
+  "balthazar": {
+   "name": "Templo de Balthazar (vendedor de karma, sólo con el templo en manos del Pacto) — Estrecho de la Devastación",
+   "coord": [
+    47772,
+    41048
+   ],
+   "wp": "Glorious Victory Waypoint"
+  },
+  "rojan": {
+   "name": "Rojan el Penitente, Cuenca Sísmica (sólo si el mapa ganó el meta de la Garra de Jormag) — Estrecho de Gelidafrost",
+   "coord": [
+    56386,
+    25831
+   ],
+   "wp": "Earthshake Waypoint"
+  },
+  "dungeonvendor": {
+   "name": "Vendedores de mazmorras (Fuerte Marriner) — Arco del León",
+   "coord": [
+    49322,
+    31884
+   ],
+   "wp": "Fort Marriner Waypoint"
+  },
+  "aerodrome": {
+   "name": "Manfred Njallson, Aeródromo — Arco del León",
+   "coord": [
+    49331,
+    32137
+   ],
+   "wp": "Aerodrome Waypoint"
   }
  }
 }

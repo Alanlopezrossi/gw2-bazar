@@ -694,6 +694,8 @@ table.cr-fixed td .coin { white-space: normal; }
 .cur-card { display: grid; gap: 4px; padding: 12px; border: 1px solid rgba(217,170,76,.3); border-radius: 10px; background: rgba(217,170,76,.06); color: inherit; }
 .cur-card:hover { border-color: var(--accent); }
 .cur-icons img { width: 28px; height: 28px; border-radius: 4px; margin-right: 4px; }
+.gd-ach { color: #f0c873; font-weight: 600; }
+.gd-ach:hover { text-decoration: underline; }
 
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }

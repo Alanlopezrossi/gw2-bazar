@@ -8,13 +8,12 @@ export async function renderGuide(box, id, { api, esc, coin, mode = 'instant' })
   try { g = await api(`/api/item/${id}/guide?mode=${mode}`); } catch (e) { box.innerHTML = `<p class="muted small">No pude armar la guía: ${esc(e.message)}</p>`; return; }
   const link = (x, qty) => `<a href="#/item/${x.id}" class="gd-it">${x.icon ? `<img src="${esc(x.icon)}" alt="">` : ''}${qty != null ? `<b>${nf(qty)}</b> ` : ''}<span class="rar-${esc(x.rarity || '')}">${esc(x.name)}</span></a>`;
   const placeHTML = (p) => `<a class="gd-place" href="${esc(p.href)}" title="Ver en el mapa">📍 ${esc(p.name)}</a>${p.wp ? ` <span class="gd-wp">· waypoint <b>${esc(p.wp.name)}</b> <button type="button" class="btn ghost small" data-copy-wp="${esc(p.wp.chat)}" title="Copiar el código y pegarlo en el chat del juego">${esc(p.wp.chat)}</button></span>` : ''}`;
-  const rich = (ps) => ps.map((p) => (p.t != null ? esc(p.t) : p.place ? placeHTML(p.place) : link(p, p.qty))).join('');
+  const rich = (ps) => ps.map((p) => (p.t != null ? esc(p.t) : p.place ? placeHTML(p.place) : p.ach ? `<a class="gd-ach" href="#/logro/${p.ach.id}">🏆 ${esc(p.ach.name)}</a>` : link(p, p.qty))).join('');
   const cur = (c) => (c.type === 'Currency' && c.id === 1 ? coin(c.total ?? c.qty) : `${nf(c.total ?? c.qty)} × ${esc(c.type === 'Currency' ? `moneda #${c.id}` : c.type)}`);
   const parts = [];
 
   // 1) Guía escrita a mano (cadenas especiales)
-  if (g.curated) {
-    const c = g.curated;
+  for (const c of g.curated || []) {
     parts.push(`<div class="gd-cur"><h4>📘 ${esc(c.title)}</h4><p>${rich(c.intro)}</p>
       ${c.requires.length ? `<h5>Requisitos</h5><ul>${c.requires.map((r) => `<li>${rich(r)}</li>`).join('')}</ul>` : ''}
       ${c.needs.length ? `<h5>Qué necesitás en total</h5><div class="gd-needs">${c.needs.map((n) => `<span>${link(n, n.qty)}${n.total ? ` <span class="muted small">≈ ${coin(n.total)}</span>` : ''}</span>`).join('')}</div>` : ''}
