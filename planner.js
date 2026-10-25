@@ -74,6 +74,8 @@ export function planItem(targetId, inventory, { mode = 'instant', withTree = fal
     node.out = r.output_item_count || 1;
     node.how = r.id < 0 ? 'forja' : 'crafteo';
     node.disciplines = r.disciplines || [];
+    node.rating = r.min_rating || 0;
+    node.needsRecipe = r.flags?.includes('LearnedFromItem') || false;
     if (id !== targetId) crafted.set(id, (crafted.get(id) || 0) + crafts);
     stack.add(id);
     for (const g of r.ingredients || []) {
@@ -106,7 +108,7 @@ export function planItem(targetId, inventory, { mode = 'instant', withTree = fal
   // Árbol con nombres e íconos (sólo cuando se pide el detalle de una legendaria).
   const dress = (n) => {
     const i = info(n.id);
-    return { id: n.id, name: i.name, icon: i.icon, rarity: i.rarity, per: n.per, total: n.total, have: n.have, missing: n.missing, how: n.how, crafts: n.crafts, out: n.out, unit: n.unit ?? null, disciplines: n.disciplines, cur: n.cur, children: n.children.map(dress) };
+    return { id: n.id, name: i.name, icon: i.icon, rarity: i.rarity, per: n.per, total: n.total, have: n.have, missing: n.missing, how: n.how, crafts: n.crafts, out: n.out, unit: n.unit ?? null, disciplines: n.disciplines, rating: n.rating, needsRecipe: n.needsRecipe, cur: n.cur, children: n.children.map(dress) };
   };
   return {
     tree: withTree ? dress(root) : undefined,

@@ -1,0 +1,77 @@
+{
+  "at": "2026-10-24",
+  "source": "Guild Wars 2 Wiki (copia archivada): Mawdrey/Walkthrough, Mysterious Vine, Cultivated Vine, Mawdrey",
+  "guides": {
+    "mawdrey": {
+      "title": "Cadena de Mawdrey: Hiedra misteriosa → Hiedra cultivada → Mawdrey",
+      "items": [66924, 66982, 67004, 66999, 67002, 66909, 66908, 66911, 66981, 66980, 66979, 66890, 66910, 67003, 67000, 67005, 67006, 66912, 66916, 66920, 66984, 66987, 66989, 66995, 67008, 67010, 67012, 67014, 67016, 66913, 66917, 66923, 66993, 67015, 66914, 66919, 66921, 66983, 66986, 66991, 66994, 67007, 67009, 67011, 67013, 67017, 66915, 66918, 66922, 66985, 66988, 66990, 66992],
+      "intro": "Mawdrey es una espalda ascendida que se «cultiva» en tres generaciones: primero la {{66924}} (exótica), que da la {{66981}}; con esa se cultiva la {{66982}} (exótica), que da la {{66910}}; y con esa se cultiva {{67004}} (ascendida, estadísticas a elegir) + {{66999}}. Cada etapa es una búsqueda del tesoro: llevás objetos de la historia a lugares del mundo para «cargarlos», hacés las macetas y abonos en la Forja Mística y los usás en orden sobre la semilla.",
+      "requires": [
+        "Historia de la Temporada 2 del Mundo Viviente: «The Dragon's Reach, parte 1» y «parte 2» (ahí te dan gratis la semilla y los objetos de partida). Si los perdiste, Azarr Softhoof (Oasis de Cima Seca) vende la {{66909}} y los objetos de la parte 1.",
+        "Nivel 400 de Artífice, Cazador y Cocinero si querés fabricar vos las macetas y los platos de abono (o comprarlos en el bazar); Joyero 400 para la {{66993}}; Peletero, Sastre o Forjador de armaduras 500 para la {{67015}}.",
+        "450 en cualquier disciplina de armas o armaduras para los {{46730}} (9 en total).",
+        "Las recetas de {{66913}}, {{66917}} y {{66923}} se compran con {{66593}} en Cima Seca (favor de los zephyritas nivel 3 o más) y sólo se pueden fabricar 1 por día: para las tres etapas hacen falta 3 macetas, 21 platos carnosos y 21 picantes (mínimo 21 días si los hacés vos)."
+      ],
+      "needs": [[46731, 1800], [19729, 600], [66933, 60], [46747, 90], [19925, 18], [45178, 8], [39078, 5], [49428, 1], [66913, 3], [66917, 21], [66923, 21], [66993, 2], [67015, 1]],
+      "sections": [
+        {
+          "title": "Etapa 1: Hiedra misteriosa",
+          "items": [66924, 66909, 66908, 66911, 66912, 66916, 66920, 66914, 66919, 66921, 66915, 66918, 66922],
+          "steps": [
+            "Cargá los 3 objetos (en cualquier orden): llevá la {{66915}} al Taladro megapolarizado, en el fondo de los restos del Breachmaker (Arco del León, waypoint Claw Island Portage) → {{66914}}.",
+            "Llevá el {{66918}} al Fragmento de hielo glacial puro, al final del puzzle Shattered Ice Ruins (Estrecho de Gelidafrost, waypoint Slough of Despond) → {{66919}}.",
+            "Llevá el {{66922}} al desafío de héroe del Acueducto ascaloniano (Meseta de Diessa, waypoint Blasted Moors) → {{66921}}.",
+            "Forja Mística: {{66913}} + {{20×66933}} + {{100×46731}} + {{66914}} = {{66912}}.",
+            "Forja Mística: {{7×66917}} + {{100×19729}} + {{100×46731}} + {{66919}} = {{66916}}.",
+            "Forja Mística: {{7×66923}} + {{100×19729}} + {{100×46731}} + {{66921}} = {{66920}}.",
+            "Con la {{66909}} en el inventario, usá en orden: la maceta (→ {{66908}}), el abono sagrado (→ {{66911}}) y el abono fantasmagórico → {{66924}} + {{66981}}."
+          ]
+        },
+        {
+          "title": "Etapa 2: Hiedra cultivada",
+          "items": [66982, 66981, 66980, 66979, 66890, 66984, 66987, 66989, 66995, 66983, 66986, 66991, 66994, 66985, 66988, 66990, 66992],
+          "steps": [
+            "Llevá el {{66985}} a la Radiación caótica concentrada sobre el Reactor Thaumanova (Provincia de Métrica, waypoint Muridian). Se entra con una {{19389}}; casi siempre queda abierto justo después del jefe Elemental de Fuego → {{66983}}.",
+            "Llevá el {{66988}} al Material de investigación de waypoints, al final del minidungeon Laboratorio de Vexa (Colina Corazón de Fuego, waypoint Breaktooth) → {{66986}}.",
+            "Hablá con Gleam en Restoration Refuge (Cima Seca) y pedile algo que contenga agua mágica → {{66990}}. Llenalo en las Aguas sanadoras del oasis de Cima Seca → {{66991}}.",
+            "Llevá el {{66992}} al Céfiro rico en polen, en Aurora's Remains (Tierras Salvajes de Brisban, waypoint Triforge Point) → {{66994}}.",
+            "Crafteá {{3×46730}}.",
+            "Forja Mística: {{66913}} + {{20×66933}} + {{100×46731}} + {{66983}} = {{66984}}.",
+            "Forja Mística: {{7×66917}} + {{100×19729}} + {{100×46731}} + {{66986}} = {{66987}}.",
+            "Forja Mística: {{7×66923}} + {{100×19729}} + {{100×46731}} + {{66991}} = {{66989}}.",
+            "Forja Mística: {{66993}} + {{3×46730}} + {{4×45178}} + {{66994}} = {{66995}}.",
+            "Con la {{66981}} en el inventario, usá en orden: maceta (→ {{66980}}), abono de línea ley (→ {{66979}}), abono de oasis (→ {{66890}}) y la lámpara → {{66982}} + {{66910}}."
+          ]
+        },
+        {
+          "title": "Etapa 3: Mawdrey",
+          "items": [67004, 66999, 67002, 66910, 67003, 67000, 67005, 67006, 67008, 67010, 67012, 67014, 67016, 67007, 67009, 67011, 67013, 67017],
+          "steps": [
+            "{{67007}}: la vende BUY-2046 PFR en la sala de los Fractales de la Niebla por {{5×39078}}.",
+            "{{67009}}: interactuá con cualquier cúmulo elemental del puzzle Hidden Garden (Monte Vorágine); el más fácil es el de tierra, debajo del árbol.",
+            "{{67011}}: minidungeon Fuente de Rhand (Meseta de Diessa). Rompé el piso con el mortero y está en la primera cámara bajo el agua (Agua fresca).",
+            "{{67017}}: en el núcleo de lava de Monte Vorágine (Maelstrom's Core), en una saliente sobre la cámara central.",
+            "{{67013}}: minidungeon Forsaken Fortune (Riscos de Dredgehaunt), en los rayos de luz de la segunda sala.",
+            "Crafteá {{6×46730}}.",
+            "Forja Mística: {{66913}} + {{20×66933}} + {{100×46731}} + {{67007}} = {{67008}}.",
+            "Forja Mística: {{7×66917}} + {{100×19729}} + {{100×46731}} + {{67009}} = {{67010}}.",
+            "Forja Mística: {{7×66923}} + {{100×19729}} + {{100×46731}} + {{67011}} = {{67012}}.",
+            "Forja Mística: {{66993}} + {{3×46730}} + {{4×45178}} + {{67013}} = {{67014}}.",
+            "Forja Mística: {{67015}} + {{3×46730}} + {{49428}} + {{67017}} = {{67016}}.",
+            "Con la {{66910}} en el inventario, usá en orden: maceta (→ {{67003}}), abono elemental (→ {{67000}}), abono de Rhand (→ {{67005}}), lámpara poderosa (→ {{67006}}) y la piedra caliente → {{67004}} + {{66999}}."
+          ]
+        },
+        {
+          "title": "Recetas con límite diario (si las fabricás vos)",
+          "steps": [
+            "{{66913}} (Artífice 400): {{15×24276}} + {{25×46747}} + {{5×19721}} + {{25×66902}}.",
+            "{{66917}} (Cazador 400): {{2×24282}} + {{2×24294}} + {{2×24341}} + {{2×24276}}.",
+            "{{66923}} (Cocinero 400): {{2×24359}} + {{2×12544}} + {{2×12547}} + {{4×66933}}.",
+            "{{66993}} (Joyero 400): {{10×43772}} + {{10×12815}} + {{25×24503}} + {{25×44941}}.",
+            "{{67015}} (Peletero / Sastre / Forjador de armaduras 500): {{49523}} + {{10×24315}} + {{10×24310}} + {{15×46747}}."
+          ]
+        }
+      ]
+    }
+  }
+}

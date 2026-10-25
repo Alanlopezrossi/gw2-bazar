@@ -9,6 +9,7 @@ import { syncItems } from './sync.js';
 import { accountSummary, tokenInfo, accountInventory } from './account.js';
 import { planAll, planItem } from './planner.js';
 import { listRecipes, professionsSummary } from './professions.js';
+import { itemGuide, setGuides } from './guide.js';
 import { getAuthed } from './gw2api.js';
 import { containerContents, setContainersSnapshot } from './containers.js';
 import { listItems, flips, demand, craftingProfits } from './analysis.js';
@@ -31,6 +32,7 @@ const ready = (async () => {
 
 // El índice de todos los items pesa varios MB: sólo se baja la primera vez que se usa la pestaña Items.
 let catalogP = null;
+let guidesP = null;
 let containersP = null;
 function loadCatalog() {
   if (!catalogP) {
@@ -134,10 +136,20 @@ export async function localApi(path, opts) {
   const url = new URL(path, 'http://local');
   if (url.pathname !== '/api/meta') await ready;
   try {
-    const mc = url.pathname.match(/^\/api\/item\/(\d+)\/contents$/);
-    if (mc) {
+    if (/^\/api\/item\/\d+/.test(url.pathname)) {
       if (!containersP) containersP = fetch('containers.json').then((r) => (r.ok ? r.json() : null)).then(setContainersSnapshot).catch(() => {});
       await containersP;
+    }
+    const mg = url.pathname.match(/^\/api\/item\/(\d+)\/guide$/);
+    if (mg) {
+      if (!guidesP) guidesP = fetch('guides.json').then((r) => (r.ok ? r.json() : null)).then(setGuides).catch(() => {});
+      await guidesP;
+      const gid = Number(mg[1]);
+      if (!state.items.has(gid) && !state.prices.has(gid)) { const ix = indexItem(gid); if (ix) state.items.set(gid, { vendor: 0, flags: [], gameTypes: [], desc: '', icon: null, ...ix }); }
+      return { status: 200, body: itemGuide(gid, { mode: url.searchParams.get('mode') === 'order' ? 'order' : 'instant' }) };
+    }
+    const mc = url.pathname.match(/^\/api\/item\/(\d+)\/contents$/);
+    if (mc) {
       return { status: 200, body: await containerContents(Number(mc[1]), { live: false }) };
     }
     const m = url.pathname.match(/^\/api\/item\/(\d+)(\/wiki)?$/);

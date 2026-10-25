@@ -662,5 +662,23 @@ table.cr-fixed td .coin { white-space: normal; }
 .table-wrap.hs-on { scrollbar-width: none; }
 .table-wrap.hs-on::-webkit-scrollbar { height: 0; display: none; }
 
+/* Guía del item */
+.guide-sec > summary { cursor: pointer; list-style: none; }
+.guide-sec > summary::-webkit-details-marker { display: none; }
+#guideBox h5 { margin: 14px 0 6px; font-size: 13px; color: var(--accent-2); text-transform: uppercase; letter-spacing: .04em; }
+#guideBox ul, #guideBox ol { margin: 4px 0; padding-left: 20px; line-height: 1.6; font-size: 13px; }
+.gd-it { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.gd-it img { width: 18px; height: 18px; border-radius: 3px; vertical-align: middle; }
+.gd-cur { background: rgba(217,170,76,.07); border: 1px solid rgba(217,170,76,.3); border-radius: 10px; padding: 10px 14px; margin-bottom: 10px; }
+.gd-cur h4 { margin: 0 0 6px; }
+.gd-cur h5 { margin: 10px 0 4px; }
+.gd-needs { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; }
+.gd-step-sec { margin: 6px 0; }
+.gd-step-sec summary { cursor: pointer; }
+.gd-step-sec ol li { margin-bottom: 4px; }
+.gd-steps li { margin-bottom: 8px; }
+.gd-ings { font-size: 12px; color: var(--muted); }
+.gd-ings .gd-it { white-space: normal; }
+
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }
