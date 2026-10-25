@@ -743,6 +743,14 @@ async function openItem(id, { silent = false } = {}) {
   try {
     const d = await api(`/api/item/${id}?mode=${S.crafteo.mode}`);
     if (openId !== id) return;
+    // Actualización automática de precios: sólo se cambian los precios y el libro de órdenes,
+    // para no cerrar lo que estés leyendo (guía, secciones abiertas, posición).
+    if (silent && body.querySelector('#mktBox')) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = itemHTML(d);
+      for (const sel of ['#mktBox', '#bookBox']) { const a = body.querySelector(sel), b = tmp.querySelector(sel); if (a && b) a.innerHTML = b.innerHTML; }
+      return;
+    }
     body.innerHTML = itemHTML(d);
     const me = drawerStack.find((x) => x.id === id);
     if (me) me.name = d.item?.name;
@@ -879,7 +887,7 @@ function itemHTML(d) {
     <details class="section guide-sec" open><summary><h3 style="display:inline">📘 Guía</h3> <span class="muted small">qué necesitás, paso a paso, disciplinas y logros</span></summary><div id="guideBox"></div></details>
     <div class="section ch-sec"><h3>Características</h3><div id="charBox"></div></div>
     ${summaryHTML(d)}
-    ${m && (m.sell || m.buy) ? `<div class="cards">
+    <div id="mktBox">${m && (m.sell || m.buy) ? `<div class="cards">
       <div class="card"><div class="k">Orden de compra</div><div class="v">${coin(m.buy)}</div><div class="h">${qty(m.buyQty)} pedidas</div></div>
       <div class="card"><div class="k">Precio de venta</div><div class="v">${coin(m.sell)}</div><div class="h">${qty(m.sellQty)} en venta</div></div>
       <div class="card"><div class="k">Cobrás publicando</div><div class="v">${coin(d.netSell)}</div><div class="h">venta − 1c − 15%</div></div>
@@ -887,9 +895,9 @@ function itemHTML(d) {
       <div class="card"><div class="k">Vendidos 24h / 7d</div><div class="v num">${qty(m.s1)} <span class="muted">/ ${qty(m.s7)}</span></div><div class="h">órdenes llenadas: ${qty(m.b1)} / ${qty(m.b7)}</div></div>
       <div class="card"><div class="k">Margen de flipeo</div><div class="v">${coin(m.profit)}</div><div class="h">ROI ${pct(m.roi)}</div></div>
     </div>
-    <div class="section"><h3>Precio últimas 24 h</h3>${sparkline(d.history)}</div>` : ''}
+    <div class="section"><h3>Precio últimas 24 h</h3>${sparkline(d.history)}</div>` : ''}</div>
     ${m && (m.sell || m.buy) ? '<div class="section"><h3>Historial de precio: desde que salió hasta hoy</h3><div id="histBox"></div></div>' : ''}
-    ${L ? `<div class="section"><h3>Libro de órdenes en vivo <span class="muted small">(${new Date(L.at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })})</span></h3><div class="two">${depth(L.sells, 'Vendiendo a')}${depth(L.buys, 'Comprando a')}</div></div>` : ''}
+    <div id="bookBox">${L ? `<div class="section"><h3>Libro de órdenes en vivo <span class="muted small">(${new Date(L.at).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })})</span></h3><div class="two">${depth(L.sells, 'Vendiendo a')}${depth(L.buys, 'Comprando a')}</div></div>` : ''}</div>
 
     <div class="section"><h3>Comprar, craftear o vender</h3>
       <div class="ways">${d.ways.map((w) => `<div class="way"><div class="ic">${WAY_ICON[w.kind] || '•'}</div><div><b>${esc(w.title)}</b><p>${coinText(w.text)}</p></div></div>`).join('')}</div>
