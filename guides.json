@@ -173,7 +173,7 @@
      ],
      "steps": [
       "Conseguí los objetos de partida jugando «The Dragon's Reach, parte 2»: el {{66985}} te lo da Kasmeer Meade al terminar la misión «Party Politics»; el {{66988}}, Braham al terminar «Recalibrating the Waypoints»; y el {{66992}}, Rox al terminar «The World Summit». Si alguno lo borraste o lo perdiste, no se compra: hay que repetir esa misión (desde el panel de Historia) y hablar con ese personaje al final para que te dé otro. Ojo: no se apila y no se puede cargar un Orbe de caos si ya tenés un Orbe resonante en el inventario.",
-      "Andá a [[thaumanova]]. Para subir a la plataforma de la Radiación caótica concentrada (zona del evento del ogro de vapor) hace falta una {{19389}} cargada, o esperar a que otro abra el portal (casi siempre queda abierto después del jefe Elemental de Fuego). Con grifo celeste (Skyscale) también se llega sin llave: trepá las tres torres al noreste de la plataforma y saltá. Interactuá con la radiación: el {{66985}} se convierte en {{66983}}.",
+      "Andá a [[thaumanova]]. Para subir a la plataforma de la Radiación caótica concentrada (zona del evento del ogro de vapor) hace falta una {{19389}} cargada (tocala para ver la guía de cómo encontrarla y cargarla), o esperar a que otro abra el portal (casi siempre queda abierto después del jefe Elemental de Fuego). Con grifo celeste (Skyscale) también se llega sin llave: trepá las tres torres al noreste de la plataforma y saltá. Interactuá con la radiación: el {{66985}} se convierte en {{66983}}.",
       "Andá a [[vexa]], resolvé el minidungeon y, al final, interactuá con el Material de investigación de waypoints: el {{66988}} se convierte en {{66986}}.",
       "Andá a [[gleam]] y elegí «¿Tenés algo que contenga agua mágica?» → {{66990}}.",
       "Andá a [[oasis]] y llená el vial → {{66991}}.",
@@ -231,6 +231,85 @@
       "{{66923}} (Cocinero 400): {{2×24359}} + {{2×12544}} + {{2×12547}} + {{4×66933}}.",
       "{{66993}} (Joyero 400): {{10×43772}} + {{10×12815}} + {{25×24503}} + {{25×44941}}.",
       "{{67015}} (Peletero / Sastre / Forjador de armaduras 500): {{49523}} + {{10×24315}} + {{10×24310}} + {{15×46747}}."
+     ]
+    }
+   ]
+  },
+  "matrixkey": {
+   "title": "Llave de cubo matricial: cómo conseguirla y cargarla",
+   "items": [
+    19389,
+    19390,
+    19391,
+    19392,
+    19394,
+    19395,
+    19396,
+    19397,
+    19398,
+    19399,
+    19400,
+    19401,
+    19402,
+    19403,
+    19404,
+    19405
+   ],
+   "intro": "La {{19389}} es un cristalito verde que aparece tirado en el piso dentro del [[thaumanova]]. No se compra ni se fabrica: hay que encontrarla y cargarla con 4 elementos (Hielo, Fuego, Agua y Tierra). Cargada, abre la barrera del agujero central y te lleva a la plataforma flotante (la de la Radiación caótica concentrada que pide la Hiedra cultivada, y la del ogro de vapor fuera de lugar).",
+   "requires": [
+    "Para la carga de Fuego hace falta el meta evento del Reactor Thaumanova (el jefe mundial Elemental de Fuego): mirá el horario en la pestaña Eventos.",
+    "Estabilidad (o mucha paciencia) para el puzzle de Hielo: los enemigos te empujan al vacío.",
+    "Sólo podés tener una llave sin usar en el inventario: si ya tenés una, no podés levantar otra."
+   ],
+   "needs": [],
+   "sections": [
+    {
+     "title": "1. Encontrar la llave",
+     "items": [
+      19389
+     ],
+     "steps": [
+      "Andá a [[thaumanova]] y entrá al reactor.",
+      "Buscá un cristal verde muy chiquito en el piso (parecido a los fragmentos de caos de la zona, pero mucho más pequeño). No tiene nombre: aparece la opción de recogerlo cuando estás encima.",
+      "Aparece en uno de ~20 lugares fijos, siempre en uno solo a la vez (es compartida: si otro la levanta, aparece en otro lugar al instante, incluso en el mismo). Lugares conocidos: zona central (oeste, en un rincón detrás de los escombros, debajo de una plataforma flotante); cámara de Veneno/Tierra al sureste (en los arbustos del noreste, del este y del suroeste, en la primera plataforma del puzzle y en los arbustos de la mitad del puzzle); cámara de Hielo al suroeste (en la plataforma de la pared norte donde aparece el Elemental de hielo veterano, en el piso entre los pilares del centro y al sur entre los pilares); cámara de Agua al noreste (pared norte, entre la pared y la escalera del lado este, pared sur arriba de unos escalones, y en el camino que baja al arroyo); zona del arroyo (junto al Quaggan desplazado, al oeste y al norte de él); cámara de Fuego al norte, donde aparece el jefe (lado sur a la vista, junto a la escalera del puente, esquina noreste detrás de un escalón y esquina sureste junto a un pilar roto).",
+      "Tip: si la estás buscando durante el meta, recorré los lugares en el orden del camino del gólem C.L.E.A.N. 5000."
+     ]
+    },
+    {
+     "title": "2. Cargarla con los 4 elementos",
+     "items": [
+      19390,
+      19391,
+      19392,
+      19394,
+      19395,
+      19396,
+      19397,
+      19398,
+      19399,
+      19400,
+      19401,
+      19402,
+      19403,
+      19404,
+      19405
+     ],
+     "steps": [
+      "Tierra: en la cámara de Veneno/Tierra (sureste) seguí el puzzle de saltos por los bordes de la sala; el cargador está escondido en un arbusto de la plataforma más alta.",
+      "Agua: al final del túnel de la cascada (debajo del puente que va a la zona del Elemental de Fuego) hay un camino escondido a la izquierda. Rompé el cristal violeta marcado que tapa el cargador (salen varios Limos cromáticos).",
+      "Hielo: en la cámara de Hielo (suroeste) hacé el puzzle que arranca cerca del núcleo central. Al llegar a la plataforma central, saltá por detrás del pilar norte. Llevá estabilidad: hay enemigos que te tiran.",
+      "Fuego: después del evento de grupo «Destruir al elemental de fuego…» (el jefe mundial Elemental de Fuego), revisá el cuerpo del gólem C.L.E.A.N. 5000. Desaparece al poco tiempo de terminar la pelea, así que hacelo enseguida.",
+      "La llave cambia de nombre según las cargas que tiene; cuando tiene las 4 queda lista."
+     ]
+    },
+    {
+     "title": "3. Usarla",
+     "items": [],
+     "steps": [
+      "Con la llave cargada, andá a [[thaumanova_core]] e interactuá con la consola: la barrera se apaga y la llave se gasta.",
+      "Tirate al agujero: te teletransporta a la plataforma de arriba. Ahí está la Radiación caótica concentrada (se activa al derrotar al ogro de vapor fuera de lugar, campeón).",
+      "Ojo: al tirarte, se destruyen las otras llaves que tengas en el inventario (salvo las cargadas sólo con Fuego y Tierra).",
+      "Alternativas sin llave: un Estabilizador de grieta clase I o II, saltando por una Grieta mágica clase I con IX o IX-I seleccionado; o con el grifo celeste, trepando las tres torres al noreste de la plataforma y saltando."
      ]
     }
    ]
@@ -356,6 +435,14 @@
     30985
    ],
    "wp": "Fort Marriner Waypoint"
+  },
+  "thaumanova_core": {
+   "name": "Consola junto a la barrera azul del agujero central del Reactor Thaumanova — Provincia de Métrica",
+   "coord": [
+    40206,
+    33802
+   ],
+   "wp": "Muridian Waypoint"
   }
  }
 }
