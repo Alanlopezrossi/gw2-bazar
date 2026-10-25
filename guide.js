@@ -7,6 +7,7 @@ import { planItem } from './planner.js';
 import { achievementsFor } from './equipment.js';
 import { howToObtain } from './obtain.js';
 import { indexItem } from './catalog.js';
+import { geoRaw } from './vendors.js';
 
 let GUIDES = null;
 let byItem = new Map();
@@ -18,13 +19,25 @@ export function setGuides(data) {
 
 const info = (id) => { const it = state.items.get(id) || indexItem(id); return { id, name: it?.name || `#${id}`, icon: it?.icon || null, rarity: it?.rarity || null }; };
 
-/** "texto {{id}} y {{20×id}}" → partes [{t}, {id, qty, name, icon, rarity}] para pintar con links. */
+/** Lugar de una guía → link al mapa con el punto exacto y el waypoint más cercano. */
+function place(key) {
+  const p = GUIDES?.places?.[key];
+  if (!p) return { t: key };
+  const geo = geoRaw();
+  const wp = p.wp && geo ? geo.waypoints.find((w) => w.nameEn === p.wp) : null;
+  const short = p.name.split(/\. /)[0];
+  const key2 = `@${p.coord[0]},${p.coord[1]},${short}${wp ? `|${wp.chat}|${wp.coord[0]};${wp.coord[1]};${wp.name}` : ''}`;
+  return { place: { name: p.name, href: `#/mapa/${encodeURIComponent(key2)}`, wp: wp ? { name: wp.name, chat: wp.chat } : null } };
+}
+
+/** "texto {{id}} y {{20×id}} en [[lugar]]" → partes [{t}, {id, qty, name, icon, rarity}, {place}] para pintar con links. */
 function parts(text) {
   const out = [];
   let last = 0;
-  for (const m of String(text).matchAll(/\{\{(?:(\d+)×)?(\d+)\}\}/g)) {
+  for (const m of String(text).matchAll(/\{\{(?:(\d+)×)?(\d+)\}\}|\[\[(\w+)\]\]/g)) {
     if (m.index > last) out.push({ t: text.slice(last, m.index) });
-    out.push({ ...info(Number(m[2])), qty: m[1] ? Number(m[1]) : null });
+    if (m[3]) out.push(place(m[3]));
+    else out.push({ ...info(Number(m[2])), qty: m[1] ? Number(m[1]) : null });
     last = m.index + m[0].length;
   }
   if (last < text.length) out.push({ t: text.slice(last) });
@@ -82,6 +95,12 @@ const brief = (o) => {
   return o.title;
 };
 
+/** NPC más a mano para conseguir un item (link al mapa con el vendedor marcado). */
+function whereOf(id) {
+  const v = howToObtain(id).find((o) => o.vendors?.length)?.vendors?.[0];
+  return v ? { label: `${v.vendor}${v.zone ? ` (${v.zone})` : ''}${v.cost ? ` — ${v.cost}` : ''}`, href: `#/mapa/${encodeURIComponent(v.map)}` } : null;
+}
+
 export function itemGuide(id, { mode = 'instant' } = {}) {
   const it = info(id);
   const out = { item: it, curated: curated(id, mode) };
@@ -96,7 +115,7 @@ export function itemGuide(id, { mode = 'instant' } = {}) {
     for (const st of steps) if (st.how === 'crafteo' && st.disciplines.length) { const k = [...st.disciplines].sort().join('|'); const g = groups.get(k) || { ds: [...st.disciplines].sort(), r: 0, items: [] }; g.r = Math.max(g.r, st.rating); g.items.push(st.name); groups.set(k, g); }
     if (!cyclic) out.plan = {
       missingCost: p.missingCost,
-      needs: p.missing.map((m) => ({ id: m.id, name: m.name, icon: m.icon, rarity: m.rarity, qty: m.qty, unit: m.unit, total: m.total, how: m.unit == null ? howToObtain(m.id).filter((o) => o.kind !== 'tp').slice(0, 2).map(brief) : null, usedFor: m.usedFor?.[0]?.name || '' })),
+      needs: p.missing.map((m) => ({ id: m.id, name: m.name, icon: m.icon, rarity: m.rarity, qty: m.qty, unit: m.unit, total: m.total, how: m.unit == null ? howToObtain(m.id).filter((o) => o.kind !== 'tp').slice(0, 2).map(brief) : null, where: m.unit == null ? whereOf(m.id) : null, usedFor: m.usedFor?.[0]?.name || '' })),
       currencies: p.currencies,
       steps,
       disciplines: [...groups.values()].sort((a, b) => b.r - a.r).map((g) => ({ ds: g.ds, r: g.r, items: g.items.slice(0, 4), more: Math.max(0, g.items.length - 4) })),

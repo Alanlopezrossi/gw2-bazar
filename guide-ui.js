@@ -7,7 +7,8 @@ export async function renderGuide(box, id, { api, esc, coin, mode = 'instant' })
   let g;
   try { g = await api(`/api/item/${id}/guide?mode=${mode}`); } catch (e) { box.innerHTML = `<p class="muted small">No pude armar la guía: ${esc(e.message)}</p>`; return; }
   const link = (x, qty) => `<a href="#/item/${x.id}" class="gd-it">${x.icon ? `<img src="${esc(x.icon)}" alt="">` : ''}${qty != null ? `<b>${nf(qty)}</b> ` : ''}<span class="rar-${esc(x.rarity || '')}">${esc(x.name)}</span></a>`;
-  const rich = (ps) => ps.map((p) => (p.t != null ? esc(p.t) : link(p, p.qty))).join('');
+  const placeHTML = (p) => `<a class="gd-place" href="${esc(p.href)}" title="Ver en el mapa">📍 ${esc(p.name)}</a>${p.wp ? ` <span class="gd-wp">· waypoint <b>${esc(p.wp.name)}</b> <button type="button" class="btn ghost small" data-copy-wp="${esc(p.wp.chat)}" title="Copiar el código y pegarlo en el chat del juego">${esc(p.wp.chat)}</button></span>` : ''}`;
+  const rich = (ps) => ps.map((p) => (p.t != null ? esc(p.t) : p.place ? placeHTML(p.place) : link(p, p.qty))).join('');
   const cur = (c) => (c.type === 'Currency' && c.id === 1 ? coin(c.total ?? c.qty) : `${nf(c.total ?? c.qty)} × ${esc(c.type === 'Currency' ? `moneda #${c.id}` : c.type)}`);
   const parts = [];
 
@@ -41,8 +42,12 @@ export async function renderGuide(box, id, { api, esc, coin, mode = 'instant' })
         ${p.needs.map((n) => `<tr><td class="left">${link(n)}</td><td class="num">${nf(n.qty)}</td><td>${n.total != null ? `${coin(n.total)} <span class="muted small">(${coin(n.unit)} c/u)</span>` : '<span class="pill warn">no se vende</span>'}</td><td class="left small">${n.how?.length ? esc(n.how.join(' · ')) : n.unit == null ? '<span class="muted">tocá el item para ver de dónde sale</span>' : ''}</td></tr>`).join('')}
       </tbody></table></div>
       <p class="small">Costo de lo que se compra: <b>${coin(p.missingCost)}</b>${nobuy.length ? ` · <span class="warn-t">${nobuy.length} cosa${nobuy.length === 1 ? '' : 's'} no se compra${nobuy.length === 1 ? '' : 'n'}</span>` : ''}${p.currencies.length ? ` · además: ${p.currencies.map(cur).join(', ')}` : ''}</p>
-      <h5>Paso a paso (${p.steps.length})</h5>
-      <ol class="gd-steps">${p.steps.map((s) => `<li><b>${s.how === 'forja' ? '🔮 Forja Mística' : `⚒ ${esc(s.disciplines.map((d) => DISC[d] || d).join(' / '))}${s.rating ? ` ${s.rating}` : ''}`}</b>: hacé ${link(s, s.crafts * s.out)}${s.crafts > 1 ? ` <span class="muted small">(${nf(s.crafts)} ${s.crafts === 1 ? 'vez' : 'veces'}${s.out > 1 ? `, da ${s.out} c/u` : ''})</span>` : ''}${s.needsRecipe ? ' <span class="pill warn">requiere receta</span>' : ''}${s.gated ? ' <span class="pill warn">1 por día</span>' : ''}
+      <h5>Paso a paso</h5>
+      <ol class="gd-steps">
+        ${p.needs.some((n) => n.unit != null) ? `<li><b>⚖ Bazar</b>: comprá los materiales de la tabla de arriba que tienen precio (${coin(p.missingCost)} en total).</li>` : ''}
+        ${nobuy.map((n) => `<li><b>✋ Conseguí</b> ${link(n, n.qty)}${n.where ? `: <a class="gd-place" href="${esc(n.where.href)}" title="Ver el NPC en el mapa">📍 ${esc(n.where.label)}</a>` : n.how?.length ? `: ${esc(n.how.join(' · '))}` : ' <span class="muted small">(tocá el item para ver de dónde sale)</span>'}</li>`).join('')}
+        ${p.forge ? '<li><b>🔮</b> Para los pasos de la Forja Mística: <a class="gd-place" href="#/mapa/%4048987%2C30985%2CForja%20M%C3%ADstica%20(Plaza%20M%C3%ADstica)%20%E2%80%94%20Arco%20del%20Le%C3%B3n">📍 Forja Mística, Arco del León</a> (también hay una en el Santuario de Mistlock).</li>' : ''}
+        ${p.steps.map((s) => `<li><b>${s.how === 'forja' ? '🔮 Forja Mística' : `⚒ ${esc(s.disciplines.map((d) => DISC[d] || d).join(' / '))}${s.rating ? ` ${s.rating}` : ''}`}</b>: hacé ${link(s, s.crafts * s.out)}${s.crafts > 1 ? ` <span class="muted small">(${nf(s.crafts)} ${s.crafts === 1 ? 'vez' : 'veces'}${s.out > 1 ? `, da ${s.out} c/u` : ''})</span>` : ''}${s.needsRecipe ? ' <span class="pill warn">requiere receta</span>' : ''}${s.gated ? ' <span class="pill warn">1 por día</span>' : ''}
         <div class="gd-ings">con ${s.ings.map((x) => link(x, x.total)).join(' + ')}${s.cur.length ? ` + ${s.cur.map(cur).join(' + ')}` : ''}</div></li>`).join('')}</ol>
       <p class="muted small">Plan más barato: lo que conviene comprar hecho no se craftea. Precios ${mode === 'order' ? 'con órdenes de compra' : 'comprando al instante'}.</p>`);
   }
@@ -58,4 +63,5 @@ export async function renderGuide(box, id, { api, esc, coin, mode = 'instant' })
   if (g.usedInTotal) parts.push(`<h5>Para qué sirve</h5><p class="small">Es ingrediente de ${g.usedInTotal} receta${g.usedInTotal === 1 ? '' : 's'}: ${g.usedIn.map((x) => link(x)).join(', ')}${g.usedInTotal > g.usedIn.length ? '…' : ''}</p>`);
 
   box.innerHTML = parts.join('') || '<p class="muted">Sin datos para armar una guía.</p>';
+  box.querySelectorAll('[data-copy-wp]').forEach((b) => b.addEventListener('click', async (e) => { e.preventDefault(); try { await navigator.clipboard.writeText(b.dataset.copyWp); b.textContent = '¡copiado!'; setTimeout(() => { b.textContent = b.dataset.copyWp; }, 1500); } catch { /* sin portapapeles */ } }));
 }

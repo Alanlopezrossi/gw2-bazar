@@ -13,6 +13,7 @@ export function setGeoData(data) {
   cache.key = '';
   labelsCache = null;
 }
+export function geoRaw() { return GEO; }
 export function geoInfo() {
   return GEO ? { dims: GEO.dims, maxZoom: GEO.maxZoom, continent: GEO.continent, at: GEO.at } : null;
 }

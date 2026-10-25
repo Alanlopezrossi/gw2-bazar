@@ -679,6 +679,11 @@ table.cr-fixed td .coin { white-space: normal; }
 .gd-steps li { margin-bottom: 8px; }
 .gd-ings { font-size: 12px; color: var(--muted); }
 .gd-ings .gd-it { white-space: normal; }
+.gd-place { color: #8fd0ff; font-weight: 600; }
+.gd-place:hover { text-decoration: underline; }
+.gd-wp { font-size: 12px; color: var(--muted); }
+.gd-wp .btn { padding: 1px 6px; font-size: 11px; font-family: var(--mono); }
+.gd-step-sec ol li { margin-bottom: 8px; line-height: 1.6; }
 
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }
