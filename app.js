@@ -8,6 +8,7 @@ import { renderHistory } from './history.js';
 import { renderProfesiones } from './profesiones.js';
 import { renderDetails } from './item-details.js';
 import { renderGuide } from './guide-ui.js';
+import { renderGuia } from './guia.js';
 import { initColumnResize, initHScroll } from './colresize.js';
 initColumnResize();
 initHScroll();
@@ -239,6 +240,7 @@ function route() {
   else if (a === 'cuenta' && (!STATUS?.publicMode || STATUS?.browserKey)) renderAccount();
   else if (a === 'equipo') renderEquipo();
   else if (a === 'items') renderItems();
+  else if (a === 'guia') { current = { name: 'guia', refresh() {} }; renderGuia(view, { api, esc, coin, itemCell }); }
   else if (a === 'profesiones') { current = { name: 'profesiones', refresh() {} }; renderProfesiones(view, { api, esc, coin, itemCell, debounce, meta: META, fillIcons }); }
   else if (a === 'legendarias') { const r = renderLegendarias(view, { api, esc, coin, itemCell, toast, debounce }); current = { name: 'legendarias', refresh() {} }; }
   else if (a === 'eventos') { current = { name: 'eventos', refresh() {} }; renderEventos(view, { api, esc, toast, normalize: normalizeText }); }

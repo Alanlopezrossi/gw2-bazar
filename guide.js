@@ -151,3 +151,8 @@ export function itemGuide(id, { mode = 'instant' } = {}) {
   out.usedInTotal = usedIn.size;
   return out;
 }
+
+/** Índice de guías escritas a mano (apartado Guía del menú). */
+export function guidesList() {
+  return Object.entries(GUIDES?.guides || {}).map(([k, g]) => ({ key: k, title: g.title, intro: parts(g.intro || '').map((p) => (p.t != null ? p.t : p.name || p.place?.name || '')).join(''), items: (g.items || []).slice(0, 3).map(info), sections: (g.sections || []).map((s) => s.title) }));
+}

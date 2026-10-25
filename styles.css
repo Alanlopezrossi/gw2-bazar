@@ -685,5 +685,15 @@ table.cr-fixed td .coin { white-space: normal; }
 .gd-wp .btn { padding: 1px 6px; font-size: 11px; font-family: var(--mono); }
 .gd-step-sec ol li { margin-bottom: 8px; line-height: 1.6; }
 
+/* Pestaña Guía */
+.lv-bands { padding-left: 22px; }
+.lv-bands > li { margin: 10px 0; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.02); }
+.lv-bands ul { margin: 6px 0 0; padding-left: 18px; font-size: 13px; line-height: 1.6; }
+.lv-head { font-size: 14px; }
+.cur-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+.cur-card { display: grid; gap: 4px; padding: 12px; border: 1px solid rgba(217,170,76,.3); border-radius: 10px; background: rgba(217,170,76,.06); color: inherit; }
+.cur-card:hover { border-color: var(--accent); }
+.cur-icons img { width: 28px; height: 28px; border-radius: 4px; margin-right: 4px; }
+
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }
