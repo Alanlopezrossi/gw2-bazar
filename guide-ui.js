@@ -3,8 +3,8 @@ const DISC = { Armorsmith: 'Forjador de armaduras', Artificer: 'Artífice', Chef
 const nf = (n) => Number(n).toLocaleString('es-AR', { maximumFractionDigits: 2 });
 
 function helpers(esc, coin) {
-  const link = (x, qty) => `<a href="#/item/${x.id}" class="gd-it">${x.icon ? `<img src="${esc(x.icon)}" alt="">` : ''}${qty != null ? `<b>${nf(qty)}</b> ` : ''}<span class="rar-${esc(x.rarity || '')}">${esc(x.name)}</span></a>`;
-  const placeHTML = (p) => `<a class="gd-place" href="${esc(p.href)}" title="Ver en el mapa">📍 ${esc(p.name)}</a>${p.wp ? ` <span class="gd-wp">· waypoint <b>${esc(p.wp.name)}</b> <button type="button" class="btn ghost small" data-copy-wp="${esc(p.wp.chat)}" title="Copiar el código y pegarlo en el chat del juego">${esc(p.wp.chat)}</button></span>` : ''}`;
+  const link = (x, qty) => `<a href="#/item/${x.id}" class="gd-it" data-it="${x.id}">${x.icon ? `<img src="${esc(x.icon)}" alt="">` : '<span class="gd-ph"></span>'}${qty != null ? `<b>${nf(qty)}</b> ` : ''}<span class="rar-${esc(x.rarity || '')}">${esc(x.name)}</span></a>`;
+  const placeHTML = (p) => `<a class="gd-place" href="${esc(p.href)}" title="Ver en el mapa">📍 ${esc(p.name)}</a>${p.wp ? ` <span class="gd-wp">· waypoint más cercano: <b>${esc(p.wp.name)}</b></span>` : ''}`;
   const rich = (ps) => ps.map((p) => (p.t != null ? esc(p.t) : p.place ? placeHTML(p.place) : p.ach ? `<a class="gd-ach" href="#/logro/${p.ach.id}">🏆 ${esc(p.ach.name)}</a>` : link(p, p.qty))).join('');
   const cur = (c) => (c.type === 'Currency' && c.id === 1 ? coin(c.total ?? c.qty) : `${nf(c.total ?? c.qty)} × ${esc(c.type === 'Currency' ? `moneda #${c.id}` : c.type)}`);
   return { link, placeHTML, rich, cur };
@@ -20,9 +20,25 @@ export function curatedHTML(c, { esc, coin, openAll = false }) {
       <p class="muted small">Fuente: ${esc(c.source || '')}.</p></div>`;
 }
 
-/** Botones para copiar waypoints dentro de una guía. */
-export function wireGuide(box) {
-  box.querySelectorAll('[data-copy-wp]').forEach((b) => b.addEventListener('click', async (e) => { e.preventDefault(); try { await navigator.clipboard.writeText(b.dataset.copyWp); b.textContent = '¡copiado!'; setTimeout(() => { b.textContent = b.dataset.copyWp; }, 1500); } catch { /* sin portapapeles */ } }));
+/** Completa íconos (y nombres) de los items de una guía que no vinieron con el dato. */
+const iconMemo = new Map();
+export async function wireGuide(box) {
+  const need = [...new Set([...box.querySelectorAll('a.gd-it .gd-ph')].map((ph) => Number(ph.closest('a').dataset.it)).filter((id) => id && !iconMemo.has(id)))];
+  for (let i = 0; i < need.length; i += 150) {
+    try {
+      const base = globalThis.GW2_API_BASE || 'https://api.guildwars2.com';
+      const list = await fetch(`${base}/v2/items?ids=${need.slice(i, i + 150).join(',')}&lang=es`).then((r) => r.json());
+      for (const it of Array.isArray(list) ? list : []) iconMemo.set(it.id, it);
+    } catch { /* sin íconos */ }
+  }
+  box.querySelectorAll('a.gd-it').forEach((a) => {
+    const it = iconMemo.get(Number(a.dataset.it));
+    if (!it) return;
+    const ph = a.querySelector('.gd-ph');
+    if (ph && it.icon) ph.outerHTML = `<img src="${it.icon}" alt="">`;
+    const nm = a.querySelector('span[class^="rar-"]');
+    if (nm && /^#\d+$/.test(nm.textContent.trim()) && it.name) { nm.textContent = it.name; nm.className = `rar-${it.rarity}`; }
+  });
 }
 
 export async function renderGuide(box, id, { api, esc, coin, mode = 'instant' }) {

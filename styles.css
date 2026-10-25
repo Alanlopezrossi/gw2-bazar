@@ -722,6 +722,7 @@ table.cr-fixed td .coin { white-space: normal; }
 .bld-skill { display: grid; justify-items: center; gap: 2px; width: 90px; text-align: center; }
 .bld-skill img, .bld-skill .icon-ph { width: 44px; height: 44px; border-radius: 6px; }
 @media (max-width: 800px) { .bld-tiers { grid-template-columns: 1fr; } }
+.gd-ph { display: inline-block; width: 18px; height: 18px; border-radius: 3px; background: rgba(255,255,255,.08); vertical-align: middle; }
 
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }

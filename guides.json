@@ -328,7 +328,7 @@
     19675,
     19676
    ],
-   "intro": "Toda legendaria de 1.ª generación (Crepúsculo, Amanecer, El Bifrost, Meteorológico, etc.) se hace en la [[forge]] con 4 cosas: el precursor del arma, el {{19674}}, el {{19626}} y el don propio del arma (por ejemplo Don del Crepúsculo). El planificador de la pestaña Legendarias te calcula exactamente qué te falta para cada una.",
+   "intro": "Toda legendaria de 1.ª generación (Crepúsculo, Amanecer, El Bifrost, Meteorológico, etc.) se hace en la [[forge]] con 4 cosas: el precursor del arma, el {{19674}}, el {{19626}} y el don propio del arma (por ejemplo {{19648}}). El planificador de la pestaña Legendarias te calcula exactamente qué te falta para cada una.",
    "requires": [
     "Nivel 400 en la disciplina del don propio del arma (Armero, Cazador, Artífice, etc.) y aprender su receta.",
     "Exploración completa del mundo (Tyria central) para el {{19677}}.",
@@ -387,7 +387,7 @@
      ],
      "steps": [
       "{{19677}}: completá el 100% de exploración de Tyria central con un personaje (te da 2).",
-      "{{19678}}: completá la pista de recompensa «Don de la batalla» en McM (pestaña de pistas de recompensa de McM).",
+      "{{19678}}: completá la pista de recompensa «{{19678}}» en McM (pestaña de pistas de recompensa de McM).",
       "{{20797}}: comprala a [[miyani]] por 200 {{69910}}.",
       "{{250×19925}}: comprá con karma en [[balthazar]] (o en pistas de recompensa de PvP/McM).",
       "En la [[forge]]: {{20797}} + {{250×19925}} + {{19677}} + {{19678}} = {{19674}}."
@@ -502,7 +502,7 @@
    "items": [
     19678
    ],
-   "intro": "El {{19678}} sale de la pista de recompensa de McM «Don de la batalla» (último premio de la pista, nivel 8). Activala desde el panel de McM y jugá McM hasta completarla.",
+   "intro": "El {{19678}} sale de la pista de recompensa de McM «{{19678}}» (último premio de la pista, nivel 8). Activala desde el panel de McM y jugá McM hasta completarla.",
    "requires": [
     "Nivel 80 para usar las pistas de recompensa de McM."
    ],
@@ -526,7 +526,7 @@
    "items": [
     19671
    ],
-   "intro": "El {{19671}} (para Don de las almas, Don del clima y Don del sigilo) se compra por 500 relatos de exploración de mazmorras en los [[dungeonvendor]], sección «Crisol de la Eternidad: armas».",
+   "intro": "El {{19671}} (para {{36072}}, {{19637}} y {{19636}}) se compra por 500 relatos de exploración de mazmorras en los [[dungeonvendor]], sección «Crisol de la Eternidad: armas».",
    "requires": [
     "Haber completado 5 veces el modo explorable del Crisol de la Eternidad."
    ],
@@ -561,10 +561,10 @@
    "items": [
     81908
    ],
-   "intro": "{{81908}} se hace en la [[forge]] con la Chispa de consciencia, un Tributo místico, el Don de la consciencia y el Don de la maestría dracónica. Los componentes salen de colecciones de la temporada 3 del Mundo Viviente.",
+   "intro": "{{81908}} se hace en la [[forge]] con la {{81729}}, un {{71820}}, el {{81796}} y el {{81861}}. Los componentes salen de colecciones de la temporada 3 del Mundo Viviente.",
    "requires": [
     "Tener la temporada 3 del Mundo Viviente (mapas Bloodstone Fen, Ember Bay, Bitterfrost Frontier, Lake Doric, Draconis Mons y Siren's Landing).",
-    "250 de cada moneda de esos mapas para el Don de la maestría dracónica."
+    "250 de cada moneda de esos mapas para el {{81861}}."
    ],
    "needs": [],
    "sections": [
@@ -575,9 +575,9 @@
      ],
      "steps": [
       "Completá estos 4 logros para conseguir los convertidores: {{a:3053}} (Bloodstone Fen), {{a:3129}} (Ember Bay), {{a:3383}} (Lake Doric) y {{a:3429}} (Draconis Mons).",
-      "Combiná los 4 convertidores en la [[forge]]: te da el Destello de consciencia. Con él comprá la Semilla consciente por 1.000 de magia desatada: eso desbloquea {{a:3522}}.",
-      "Completá {{a:3522}} (Don del valor → Don de la consciencia) y después {{a:3489}} (Chispa de consciencia). Cada logro tiene su guía en la pestaña Logros.",
-      "Hacé el Don de la maestría dracónica y el Tributo místico (guía automática en sus fichas) y forjá {{81908}}."
+      "Combiná los 4 convertidores en la [[forge]]: te da el {{81780}}. Con él comprá la {{81781}} por 1.000 de magia desatada: eso desbloquea {{a:3522}}.",
+      "Completá {{a:3522}} ({{82008}} → {{81796}}) y después {{a:3489}} ({{81729}}). Cada logro tiene su guía en la pestaña Logros.",
+      "Hacé el {{81861}} y el {{71820}} (guía automática en sus fichas) y forjá {{81908}}."
      ]
     }
    ]
@@ -587,10 +587,10 @@
    "items": [
     91048
    ],
-   "intro": "{{91048}} se hace en la [[forge]] con Atisbo, un Tributo místico, el Don de la presciencia y el Don de la maestría árida. Sus colecciones recorren los mapas de la temporada 4 del Mundo Viviente.",
+   "intro": "{{91048}} se hace en la [[forge]] con {{91035}}, un {{71820}}, el {{90985}} y el {{91041}}. Sus colecciones recorren los mapas de la temporada 4 del Mundo Viviente.",
    "requires": [
     "Tener la temporada 4 del Mundo Viviente.",
-    "Magia volátil para la Piedra de trance."
+    "Magia volátil para la {{91098}}."
    ],
    "needs": [],
    "sections": [
@@ -600,10 +600,10 @@
       91048
      ],
      "steps": [
-      "Comprá la Piedra de trance a cualquier recolector de magia volátil: desbloquea {{a:4762}}.",
+      "Comprá la {{91098}} a cualquier recolector de magia volátil: desbloquea {{a:4762}}.",
       "Completá {{a:4762}} y las «Visiones» de cada mapa: {{a:4765}}, {{a:4774}}, {{a:4760}}, {{a:4770}}, {{a:4764}} y {{a:4757}}.",
-      "Completá {{a:4771}} para conseguir Atisbo.",
-      "Hacé el Don de la maestría árida y el Tributo místico y forjá {{91048}}."
+      "Completá {{a:4771}} para conseguir {{91035}}.",
+      "Hacé el {{91041}} y el {{71820}} y forjá {{91048}}."
      ]
     }
    ]
@@ -613,7 +613,7 @@
    "items": [
     91234
    ],
-   "intro": "{{91234}} se hace en la [[forge]] con el Remolino odioso, el Don de la paciencia, un Tributo místico y el Don de la compasión. Es el anillo legendario de incursiones.",
+   "intro": "{{91234}} se hace en la [[forge]] con el {{86104}}, el {{91193}}, un {{71820}} y el {{91225}}. Es el anillo legendario de incursiones.",
    "requires": [
     "Haber matado a cualquier jefe de incursión (desbloquea la primera colección)."
    ],
@@ -627,7 +627,7 @@
      "steps": [
       "{{a:4035}}: se desbloquea al matar cualquier jefe de incursión.",
       "{{a:4412}} y después {{a:4805}}.",
-      "El Don de la compasión se compra a la Erudita Glenna en cualquier ala de incursión.",
+      "El {{91225}} se compra a la Erudita Glenna en cualquier ala de incursión.",
       "Forjá {{91234}}."
      ]
     }
@@ -638,10 +638,10 @@
    "items": [
     74155
    ],
-   "intro": "{{74155}} se hace en la [[forge]] con su precursor (Variable independiente), el Don del infinito, el {{19626}} y el {{37070}}. El precursor sale de tres colecciones de Fractales.",
+   "intro": "{{74155}} se hace en la [[forge]] con su precursor ({{72309}}), el {{74377}}, el {{19626}} y el {{37070}}. El precursor sale de tres colecciones de Fractales.",
    "requires": [
     "Cualquier expansión (el dominio de Sintonía fractal desbloquea varias compras).",
-    "4 Diarios fractales: cada uno lleva entre 4 y 5 días en el mejor caso."
+    "4 {{75439}}: cada uno lleva entre 4 y 5 días en el mejor caso."
    ],
    "needs": [],
    "sections": [
@@ -685,7 +685,7 @@
    "intro": "La armadura del Enviado perfeccionado se hace con {{77302}} de las incursiones de Heart of Thorns y las colecciones de Armadura legendaria. El primer juego pide 150 conocimientos (el precursor de una clase de peso es gratis); los siguientes, 300 cada uno.",
    "requires": [
     "Heart of Thorns.",
-    "Tiempo: para el primer juego hay que matar a Gorseval en 5 semanas distintas (Hilo espiritual → Tejido espiritual). Los siguientes juegos llevan al menos 4 semanas de conocimientos (50 por pieza: 25 para el Don de destreza y 25 para la insignia del precursor).",
+    "Tiempo: para el primer juego hay que matar a Gorseval en 5 semanas distintas ({{77372}} → {{77343}}). Los siguientes juegos llevan al menos 4 semanas de conocimientos (50 por pieza: 25 para el {{78989}} y 25 para la insignia del precursor).",
     "Un {{77451}} por pieza (depende de cómo consigas las fichas de abastecedor)."
    ],
    "needs": [
@@ -720,7 +720,7 @@
      "steps": [
       "Completá {{a:2646}}: juntá los objetos de las alas de incursión.",
       "Completá {{a:3012}}: te da el precursor (Armadura del enviado refinada) de la clase de peso que elijas.",
-      "Para cada pieza: Don de destreza + {{77451}} + {{70867}} + {{76530}} y el precursor, en la [[forge]]. Mirá la guía automática de cada pieza para las cantidades exactas.",
+      "Para cada pieza: {{78989}} + {{77451}} + {{70867}} + {{76530}} y el precursor, en la [[forge]]. Mirá la guía automática de cada pieza para las cantidades exactas.",
       "Los precursores de las otras clases de peso se craftean con más conocimientos legendarios."
      ]
     }
@@ -784,7 +784,7 @@
     89260,
     89266
    ],
-   "intro": "Se hace a partir de la versión ascendida de la armadura de PvP y los dones de PvP. Cuesta 300 Esquirlas ascendidas de gloria (con el tope de 120 por temporada son al menos 3 temporadas) y otras 3.200 de la moneda de liga para la Estrella de gloria y la armadura ascendida.",
+   "intro": "Se hace a partir de la versión ascendida de la armadura de PvP y los dones de PvP. Cuesta 300 Esquirlas ascendidas de gloria (con el tope de 120 por temporada son al menos 3 temporadas) y otras 3.200 de la moneda de liga para la {{83872}} y la armadura ascendida.",
    "requires": [
     "Heart of Thorns para varios componentes.",
     "Jugar partidas clasificatorias de la liga de PvP (cofres de la pista de liga)."
@@ -996,7 +996,7 @@
    ],
    "intro": "{{93105}} se hace en la [[forge]] con el {{93190}}, una {{79982}}, un {{71820}} y el {{81371}}. Es el anillo legendario de McM.",
    "requires": [
-    "Pistas de recompensa de McM (Don de la batalla y otros), boletos de escaramuza.",
+    "Pistas de recompensa de McM ({{19678}} y otros), boletos de escaramuza.",
     "Desde el Arsenal legendario se pueden guardar dos Confluencias."
    ],
    "needs": [],
@@ -1009,8 +1009,8 @@
    ],
    "intro": "{{92991}} se hace en la [[forge]] con el {{93036}}, un {{79980}}, un {{71820}} y el {{77485}}.",
    "requires": [
-    "1 Emblema de victoria: ganar 120 partidas clasificatorias durante temporadas de PvP.",
-    "1 {{19678}} (pista de recompensa) y 4 Fragmentos de núcleo de la Niebla (pista de recompensa gloriosa).",
+    "1 {{93022}}: ganar 120 partidas clasificatorias durante temporadas de PvP.",
+    "1 {{19678}} (pista de recompensa) y 4 {{77531}} (pista de recompensa gloriosa).",
     "Del bazar: 250 {{71581}} y 2.250 {{70820}}; además 100 esquirlas espirituales y 100 tomos de conocimiento."
    ],
    "needs": [
@@ -1056,7 +1056,7 @@
    ],
    "intro": "{{77474}} se hace en la [[forge]] con el {{77509}}, el {{77485}}, el {{19626}} y las {{77536}}.",
    "requires": [
-    "Sólo se puede hacer una vez: el Don del competidor sale de logros que dan su recompensa una sola vez (camino de la Ascensión en la liga de PvP).",
+    "Sólo se puede hacer una vez: el {{77509}} sale de logros que dan su recompensa una sola vez (camino de la Ascensión en la liga de PvP).",
     "Ganar una partida clasificatoria con una profesión avanza todos los niveles de liga desbloqueados de esa profesión."
    ],
    "needs": [],
@@ -1069,7 +1069,7 @@
     70867,
     76530
    ],
-   "intro": "Una runa legendaria se hace con el Don de runas + {{77451}} + {{70867}} + {{76530}}; un sello legendario, igual pero con el Don de sellos. Las runas legendarias se combinan con runas exóticas del mismo tipo (2 legendarias + 4 exóticas dan los 6 bonos).",
+   "intro": "Una runa legendaria se hace con el {{89218}} + {{77451}} + {{70867}} + {{76530}}; un sello legendario, igual pero con el {{91449}}. Las runas legendarias se combinan con runas exóticas del mismo tipo (2 legendarias + 4 exóticas dan los 6 bonos).",
    "requires": [
     "Con 7 runas y 8 sellos legendarios alcanza para todo (logros «Coleccionista de runas/sellos legendarios»); hacer más no sirve.",
     "Las runas legendarias piden equipo de nivel 80."
@@ -1104,7 +1104,7 @@
     104857,
     104690
    ],
-   "intro": "Orrax Manifestado se hace en la [[forge]] con el Don de las Islas de Pavesas de Niebla, el Don de las sombras, el Don del banquete y el precursor Orrax Contenido.",
+   "intro": "{{104857}} se hace en la [[forge]] con el {{104962}}, el {{104846}}, el {{104872}} y el precursor {{104690}}.",
    "requires": [
     "Janthir Wilds."
    ],
@@ -1127,7 +1127,7 @@
    "items": [
     103815
    ],
-   "intro": "Klobjarne Geirr se hace en la [[forge]] con el Don de Janthir Wilds, el Don del hacendado, el Don de Klobjarne Geirr y el precursor Nyr Hrammr.",
+   "intro": "Klobjarne Geirr se hace en la [[forge]] con el {{102514}}, el {{102376}}, el {{102901}} y el precursor {{103973}}.",
    "requires": [
     "Janthir Wilds."
    ],
@@ -1148,10 +1148,10 @@
    "items": [
     107022
    ],
-   "intro": "{{107022}} se hace en la [[forge]] con el Don de rayos, el Don de los supervivientes, el Don del pueblo y el Don de los hylek (Janthir Wilds).",
+   "intro": "{{107022}} se hace en la [[forge]] con el {{107040}}, el {{106712}}, el {{105804}} y el {{106986}} (Janthir Wilds).",
    "requires": [
     "Janthir Wilds.",
-    "Las Esencias de grieta amalgamadas conviene craftearlas (receta de 50 en cualquier disciplina a 400)."
+    "Las {{100930}} conviene craftearlas (receta de 50 en cualquier disciplina a 400)."
    ],
    "needs": [],
    "sections": []
@@ -1161,7 +1161,7 @@
    "items": [
     109070
    ],
-   "intro": "{{109070}} se hace en la [[forge]] con un {{71820}}, el Don de Galdra, el Don de las piedras sombrías y un Vial de piedra sombría líquida.",
+   "intro": "{{109070}} se hace en la [[forge]] con un {{71820}}, el {{109469}}, el {{109161}} y un {{109391}}.",
    "requires": [
     "Visions of Eternity."
    ],
@@ -1205,7 +1205,7 @@
      "title": "Facetas de Aurene (variantes)",
      "items": [],
      "steps": [
-      "Zhaitan: {{a:6562}} → Fragmento de sombras prismáticas. Recuerdos: {{a:6576}}.",
+      "Zhaitan: {{a:6562}} → {{98122}}. Recuerdos: {{a:6576}}.",
       "Mordremoth: {{a:6590}} (pide Heart of Thorns). Recuerdos: {{a:6658}}.",
       "Kralkatorrik: {{a:6702}} (pide los episodios 5 y 6 de la temporada 4). Recuerdos: {{a:6699}}.",
       "Jormag: {{a:6771}}. Recuerdos: {{a:6772}}.",
