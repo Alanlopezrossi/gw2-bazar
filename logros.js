@@ -165,7 +165,9 @@ export async function renderLogros(view, { api, esc, normalize, catId = null, to
     const mine = view.querySelector('#amine').checked;
     const rew = view.querySelector('#arew').checked;
     const words = q.split(/\s+/).filter(Boolean);
-    const list = rows.filter((a) => {
+    // Al buscar sin categoría elegida, se busca en todos los logros (si ya están cargados).
+    const src = words.length && !catId && ALL ? ALL : rows;
+    const list = src.filter((a) => {
       if (mine && P.get(a.id)?.done) return false;
       if (rew && !(a.rewards || []).some((r) => r.type === 'Item')) return false;
       if (!words.length) return true;
@@ -227,7 +229,7 @@ export async function renderLogros(view, { api, esc, normalize, catId = null, to
     searchingAll = true;
     view.querySelector('#acount').textContent = 'Cargando todos los logros…';
     try {
-      rows = await loadAll((d, t) => { view.querySelector('#acount').textContent = `Cargando todos los logros… ${Math.round((d / t) * 100)}%`; });
+      await loadAll((d, t) => { view.querySelector('#acount').textContent = `Cargando todos los logros… ${Math.round((d / t) * 100)}%`; });
     } catch (e) { toast?.(e.message); }
     searchingAll = false;
     paintList();
@@ -255,9 +257,13 @@ export async function renderLogros(view, { api, esc, normalize, catId = null, to
       view.querySelector('#alist')?.insertAdjacentHTML('beforebegin', '<p class="muted small" id="ahint">Mostrando los logros que <b>empezaste y te faltan terminar</b>, los más avanzados primero. Elegí una categoría o buscá para ver todos.</p>');
       paintList();
     } else {
-      view.querySelector('#alist').innerHTML = '<div class="empty">Elegí una categoría a la izquierda o escribí en el buscador para buscar entre todos los logros.</div>';
-      view.querySelector('#acount').textContent = '';
+      // Sin API key: precargamos todos los logros (los más nuevos primero) para que la portada no quede vacía.
+      view.querySelector('#alist').insertAdjacentHTML('beforebegin', '<p class="muted small" id="ahint">Mostrando <b>todos los logros</b>, los más nuevos primero. Elegí una categoría a la izquierda o usá el buscador para filtrar. Con tu API key (⚙ Ajustes) también ves tu progreso.</p>');
+      await ensureAll();
+      if (!catId && !view.querySelector('#aq').value.trim()) { rows = [...(ALL || [])].sort((a, b) => b.id - a.id); paintList(); }
     }
+    // Con API key: los que empezaste arriba, y en segundo plano cargamos todos para que el buscador sea instantáneo.
+    if (!P.unavailable) ensureAll();
   }
 }
 
