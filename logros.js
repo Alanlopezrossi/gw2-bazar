@@ -12,12 +12,27 @@ function g(path) {
   p.catch(() => cache.delete(path));
   return p.then((x) => x);
 }
+// Logros que la API oficial ya no publica (quitados o sin redescubrir): última versión conocida, de gw2treasures.
+let EXTRA = null;
+function extraAch() {
+  if (!EXTRA) EXTRA = fetch('achievements-extra.json').then((r) => (r.ok ? r.json() : { achievements: {} })).then((d) => d.achievements || {}).catch(() => ({}));
+  return EXTRA;
+}
+const fromExtra = (e, lang) => ({ ...e.data, name: lang === 'en' ? e.nameEn || e.data.name : e.data.name, removed: true });
+
 async function many(endpoint, ids, lang = 'es') {
   ids = [...new Set(ids.filter((x) => x != null))];
   const out = [];
   for (let i = 0; i < ids.length; i += 200) {
-    const { data } = await g(`/${endpoint}?ids=${ids.slice(i, i + 200).join(',')}&lang=${lang}`);
-    out.push(...data);
+    try {
+      const { data } = await g(`/${endpoint}?ids=${ids.slice(i, i + 200).join(',')}&lang=${lang}`);
+      out.push(...data);
+    } catch (e) { if (endpoint !== 'achievements') throw e; /* todos fuera de la API: se completan abajo */ }
+  }
+  if (endpoint === 'achievements') {
+    const have = new Set(out.map((a) => a.id));
+    const ex = await extraAch();
+    for (const id of ids) if (!have.has(id) && ex[id]) out.push(fromExtra(ex[id], lang));
   }
   return out;
 }
@@ -38,6 +53,9 @@ async function meta() {
   const groupOfCat = new Map();
   groups.sort((a, b) => a.order - b.order);
   for (const gr of groups) for (const cid of gr.categories) groupOfCat.set(cid, gr);
+  // Sumamos a cada categoría los logros que la API ya no publica.
+  const ex = await extraAch();
+  for (const [id, e] of Object.entries(ex)) { const c = catById.get(e.cat); if (c && !c.achievements.includes(Number(id))) c.achievements.push(Number(id)); }
   for (const c of catById.values()) for (const a of c.achievements) if (!catOfAch.has(a)) catOfAch.set(a, c.id);
   META = { groups, catById, catOfAch, groupOfCat };
   return META;
@@ -54,6 +72,9 @@ async function loadAll(onProgress) {
     for (const b of batch) list.push(...b.data);
     onProgress?.(Math.min(total, p + 6), total);
   }
+  const ex = await extraAch();
+  const have = new Set(list.map((a) => a.id));
+  for (const e of Object.values(ex)) if (!have.has(e.data.id)) list.push(fromExtra(e, 'es'));
   ALL = list;
   return ALL;
 }
@@ -174,7 +195,7 @@ export async function renderLogros(view, { api, esc, normalize, catId = null, to
           const st = stateOf(a, P);
           const rw = (a.rewards || []).map((r) => (r.type === 'Item' ? '🎁 item' : r.type === 'Mastery' ? '⭐ maestría' : r.type === 'Title' ? '🏷 título' : r.type === 'Coins' ? '🪙 monedas' : r.type)).join(', ');
           return `<tr class="clickable" data-ach="${a.id}">
-            <td class="left"><b>${esc(a.name)}</b><div class="muted small">${esc(c?.name || '')}</div></td>
+            <td class="left"><b>${esc(a.name)}</b>${a.removed ? ' <span class="pill warn">fuera de la API</span>' : ''}<div class="muted small">${esc(c?.name || '')}</div></td>
             <td class="left small">${esc(requirement(a)).slice(0, 180)}</td>
             <td class="num">${points(a)}</td>
             <td class="left small">${esc(rw)}</td>
@@ -358,6 +379,7 @@ export async function renderLogro(view, { api, esc, id, toast, normalize }) {
           ${st ? `<div class="ach-st ${st.cls}" style="margin-top:6px">Tu progreso: ${esc(st.label)}</div>` : ''}
         </div>
       </div>
+      ${a.removed ? `<div class="explain">Este logro <b>no está en la API oficial</b> ahora (lo quitaron o hay que volver a descubrirlo). Se muestra la última versión conocida, de <a href="https://es.gw2treasures.com/achievement/${a.id}" target="_blank" rel="noopener">gw2treasures</a>.</div>` : ''}
       ${a.description ? `<p class="ach-desc">“${esc(a.description)}”</p>` : ''}
 
       <div class="section"><h3>Paso a paso</h3><ol class="ach-steps">${steps.map((s) => `<li>${s}</li>`).join('')}</ol></div>
