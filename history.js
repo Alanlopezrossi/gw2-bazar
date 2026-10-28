@@ -118,6 +118,7 @@ export function renderHistory(box, id, { coin, esc }) {
         <div class="h-tip" hidden></div>
       </div>
       <p class="small muted"><span class="h-key sell"></span> precio de venta · <span class="h-key buy"></span> orden de compra · barras: unidades vendidas por día. ${pts[0].grouped ? 'Cada punto es el promedio de varios días. ' : ''}Precios diarios de <a href="https://datawars2.ie" target="_blank" rel="noopener">DataWars2</a>${first.t < Date.parse('2019-07-13') ? ' (antes de 2019 se usa el punto medio entre mínimo y máximo del día)' : ''}.</p>
+      ${volumeHTML(all, coin)}
       <div class="why"><h4 class="sub-h">¿Por qué subió o bajó? Análisis del período</h4>${an.html}</div>`;
 
     box.querySelectorAll('[data-hr]').forEach((b) => b.addEventListener('click', () => { range = b.dataset.hr; try { localStorage.setItem('gw2-bazar-hist-range', range); } catch {} paint(all); }));
@@ -151,6 +152,49 @@ export function renderHistory(box, id, { coin, esc }) {
     svg.addEventListener('touchmove', move, { passive: true });
     svg.addEventListener('mouseleave', () => { tip.hidden = true; cross.setAttribute('x1', -10); cross.setAttribute('x2', -10); ds.setAttribute('cx', -10); db.setAttribute('cx', -10); });
   }
+}
+
+/**
+ * Histórico de cantidades vendidas: totales por período (7 días, 30 días, 3 meses, 1 año, todo) y tabla mes por mes.
+ * "Vendidos" = publicaciones de venta que alguien compró; "Comprados" = órdenes de compra que alguien llenó.
+ */
+function volumeHTML(all, coin) {
+  const rows = all.filter((r) => r.sold != null || r.bought != null);
+  if (!rows.length) return '<h4 class="sub-h">Cantidades vendidas</h4><p class="muted small">DataWars2 no tiene datos de cantidades para este item.</p>';
+  const nf = (n) => Math.round(n).toLocaleString('es-AR');
+  const last = rows[rows.length - 1].t;
+  const sum = (list) => {
+    let sold = 0, bought = 0, gold = 0;
+    for (const r of list) { sold += r.sold || 0; bought += r.bought || 0; gold += (r.sold || 0) * (r.sell || 0) + (r.bought || 0) * (r.buy || 0); }
+    const d = list.length ? Math.max(1, Math.round((list[list.length - 1].t - list[0].t) / DAY) + 1) : 1;
+    return { sold, bought, total: sold + bought, gold, perDay: (sold + bought) / d, days: d };
+  };
+  const periods = [['Últimos 7 días', 7], ['Últimos 30 días', 30], ['Últimos 3 meses', 92], ['Último año', 366], ['Todo', Infinity]].map(([l, n]) => [l, sum(rows.filter((r) => r.t > last - n * DAY))]);
+  // Mes por mes (más nuevo primero)
+  const months = new Map();
+  for (const r of rows) {
+    const d = new Date(r.t);
+    const k = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+    if (!months.has(k)) months.set(k, []);
+    months.get(k).push(r);
+  }
+  const mrows = [...months.entries()].reverse().map(([k, list]) => {
+    const s = sum(list);
+    const ps = list.filter((r) => r.sell);
+    return { k, ...s, price: ps.length ? ps.reduce((a, r) => a + r.sell, 0) / ps.length : null };
+  });
+  const maxT = Math.max(1, ...mrows.map((m) => m.total));
+  const mName = (k) => { const [y, m] = k.split('-'); return new Date(Date.UTC(+y, +m - 1, 15)).toLocaleDateString('es-AR', { month: 'long', year: 'numeric', timeZone: 'UTC' }); };
+  return `<h4 class="sub-h">Cantidades vendidas (histórico)</h4>
+    <div class="table-wrap"><table class="ing h-vol-t"><thead><tr><th>Período</th><th>Vendidos</th><th>Órdenes llenadas</th><th>Total</th><th>Por día</th><th>Oro movido ≈</th></tr></thead><tbody>
+      ${periods.map(([l, s]) => `<tr><td class="left">${l}</td><td class="num">${nf(s.sold)}</td><td class="num">${nf(s.bought)}</td><td class="num"><b>${nf(s.total)}</b></td><td class="num">${nf(s.perDay)}</td><td>${coin(Math.round(s.gold))}</td></tr>`).join('')}
+    </tbody></table></div>
+    <details class="h-months"><summary class="small">Ver mes por mes (${mrows.length} meses)</summary>
+      <div class="table-wrap"><table class="ing h-vol-t"><thead><tr><th>Mes</th><th>Vendidos</th><th>Órdenes llenadas</th><th>Total</th><th></th><th>Por día</th><th>Precio de venta promedio</th></tr></thead><tbody>
+        ${mrows.map((m) => `<tr><td class="left">${mName(m.k)}</td><td class="num">${nf(m.sold)}</td><td class="num">${nf(m.bought)}</td><td class="num"><b>${nf(m.total)}</b></td><td class="left"><span class="h-mbar" style="width:${Math.max(2, Math.round((m.total / maxT) * 120))}px"></span></td><td class="num">${nf(m.total / m.days)}</td><td>${m.price ? coin(Math.round(m.price)) : '—'}</td></tr>`).join('')}
+      </tbody></table></div>
+    </details>
+    <p class="muted small"><b>Vendidos</b>: publicaciones de venta que alguien compró al instante. <b>Órdenes llenadas</b>: órdenes de compra que alguien llenó vendiendo. Datos diarios de DataWars2 desde ${new Date(rows[0].t).toLocaleDateString('es-AR', { month: 'short', year: 'numeric' })}; el «oro movido» es aproximado (cantidad × precio promedio del día).</p>`;
 }
 
 /** Monedas en texto corto para los ejes del SVG (1o 23p 45c). */

@@ -723,6 +723,11 @@ table.cr-fixed td .coin { white-space: normal; }
 .bld-skill img, .bld-skill .icon-ph { width: 44px; height: 44px; border-radius: 6px; }
 @media (max-width: 800px) { .bld-tiers { grid-template-columns: 1fr; } }
 .gd-ph { display: inline-block; width: 18px; height: 18px; border-radius: 3px; background: rgba(255,255,255,.08); vertical-align: middle; }
+/* Cantidades vendidas (histórico) */
+.h-mbar{display:inline-block;height:8px;border-radius:4px;background:var(--accent,#c9a227);opacity:.75;vertical-align:middle}
+.h-months{margin:6px 0}
+.h-months>summary{cursor:pointer;padding:4px 0}
+.h-vol-t td.num{text-align:right}
 
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }
