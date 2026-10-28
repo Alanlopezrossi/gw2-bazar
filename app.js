@@ -761,6 +761,8 @@ async function openItem(id, { silent = false } = {}) {
     if (body.querySelector('#charBox')) renderDetails(body.querySelector('#charBox'), id, { esc });
     if (body.querySelector('#histBox')) renderHistory(body.querySelector('#histBox'), id, { coin, esc });
     body.querySelector('#wikiSec')?.addEventListener('toggle', (e) => { if (e.target.open && !e.target.dataset.loaded) { e.target.dataset.loaded = '1'; loadWiki(id); } });
+    // Si no tenemos ninguna fuente propia, abrimos solo la sección de la wiki (cómo se consigue según la wiki).
+    if (!silent && !(d.obtain || []).some((o) => o.kind !== 'note' && o.kind !== 'desc') && !(d.recipes || []).length) { const ws = body.querySelector('#wikiSec'); if (ws) ws.open = true; }
     if (d.item?.type === 'Container') loadContents(id);
   } catch (e) {
     body.innerHTML = `<div class="empty">${esc(e.message)}</div>`;
