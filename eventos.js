@@ -1,3 +1,4 @@
+import { segmentsBetween, toggleAlarm, hasAlarm, alarmId, alarmList, removeAlarm, alarmSettings, setAlarmSettings, SOUND_NAMES, playChime, testAlarm, askNotifications, onAlarmsChange } from './alarmas.js';
 // Pestaña "Eventos": metaeventos y jefes de mundo con sus horarios (hora local), qué pasa ahora y qué viene.
 // Datos: event-timers.json (temporizador de la wiki oficial). Cada día arranca a las 00:00 UTC:
 // primero la secuencia "partial" (p) y después se repite "pattern" (q). Cada paso = [segmento, minutos].
@@ -25,31 +26,6 @@ const NAME_ES = {
 const DAY = 1440;
 // Ocultos de entrada: ciclos de día/noche, torneos PvP y festivales que no siempre están activos.
 const HIDE_BY_DEFAULT = new Set(['core-dn', 'eod-dn', 'voe-dn', 'core-ateu', 'core-atna', 'festival-lc', 'festival-db']);
-
-/** Segmentos de un evento entre [desde, hasta) en minutos desde la medianoche UTC del día `d0` (puede cruzar días). */
-function segmentsBetween(ev, fromMin, toMin) {
-  const out = [];
-  const startDay = Math.floor(fromMin / DAY) - 1;
-  const endDay = Math.floor(toMin / DAY) + 1;
-  for (let day = startDay; day <= endDay; day++) {
-    let t = day * DAY;
-    const end = t + DAY;
-    const push = (r, d) => { if (r && t + d > fromMin && t < toMin) out.push({ r, start: t, end: t + d }); t += d; };
-    for (const [r, d] of ev.p) { if (t >= end) break; push(r, d); }
-    if (ev.q.length) {
-      while (t < end) for (const [r, d] of ev.q) { if (t >= end) break; push(r, Math.min(d, end - t)); }
-    }
-  }
-  // Unimos segmentos iguales consecutivos (por ejemplo, un evento que cruza la medianoche UTC).
-  out.sort((a, b) => a.start - b.start);
-  const merged = [];
-  for (const s of out) {
-    const last = merged[merged.length - 1];
-    if (last && last.r === s.r && last.end === s.start && s.start % DAY === 0) last.end = s.end;
-    else merged.push({ ...s });
-  }
-  return merged;
-}
 
 /** Todos los tramos (también los vacíos) que tocan [desde, hasta). */
 function segmentsAll(ev, fromMin, toMin) {
@@ -97,6 +73,16 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
       <label>Expansión <select id="evCat"><option value="">Todas</option>${cats.map((c) => `<option value="${esc(c)}" ${st.cat === c ? 'selected' : ''}>${esc(CAT_ES[c] || c)}</option>`).join('')}</select></label>
       <label>Lista: próximas <select id="evWin">${[60, 120, 180, 360, 720].map((m) => `<option value="${m}" ${st.window === m ? 'selected' : ''}>${m / 60} h</option>`).join('')}</select></label>
     </div>
+    <div class="section ev-alarms"><h3>🔔 Alarmas <span class="muted small">(tocá la campanita de un evento para que te avise cuando empieza)</span></h3>
+      <div class="ev-tools">
+        <label>Avisar <select id="alLead">${[0, 1, 2, 5, 10, 15].map((m) => `<option value="${m}">${m ? `${m} min antes` : 'justo al empezar'}</option>`).join('')}</select></label>
+        <label>Sonido <select id="alSound">${SOUND_NAMES.map(([k, l]) => `<option value="${k}">${esc(l)}</option>`).join('')}</select></label>
+        <label>Volumen <input type="range" id="alVol" min="0.05" max="1" step="0.05" style="width:110px"></label>
+        <button class="btn ghost small" id="alTest">▶ Probar</button>
+        <button class="btn ghost small" id="alNotif"></button>
+      </div>
+      <div id="alList" class="al-list"></div>
+      <p class="muted small">Las alarmas se repiten todos los días a la hora de ese evento hasta que las saques. Suenan mientras el Bazar esté abierto en el navegador (puede estar en otra pestaña o minimizado). Si jugás en pantalla completa y no lo escuchás, subí el volumen del navegador en el mezclador de Windows o usá el juego en «ventana sin bordes».</p></div>
     <div class="section"><h3>Horario <span class="muted small">(tu hora local · pasá el mouse por un evento para ver el detalle, tocalo para copiar el waypoint)</span></h3>
       <div class="ev-tools">
         <label>Mostrar <select id="evRange"><option value="2">las próximas 2 horas</option><option value="4">las próximas 4 horas</option><option value="8">las próximas 8 horas</option></select></label>
@@ -125,6 +111,19 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
     return { chat, wp };
   };
 
+  const bell = (ev, r, name, mini = false) => { const on = hasAlarm(alarmId(ev.key, r)); return `<button type="button" class="ev-bell${on ? ' on' : ''}${mini ? ' mini' : ''}" data-bell="${esc(ev.key)}" data-r="${r}" data-name="${esc(name)}" title="${on ? 'Alarma activada: tocá para sacarla' : 'Avisarme cuando empiece'}">${on ? '🔔' : '🔕'}</button>`; };
+  function paintAlarms() {
+    const cfg = alarmSettings();
+    view.querySelector('#alLead').value = String(cfg.lead);
+    view.querySelector('#alSound').value = cfg.sound;
+    view.querySelector('#alVol').value = String(cfg.vol);
+    const nb = view.querySelector('#alNotif');
+    const perm = 'Notification' in window ? Notification.permission : 'denied';
+    nb.textContent = cfg.notif && perm === 'granted' ? '🪟 Aviso de Windows: activado' : '🪟 Activar también aviso de Windows';
+    nb.disabled = perm === 'denied';
+    const list = alarmList();
+    view.querySelector('#alList').innerHTML = list.length ? `<b class="small">Activas:</b> ${list.map((a) => `<span class="chip">🔔 ${esc(a.name)} <span class="muted">· ${esc(a.map)}</span> <button class="al-x" data-aldel="${esc(a.id)}" title="Sacar alarma">✕</button></span>`).join(' ')}` : '<span class="muted small">No tenés alarmas. Tocá 🔕 al lado de un evento (en la lista o en el horario) para activarla.</span>';
+  }
   function paint() {
     const nowMin = Math.floor(Date.now() / 60000);
     view.querySelector('#evClock').textContent = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
@@ -149,7 +148,7 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
         const { chat, wp } = where(ev, seg);
         return `<tr class="${live ? 'ev-live' : ''}">
           <td class="left">${live ? `<span class="pill good">EN CURSO</span> <span class="small muted">termina ${fmt(seg.end)} · quedan ${rel(seg.end - nowMin)}</span>` : `<b class="num">${fmt(seg.start)}</b> <span class="small muted">en ${rel(seg.start - nowMin)}</span>`}</td>
-          <td class="left"><b title="${esc(name)}">${esc(es(name))}</b>${ev.s[seg.r]?.[1] ? ` <a class="small" target="_blank" rel="noopener" href="https://wiki.guildwars2.com/wiki/${encodeURIComponent(ev.s[seg.r][1].replace(/ /g, '_'))}">wiki</a>` : ''}</td>
+          <td class="left">${bell(ev, seg.r, name)} <b title="${esc(name)}">${esc(es(name))}</b>${ev.s[seg.r]?.[1] ? ` <a class="small" target="_blank" rel="noopener" href="https://wiki.guildwars2.com/wiki/${encodeURIComponent(ev.s[seg.r][1].replace(/ /g, '_'))}">wiki</a>` : ''}</td>
           <td class="left small" title="${esc(ev.n)}">${esc(es(ev.n))} <span class="muted">· ${esc(CAT_ES[ev.c] || ev.c)}</span></td>
           <td class="num">${seg.end - seg.start} min</td>
           <td class="left small">${chat ? `<button class="btn ghost small" data-copy="${esc(chat)}" title="Copiar para pegar en el chat del juego">${esc(chat)}</button>` : ''}${wp ? ` <a href="#/mapa/@${wp.c[0]},${wp.c[1]},${encodeURIComponent(wp.es)}" title="${esc(wp.en)}">📍 ${esc(wp.es)}</a>` : ''}</td>
@@ -182,7 +181,7 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
         const cls = ['evt-seg', sg.r ? '' : 'evt-empty', sg.start >= limit ? 'future' : '', sg.start <= nowMin && sg.end > nowMin && sg.r ? 'on' : ''].join(' ');
         const pl = sg.r ? placeOf(ev, sg.r) : null;
         const goto = pl ? `#/mapa/@${pl.c[0]},${pl.c[1]},${encodeURIComponent(`${pl.label} · ${fmt(sg.start)}–${fmt(sg.end)}${pl.exact ? '' : ' (punto de ruta)'}|${g[2] || ''}|${pl.wp && pl.exact ? `${pl.wp.c[0]};${pl.wp.c[1]};${pl.wp.es}` : ''}`)}` : '';
-        parts.push(`<div class="${cls}${pl ? ' has-map' : ''}" style="width:${w}%;${sg.r ? `background:${bgOf(g[3])}` : ''}" ${goto ? `data-goto="${esc(goto)}"` : ''} ${sg.r ? `title="${esc(es(name))}${es(name) !== name ? ` (${esc(name)})` : ''} · ${fmt(sg.start)}–${fmt(sg.end)} (${sg.end - sg.start} min)${pl ? (pl.exact ? '\nClic: ver el lugar exacto en el mapa' : '\nClic: ver su punto de ruta en el mapa') : ''}${g[2] ? `\nWaypoint ${esc(g[2])}` : ''}"` : ''}>${sg.r ? `<span class="evt-time">${fmt(sg.start)}${pl ? ' <span class="evt-pin">📍</span>' : ''}${g[1] ? ` <a class="evt-wiki" target="_blank" rel="noopener" href="https://wiki.guildwars2.com/wiki/${encodeURIComponent(g[1].replace(/ /g, '_'))}" title="Abrir en la wiki">wiki ↗</a>` : ''}</span><span class="evt-name">${esc(es(name))}</span>${g[2] ? `<span class="evt-chat" data-copy="${esc(g[2])}" title="Copiar waypoint">${esc(g[2])}</span>` : ''}` : ''}</div>`);
+        parts.push(`<div class="${cls}${pl ? ' has-map' : ''}" style="width:${w}%;${sg.r ? `background:${bgOf(g[3])}` : ''}" ${goto ? `data-goto="${esc(goto)}"` : ''} ${sg.r ? `title="${esc(es(name))}${es(name) !== name ? ` (${esc(name)})` : ''} · ${fmt(sg.start)}–${fmt(sg.end)} (${sg.end - sg.start} min)${pl ? (pl.exact ? '\nClic: ver el lugar exacto en el mapa' : '\nClic: ver su punto de ruta en el mapa') : ''}${g[2] ? `\nWaypoint ${esc(g[2])}` : ''}"` : ''}>${sg.r ? `<span class="evt-time">${bell(ev, sg.r, name, true)}${fmt(sg.start)}${pl ? ' <span class="evt-pin">📍</span>' : ''}${g[1] ? ` <a class="evt-wiki" target="_blank" rel="noopener" href="https://wiki.guildwars2.com/wiki/${encodeURIComponent(g[1].replace(/ /g, '_'))}" title="Abrir en la wiki">wiki ↗</a>` : ''}</span><span class="evt-name">${esc(es(name))}</span>${g[2] ? `<span class="evt-chat" data-copy="${esc(g[2])}" title="Copiar waypoint">${esc(g[2])}</span>` : ''}` : ''}</div>`);
       }
       return parts.join('');
     };
@@ -206,6 +205,17 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
   }
 
   view.addEventListener('click', async (e) => {
+    const b = e.target.closest('[data-bell]');
+    if (b) {
+      e.stopPropagation();
+      const ev = events.find((x) => x.key === b.dataset.bell);
+      const r = Number(b.dataset.r);
+      const on = toggleAlarm({ ev: ev.key, r, name: es(b.dataset.name), map: es(ev.n), chat: ev.s[r]?.[2] || '' });
+      toast?.(on ? `Alarma activada: te aviso ${alarmSettings().lead ? `${alarmSettings().lead} min antes de` : 'cuando empiece'} «${es(b.dataset.name)}»` : 'Alarma sacada');
+      return;
+    }
+    const del = e.target.closest('[data-aldel]');
+    if (del) { removeAlarm(del.dataset.aldel); return; }
     const c = e.target.closest('[data-copy]');
     if (c) { try { await navigator.clipboard.writeText(c.dataset.copy); toast?.('Waypoint copiado: pegalo en el chat del juego'); } catch { toast?.(c.dataset.copy); } return; }
     if (e.target.closest('a')) return;
@@ -223,6 +233,13 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
   const topChk = view.querySelector('#evTop'); topChk.checked = st.top;
   rangeSel.addEventListener('change', (e) => { st.range = e.target.value; save(); paint(); });
   topChk.addEventListener('change', (e) => { st.top = e.target.checked; save(); paint(); });
+  view.querySelector('#alLead').addEventListener('change', (e) => setAlarmSettings({ lead: Number(e.target.value) }));
+  view.querySelector('#alSound').addEventListener('change', (e) => { setAlarmSettings({ sound: e.target.value }); playChime(e.target.value); });
+  view.querySelector('#alVol').addEventListener('change', (e) => { setAlarmSettings({ vol: Number(e.target.value) }); playChime(); });
+  view.querySelector('#alTest').addEventListener('click', () => testAlarm());
+  view.querySelector('#alNotif').addEventListener('click', async () => { const ok = await askNotifications(); toast?.(ok ? 'Listo: también te va a aparecer un aviso de Windows' : 'El navegador no dio permiso para avisos'); });
+  const offAl = onAlarmsChange(() => { if (!view.querySelector('#alList')) { offAl(); return; } paintAlarms(); paint(); });
+  paintAlarms();
   paint();
   const timer = setInterval(() => { if (!view.querySelector('#evClock')) clearInterval(timer); else paint(); }, 15000);
   const clock = setInterval(() => { const el = view.querySelector('#evClock'); if (!el) clearInterval(clock); else el.textContent = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }); }, 1000);

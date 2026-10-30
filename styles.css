@@ -728,6 +728,24 @@ table.cr-fixed td .coin { white-space: normal; }
 .h-months{margin:6px 0}
 .h-months>summary{cursor:pointer;padding:4px 0}
 .h-vol-t td.num{text-align:right}
+/* Alarmas de eventos */
+.ev-bell { background: none; border: 0; padding: 0 2px; cursor: pointer; font-size: 15px; line-height: 1; opacity: .45; filter: grayscale(1); vertical-align: middle; }
+.ev-bell:hover { opacity: .9; filter: none; }
+.ev-bell.on { opacity: 1; filter: none; animation: bell-wiggle 2.4s ease-in-out infinite; }
+.ev-bell.mini { font-size: 12px; margin-right: 3px; }
+@keyframes bell-wiggle { 0%, 88%, 100% { transform: rotate(0); } 91% { transform: rotate(14deg); } 94% { transform: rotate(-12deg); } 97% { transform: rotate(6deg); } }
+.al-list { margin: 8px 0 4px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.al-x { background: none; border: 0; color: inherit; cursor: pointer; opacity: .6; padding: 0 2px; }
+.al-x:hover { opacity: 1; }
+.alarm-float { position: fixed; right: 18px; bottom: 18px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; max-width: min(380px, calc(100vw - 32px)); }
+.alarm-card { display: flex; gap: 12px; align-items: flex-start; background: var(--panel, #1d1a14); color: var(--text, #eee); border: 2px solid var(--accent, #d9aa4c); border-radius: 14px; padding: 12px 14px; box-shadow: 0 10px 30px rgba(0,0,0,.45), 0 0 0 4px rgba(217,170,76,.15); animation: alarm-in .35s ease-out, alarm-glow 2s ease-in-out infinite; }
+.alarm-ic { font-size: 28px; animation: bell-wiggle 1.6s ease-in-out infinite; }
+.alarm-body b { font-size: 15px; }
+.alarm-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.alarm-all { box-shadow: 0 4px 14px rgba(0,0,0,.35); }
+@keyframes alarm-in { from { transform: translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes alarm-glow { 0%, 100% { box-shadow: 0 10px 30px rgba(0,0,0,.45), 0 0 0 4px rgba(217,170,76,.15); } 50% { box-shadow: 0 10px 30px rgba(0,0,0,.45), 0 0 0 8px rgba(217,170,76,.30); } }
+@media (max-width: 600px) { .alarm-float { right: 12px; left: 12px; bottom: 12px; max-width: none; align-items: stretch; } }
 
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }

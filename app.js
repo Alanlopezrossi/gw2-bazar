@@ -3,6 +3,7 @@ import { renderCalc } from './calc.js';
 import { renderMap } from './map.js';
 import { renderLogros, renderLogro } from './logros.js';
 import { renderEventos } from './eventos.js';
+import { initAlarms } from './alarmas.js';
 import { renderLegendarias } from './legendarias.js';
 import { renderHistory } from './history.js';
 import { renderProfesiones } from './profesiones.js';
@@ -12,6 +13,7 @@ import { renderGuia } from './guia.js';
 import { renderBuilds } from './builds.js';
 import { initColumnResize, initHScroll } from './colresize.js';
 initColumnResize();
+initAlarms({ esc: (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" })[c]) });
 initHScroll();
 const normalizeText = (s) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 // Bazar GW2 — frontend (vanilla JS, sin build).
