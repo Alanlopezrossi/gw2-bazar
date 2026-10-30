@@ -746,6 +746,17 @@ table.cr-fixed td .coin { white-space: normal; }
 @keyframes alarm-in { from { transform: translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes alarm-glow { 0%, 100% { box-shadow: 0 10px 30px rgba(0,0,0,.45), 0 0 0 4px rgba(217,170,76,.15); } 50% { box-shadow: 0 10px 30px rgba(0,0,0,.45), 0 0 0 8px rgba(217,170,76,.30); } }
 @media (max-width: 600px) { .alarm-float { right: 12px; left: 12px; bottom: 12px; max-width: none; align-items: stretch; } }
+/* Monedas */
+.cur-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
+.cur-tile { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; color: var(--text); text-decoration: none; }
+.cur-tile:hover { border-color: var(--accent); }
+.cur-tile img { width: 32px; height: 32px; flex: none; }
+.cur-desc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin: 2px 0; }
+.cur-head { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 8px; }
+.cur-head img { width: 64px; height: 64px; flex: none; }
+.cur-head h1 { margin: 0; }
+.cur-vendor { border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; margin: 6px 0; background: var(--panel); }
+.cur-vendor > summary { cursor: pointer; padding: 4px 0; }
 
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }

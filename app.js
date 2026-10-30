@@ -4,6 +4,7 @@ import { renderMap } from './map.js';
 import { renderLogros, renderLogro } from './logros.js';
 import { renderEventos } from './eventos.js';
 import { initAlarms } from './alarmas.js';
+import { renderMonedas, renderMoneda } from './monedas.js';
 import { renderLegendarias } from './legendarias.js';
 import { renderHistory } from './history.js';
 import { renderProfesiones } from './profesiones.js';
@@ -247,6 +248,8 @@ function route() {
   else if (a === 'guia') { current = { name: 'guia', refresh() {} }; renderGuia(view, { api, esc, coin, itemCell }); }
   else if (a === 'profesiones') { current = { name: 'profesiones', refresh() {} }; renderProfesiones(view, { api, esc, coin, itemCell, debounce, meta: META, fillIcons }); }
   else if (a === 'legendarias') { const r = renderLegendarias(view, { api, esc, coin, itemCell, toast, debounce }); current = { name: 'legendarias', refresh() {} }; }
+  else if (a === 'monedas') { current = { name: 'monedas', refresh() {} }; renderMonedas(view, { api, esc, coin }); }
+  else if (a === 'moneda' && b) { current = { name: 'moneda', refresh() {} }; renderMoneda(view, Number(b), { api, esc, coin }); window.scrollTo(0, 0); }
   else if (a === 'eventos') { current = { name: 'eventos', refresh() {} }; renderEventos(view, { api, esc, toast, normalize: normalizeText }); }
   else if (a === 'logros') { current = { name: 'logros', refresh() {} }; renderLogros(view, { api, esc, toast, normalize: normalizeText, catId: b === 'c' && c ? Number(c) : null }); }
   else if (a === 'logro' && b) { current = { name: 'logro', refresh() {} }; renderLogro(view, { api, esc, toast, normalize: normalizeText, id: Number(b) }); window.scrollTo(0, 0); }

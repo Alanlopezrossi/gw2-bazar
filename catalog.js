@@ -161,6 +161,8 @@ export function searchCatalog({ q = '', type = '', rarity = '', source = '', sor
 
 /** Item por nombre en inglés (exacto, sin mayúsculas ni acentos). */
 let byEnName = null;
+/** Todas las filas del índice de items: [id, es, en, type, sub, rarity, level]. */
+export function catalogRows() { return IDX?.rows || []; }
 export function findByNameEn(name) {
   if (!IDX) return null;
   if (!byEnName) { byEnName = new Map(); for (const r of IDX.rows) { const k = normalize(r[2] || ''); if (k && !byEnName.has(k)) byEnName.set(k, r); } }
