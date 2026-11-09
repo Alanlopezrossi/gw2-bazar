@@ -30,7 +30,7 @@ const DAY = 1440;
 // Ocultos de entrada: ciclos de día/noche, torneos PvP y festivales que no siempre están activos.
 const HIDE_BY_DEFAULT = new Set(['core-dn', 'eod-dn', 'voe-dn', 'core-ateu', 'core-atna', 'festival-lc', 'festival-db', 'festival-ha']);
 // Versión de los ocultos por defecto: al subirla, los que se agregan se ocultan también a quien ya tenía su configuración.
-const HIDE_V = 2, HIDE_NEW = ['festival-ha'];
+const HIDE_V = 3, HIDE_NEW = ['festival-ha'];
 
 /** Todos los tramos (también los vacíos) que tocan [desde, hasta). */
 function segmentsAll(ev, fromMin, toMin) {
@@ -67,7 +67,7 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
 
   let saved = {};
   try { saved = JSON.parse(localStorage.getItem('gw2-eventos') || '{}'); } catch {}
-  const st = { cat: saved.cat || '', q: '', hidden: new Set(saved.hidden ? [...saved.hidden, ...((saved.hv || 1) < HIDE_V ? HIDE_NEW : [])] : [...HIDE_BY_DEFAULT]), window: saved.window || 180, range: ['2', '4', '8'].includes(saved.range) ? saved.range : '2', top: !!saved.top };
+  const st = { cat: saved.cat || '', q: '', hidden: new Set(saved.hidden ? [...saved.hidden, ...((saved.hv || 1) < HIDE_V ? HIDE_NEW : [])] : [...HIDE_BY_DEFAULT]), window: saved.window || 180, range: (saved.hv || 1) >= 3 && ['2', '4', '8'].includes(saved.range) ? saved.range : '2', top: !!saved.top, shift: 0 };
   const save = () => { try { localStorage.setItem('gw2-eventos', JSON.stringify({ hv: HIDE_V, cat: st.cat, hidden: [...st.hidden], window: st.window, range: st.range, top: st.top })); } catch {} };
 
   view.innerHTML = `
@@ -90,10 +90,10 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
       <p class="muted small">Las alarmas se repiten todos los días a la hora de ese evento hasta que las saques. Suenan mientras el Bazar esté abierto en el navegador (puede estar en otra pestaña o minimizado). Si jugás en pantalla completa y no lo escuchás, subí el volumen del navegador en el mezclador de Windows o usá el juego en «ventana sin bordes».</p></div>
     <div class="section"><h3>Horario <span class="muted small">(tu hora local · pasá el mouse por un evento para ver el detalle, tocalo para copiar el waypoint)</span></h3>
       <div class="ev-tools">
-        <label>Mostrar <select id="evRange"><option value="2">las próximas 2 horas</option><option value="4">las próximas 4 horas</option><option value="8">las próximas 8 horas</option></select></label>
-        <label><input type="checkbox" id="evTop"> Horas arriba (en vez de en cada evento)</label>
+        <label>Mostrar <select id="evRange"><option value="2">períodos de 2 horas (como la wiki)</option><option value="4">períodos de 4 horas</option><option value="8">períodos de 8 horas</option></select></label>
+        <span class="wk-nav"><button class="btn ghost small" data-shift="-1" title="Período anterior">◀</button><button class="btn ghost small" data-shift="0">Ahora</button><button class="btn ghost small" data-shift="1" title="Período siguiente">▶</button> <b id="evPeriod" class="num"></b></span>
       </div>
-      <div id="evTimeline" class="evt-wrapper"></div>
+      <div id="evTimeline" class="wk-wrap"></div>
       <p class="muted small" id="evHiddenNote"></p></div>
     <div class="section"><h3>Ahora y próximos</h3><div id="evNext"></div></div>
     <p class="muted small">Horarios: temporizador de la wiki oficial (${esc(data.v || '')}, copia del ${esc(data.at || '')}). Los eventos que dependen de que los jugadores los completen pueden adelantarse o atrasarse unos minutos. Los festivales sólo ocurren mientras el festival está activo en el juego.</p>`;
@@ -160,50 +160,61 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
         </tr>`;
       }).join('')}</tbody></table></div>` : '<div class="empty">Nada en ese rango con esos filtros.</div>';
 
-    // Formato de la wiki: título de cada evento arriba y una barra a todo el ancho con los segmentos seguidos
-    // (hora en negrita, nombre y waypoint). Ventana: desde 15 min antes hasta las próximas N horas (+15 min de margen).
+    // Línea de tiempo como la de la wiki: nombre del mapa a la izquierda, horas arriba, una fila por evento,
+    // la línea roja de "ahora" y el período siguiente atenuado. El período se alinea a tu hora local (2, 4 u 8 h).
     const H = Number(st.range) * 60;
-    const from = Math.floor((nowMin - 15) / 15) * 15;
-    const to = nowMin + H + 15;
+    const tz = new Date().getTimezoneOffset(); // minutos (Argentina: 180)
+    const localNow = nowMin - tz;
+    const from = Math.floor(localNow / H) * H + tz + st.shift * H;
+    const NEXT = Math.max(15, H / 8); // cola del período siguiente
+    const to = from + H + NEXT;
     const span = to - from;
     const pctOf = (m) => ((m - from) / span) * 100;
-    const limit = nowMin + H;
+    const limit = from + H;
     const rgb = (c) => `rgb(${c.join(',')})`;
-    const bgOf = (b) => (!b ? '#EED' : Array.isArray(b[0]) ? `linear-gradient(90deg, ${b.map(rgb).join(', ')})` : rgb(b));
+    const bgOf = (b) => (!b || b === 'transparent' ? null : Array.isArray(b[0]) ? `linear-gradient(90deg, ${b.map(rgb).join(', ')})` : rgb(b));
     const shown = events.filter((ev) => match(ev) && !st.hidden.has(ev.key));
     const byCat = new Map();
     for (const ev of shown) { if (!byCat.has(ev.c)) byCat.set(ev.c, []); byCat.get(ev.c).push(ev); }
-    // Barra con todos los tramos (incluidos los vacíos, que van rayados) recortada a la ventana.
-    const bar = (ev) => {
+    const tickStep = H <= 120 ? 15 : H <= 240 ? 30 : 60;
+    const ticks = [];
+    for (let m = from; m <= from + H; m += tickStep) ticks.push(m);
+    const nowIn = nowMin >= from && nowMin < to;
+    const wrapW = view.querySelector('#evTimeline')?.clientWidth || 1000;
+    const trackW = Math.max(980, wrapW - 20) - (wrapW < 700 ? 120 : 190);
+    const row = (ev) => {
       const parts = [];
-      const steps = segmentsAll(ev, from, to);
-      for (const sg of steps) {
+      const empty = bgOf(ev.s[0]?.[3]) || 'rgba(127,127,127,.18)';
+      for (const sg of segmentsAll(ev, from, to)) {
         const l = Math.max(sg.start, from), r = Math.min(sg.end, to);
         if (r <= l) continue;
         const g = ev.s[sg.r] || [];
-        const name = g[0] || '';
-        const w = ((r - l) / span) * 100;
-        const cls = ['evt-seg', w < 9 ? 'narrow' : '', sg.r ? '' : 'evt-empty', sg.start >= limit ? 'future' : '', sg.start <= nowMin && sg.end > nowMin && sg.r ? 'on' : ''].join(' ');
-        const pl = sg.r ? placeOf(ev, sg.r) : null;
+        const name = sg.r ? g[0] || '' : '';
+        const left = pctOf(l), w = ((r - l) / span) * 100;
+        const px = (w / 100) * trackW;
+        const live = name && sg.start <= nowMin && sg.end > nowMin;
+        const soon = name && !live && sg.start > nowMin && sg.start - nowMin <= 30;
+        const next = sg.start >= limit;
+        const pl = name ? placeOf(ev, sg.r) : null;
         const goto = pl ? `#/mapa/@${pl.c[0]},${pl.c[1]},${encodeURIComponent(`${pl.label} · ${fmt(sg.start)}–${fmt(sg.end)}${pl.exact ? '' : ' (punto de ruta)'}|${g[2] || ''}|${pl.wp && pl.exact ? `${pl.wp.c[0]};${pl.wp.c[1]};${pl.wp.es}` : ''}`)}` : '';
-        parts.push(`<div class="${cls}${pl ? ' has-map' : ''}" style="width:${w}%;${sg.r ? `background:${bgOf(g[3])}` : ''}" ${goto ? `data-goto="${esc(goto)}"` : ''} ${sg.r ? `title="${esc(es(name))}${es(name) !== name ? ` (${esc(name)})` : ''} · ${fmt(sg.start)}–${fmt(sg.end)} (${sg.end - sg.start} min)${pl ? (pl.exact ? '\nClic: ver el lugar exacto en el mapa' : '\nClic: ver su punto de ruta en el mapa') : ''}${g[2] ? `\nWaypoint ${esc(g[2])}` : ''}"` : ''}>${sg.r ? `<span class="evt-time">${bell(ev, sg.r, name, true)}${fmt(sg.start)}${pl ? ' <span class="evt-pin">📍</span>' : ''}${g[1] ? ` <a class="evt-wiki" target="_blank" rel="noopener" href="https://wiki.guildwars2.com/wiki/${encodeURIComponent(g[1].replace(/ /g, '_'))}" title="Abrir en la wiki">wiki ↗</a>` : ''}</span><span class="evt-name">${esc(es(name))}</span>${g[2] ? `<span class="evt-chat" data-copy="${esc(g[2])}" title="Copiar waypoint">${esc(g[2])}</span>` : ''}` : ''}</div>`);
+        const cls = ['wk-seg', name ? '' : 'wk-empty', next ? 'wk-next' : '', live ? 'wk-live' : '', soon ? 'wk-soon' : '', px < 60 ? 'wk-tiny' : px < 140 ? 'wk-narrow' : '', pl ? 'has-map' : ''].join(' ');
+        const done = live ? ((nowMin - sg.start) / (sg.end - sg.start)) * 100 : 0;
+        const badge = live ? `<span class="wk-badge">${px < 140 ? '' : 'EN CURSO · '}quedan ${rel(sg.end - nowMin)}</span>` : soon ? `<span class="wk-badge soon">en ${rel(sg.start - nowMin)}</span>` : '';
+        const title = name ? `${es(name)}${es(name) !== name ? ` (${name})` : ''}\n${fmt(sg.start)}–${fmt(sg.end)} (${sg.end - sg.start} min)${live ? `\nEN CURSO: quedan ${rel(sg.end - nowMin)}` : sg.start > nowMin ? `\nEmpieza en ${rel(sg.start - nowMin)}` : ''}${g[2] ? `\nWaypoint ${g[2]} (clic en el código para copiarlo)` : ''}${pl ? '\nClic: ver en el mapa' : ''}` : '';
+        parts.push(`<div class="${cls}" style="left:${left}%;width:${w}%;background:${name ? bgOf(g[3]) || '#e8e2c8' : empty}" ${goto ? `data-goto="${esc(goto)}"` : ''} ${title ? `title="${esc(title)}"` : ''}>
+          ${live ? `<i class="wk-done" style="width:${done}%"></i>` : ''}
+          ${name ? `<span class="wk-name">${bell(ev, sg.r, name, true)}${esc(es(name))}</span>${badge}${g[2] ? `<span class="wk-chat" data-copy="${esc(g[2])}">${esc(g[2])}</span>` : ''}` : ''}</div>`);
       }
-      return parts.join('');
+      return `<div class="wk-row"><div class="wk-label" title="${esc(ev.n)}">${esc(es(ev.n))}</div><div class="wk-track">${parts.join('')}<button class="wk-x" data-hide="${ev.key}" title="Ocultar esta fila">✕</button></div></div>`;
     };
-    let html = `<div class="evt-pointer" style="left:${pctOf(nowMin)}%"><span>${fmt(nowMin)}</span></div>
-      <div class="evt-limit" style="left:${pctOf(limit)}%"><span>Próximas ${st.range} h</span></div>`;
-    if (st.top) {
-      const ticks = [];
-      for (let m = Math.ceil(from / 30) * 30; m < to; m += 30) ticks.push(m);
-      html += `<div class="evt-toptimes">${ticks.map((m) => `<span style="left:${pctOf(m)}%">${fmt(m)}</span>`).join('')}</div>`;
-    }
-    for (const [cat, list] of byCat) {
-      html += `<div class="evt-cat"><h3>${esc(CAT_ES[cat] || cat)}</h3>`;
-      for (const ev of list) {
-        html += `<div class="evt-container"><h4 title="${esc(ev.n)}">${esc(es(ev.n))}</h4><div class="evt-bar ${st.top ? 'notimes' : ''}">${bar(ev)}<span class="evt-exit" data-hide="${ev.key}" title="Ocultar">✕</span></div></div>`;
-      }
-      html += '</div>';
-    }
+    let html = `<div class="wk"><div class="wk-head"><div class="wk-label"></div><div class="wk-ticks">
+        ${ticks.map((m) => `<span class="wk-tick" style="left:${pctOf(m)}%">${fmt(m)}</span>`).join('')}
+        <span class="wk-nextlab" style="left:${pctOf(limit)}%">Período siguiente</span>
+        ${nowIn ? `<span class="wk-nowlab" style="left:${pctOf(nowMin)}%">${fmt(nowMin)} · ahora</span>` : ''}</div></div>
+      <div class="wk-body"><div class="wk-overlay"><i class="wk-limit" style="left:${pctOf(limit)}%"></i>${nowIn ? `<i class="wk-now" style="left:${pctOf(nowMin)}%"></i>` : ''}${ticks.map((m) => `<i class="wk-grid" style="left:${pctOf(m)}%"></i>`).join('')}</div>`;
+    for (const [cat, list] of byCat) html += `<div class="wk-cat">${esc(CAT_ES[cat] || cat)}</div>${list.map(row).join('')}`;
+    html += '</div></div>';
+    view.querySelector('#evPeriod').textContent = `${fmt(from)} – ${fmt(from + H)}${st.shift ? (st.shift < 0 ? ' (período anterior)' : ' (período siguiente)') : ''}`;
     view.querySelector('#evTimeline').innerHTML = html;
     const hiddenList = events.filter((e) => st.hidden.has(e.key));
     view.querySelector('#evHiddenNote').innerHTML = hiddenList.length ? `Ocultos: ${hiddenList.map((e) => `<button class="btn ghost small" data-show="${e.key}">${esc(es(e.n))} ＋</button>`).join(' ')}` : '';
@@ -235,9 +246,8 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
   view.querySelector('#evCat').addEventListener('change', (e) => { st.cat = e.target.value; save(); paint(); });
   view.querySelector('#evWin').addEventListener('change', (e) => { st.window = Number(e.target.value); save(); paint(); });
   const rangeSel = view.querySelector('#evRange'); rangeSel.value = st.range;
-  const topChk = view.querySelector('#evTop'); topChk.checked = st.top;
-  rangeSel.addEventListener('change', (e) => { st.range = e.target.value; save(); paint(); });
-  topChk.addEventListener('change', (e) => { st.top = e.target.checked; save(); paint(); });
+  rangeSel.addEventListener('change', (e) => { st.range = e.target.value; st.shift = 0; save(); paint(); });
+  view.querySelector('.wk-nav').addEventListener('click', (e) => { const b = e.target.closest('[data-shift]'); if (!b) return; const d = Number(b.dataset.shift); st.shift = d ? st.shift + d : 0; paint(); });
   view.querySelector('#alLead').addEventListener('change', (e) => setAlarmSettings({ lead: Number(e.target.value) }));
   view.querySelector('#alSound').addEventListener('change', (e) => { setAlarmSettings({ sound: e.target.value }); playChime(e.target.value); });
   view.querySelector('#alVol').addEventListener('change', (e) => { setAlarmSettings({ vol: Number(e.target.value) }); playChime(); });
