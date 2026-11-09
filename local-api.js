@@ -72,6 +72,15 @@ const routes = {
   '/api/vendors': () => vendorMarkers(),
   '/api/items/by-ids': (q) => (q.get('ids') || '').split(',').map(Number).filter((x) => x > 0).slice(0, 300).map((id) => marketRow(id)),
   '/api/currency': async (q) => { await loadCatalog(); return currencyUses(q.get('en') || ''); },
+  // Dominios y progreso diario (con la key guardada en este navegador; sólo se usa con la API oficial).
+  '/api/account/progress': async () => {
+    const key = getKey();
+    if (!key) return [400, { error: 'Cargá tu API key para ver tu progreso.' }];
+    const parts = { masteryPoints: 'account/mastery/points', masteries: 'account/masteries', vaultDaily: 'account/wizardsvault/daily?lang=es', vaultWeekly: 'account/wizardsvault/weekly?lang=es', worldbosses: 'account/worldbosses', mapchests: 'account/mapchests', dailycrafting: 'account/dailycrafting', account: 'account' };
+    const out = { errors: {} };
+    await Promise.all(Object.entries(parts).map(async ([k, path]) => { try { out[k] = await getAuthed(path, key); } catch (e) { out.errors[k] = e.message; } }));
+    return out;
+  },
   '/api/account/wallet': async () => {
     const key = getKey();
     if (!key) return [400, { error: 'Cargá tu API key para ver tu cartera.' }];
