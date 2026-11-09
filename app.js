@@ -1115,7 +1115,9 @@ const dlg = $('#settings');
 async function openSettings() {
   const c = await api('/api/config').catch(() => ({}));
   $('#apiKey').value = '';
-  $('#keyStatus').textContent = c.hasKey ? `Key guardada: ${c.keyPreview}` : 'Sin API key.';
+  $('#keyRememberWrap').hidden = !c.browserKey;
+  $('#keyRemember').checked = !!c.remembered;
+  $('#keyStatus').textContent = c.hasKey ? `Key cargada: ${c.keyPreview}${c.browserKey ? (c.remembered ? ' · recordada en este navegador' : ' · sólo en esta pestaña') : ''}` : 'Sin API key.';
   dlg.showModal();
 }
 $('#btnSettings').addEventListener('click', openSettings);
@@ -1124,7 +1126,8 @@ $('#btnSaveKey').addEventListener('click', async () => {
   if (!v) return toast('Pegá tu API key primero');
   $('#keyStatus').textContent = 'Verificando…';
   try {
-    const r = await api('/api/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ apiKey: v }) });
+    const r = await api('/api/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ apiKey: v, remember: $('#keyRemember').checked }) });
+    $('#apiKey').value = '';
     $('#keyStatus').textContent = `OK: cuenta ${r.name} · permisos: ${r.permissions.join(', ')}`;
     toast('API key guardada');
     if (STATUS) STATUS.hasKey = true;

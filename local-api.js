@@ -46,9 +46,18 @@ function loadCatalog() {
   return catalogP;
 }
 
+// La API key nunca sale del navegador salvo hacia api.guildwars2.com (la política de seguridad de la página bloquea
+// cualquier otro destino). Por defecto vive sólo en esta pestaña (sessionStorage: se borra al cerrarla);
+// con «Recordar en este navegador» queda en localStorage hasta que la borres.
 const KEY_STORE = 'gw2-bazar-apikey';
-function getKey() { try { return localStorage.getItem(KEY_STORE) || ''; } catch { return ''; } }
-function setKey(k) { try { if (k) localStorage.setItem(KEY_STORE, k); else localStorage.removeItem(KEY_STORE); } catch { /* sin almacenamiento */ } }
+function getKey() { try { return sessionStorage.getItem(KEY_STORE) || localStorage.getItem(KEY_STORE) || ''; } catch { return ''; } }
+function setKey(k, remember = false) {
+  try {
+    sessionStorage.removeItem(KEY_STORE); localStorage.removeItem(KEY_STORE);
+    if (k) (remember ? localStorage : sessionStorage).setItem(KEY_STORE, k);
+  } catch { /* sin almacenamiento */ }
+}
+const remembered = () => { try { return !!localStorage.getItem(KEY_STORE); } catch { return false; } };
 
 function num(v, d = 0) {
   if (v == null || v === '') return d;
@@ -98,12 +107,12 @@ const routes = {
       if (!/^[A-F0-9-]{60,80}$/i.test(apiKey)) return [400, { error: 'Eso no parece una API key de GW2 (formato XXXXXXXX-XXXX-...).' }];
       try {
         const info = await tokenInfo(apiKey);
-        setKey(apiKey);
+        setKey(apiKey, !!body.remember);
         return { ok: true, hasKey: true, name: info.name, permissions: info.permissions };
       } catch (e) { return [400, { error: `La key no es válida: ${e.message}` }]; }
     }
     const k = getKey();
-    return { hasKey: !!k, keyPreview: k ? `${k.slice(0, 8)}…${k.slice(-4)}` : '', browserKey: true };
+    return { hasKey: !!k, keyPreview: k ? `${k.slice(0, 4)}…${k.slice(-4)}` : '', browserKey: true, remembered: remembered() };
   },
   '/api/account': async (q) => {
     const key = getKey();

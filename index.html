@@ -2,6 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://render.guildwars2.com https://tiles.guildwars2.com https://wiki.guildwars2.com https://cdnjs.cloudflare.com; connect-src 'self' https://api.guildwars2.com https://api.datawars2.ie https://wiki.guildwars2.com https://web.archive.org; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'" />
+  <meta name="referrer" content="no-referrer" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bazar GW2</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
@@ -77,11 +79,12 @@
   <dialog id="settings">
     <form method="dialog" id="settingsForm">
       <h2>Ajustes</h2>
-      <p class="muted">La API key es opcional y sólo hace falta para <strong>Mi cuenta</strong>. Se guarda en <code>data/config.json</code> en esta PC y sólo se envía a <code>api.guildwars2.com</code>.</p>
-      <p class="muted">Creala en <a href="https://account.arena.net/applications" target="_blank" rel="noopener">account.arena.net/applications</a> con permisos <code>account</code>, <code>inventories</code>, <code>characters</code> y <code>tradingpost</code>.</p>
+      <p class="muted">La API key es opcional y sólo hace falta para <strong>Mi cuenta</strong>. Queda <strong>sólo en tu navegador</strong> (no se manda a ningún servidor nuestro) y se usa únicamente con <code>api.guildwars2.com</code>. Las keys de GW2 son de <strong>sólo lectura</strong>: nadie puede usarlas para mover items ni oro, y las podés anular cuando quieras desde ArenaNet.</p>
+      <p class="muted">Creala en <a href="https://account.arena.net/applications" target="_blank" rel="noopener">account.arena.net/applications</a> con los permisos <code>account</code>, <code>progression</code>, <code>inventories</code>, <code>characters</code>, <code>unlocks</code> y <code>wallet</code>. Conviene crear una key sólo para esta página: si alguna vez querés cortar el acceso, la borrás ahí y listo.</p>
       <label>API key
-        <input id="apiKey" autocomplete="off" spellcheck="false" placeholder="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXXXXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" />
+        <input id="apiKey" type="password" autocomplete="off" spellcheck="false" placeholder="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXXXXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" />
       </label>
+      <label class="chk" id="keyRememberWrap" hidden><input type="checkbox" id="keyRemember"> Recordar en este navegador <span class="muted small">(si no, se borra al cerrar la pestaña; no lo marques en una PC compartida)</span></label>
       <p id="keyStatus" class="muted small"></p>
       <div class="row-end">
         <button type="button" class="btn ghost" id="btnClearKey">Borrar key</button>
