@@ -260,8 +260,9 @@ function route() {
   else if (a === 'logros') {
     current = { name: 'logros', refresh() {} };
     const opts = { api, esc, toast, normalize: normalizeText, catId: b === 'c' && c ? Number(c) : null };
-    // Bazar local con tu cuenta: panel completo. En la versión pública (o con #/logros/cats) va la lista por categorías.
-    if (!b && STATUS && !STATUS.publicMode) import('./logros-pro.js').then((m) => m.renderLogrosPanel(view, opts)).catch(() => renderLogros(view, opts));
+    // Con cuenta (Bazar local, o una API key cargada en «Mi cuenta» de la versión online): panel completo.
+    // Sin key, o con #/logros/cats, va la lista por categorías.
+    if (!b && STATUS && (!STATUS.publicMode || STATUS.hasKey)) import('./logros-pro.js').then((m) => m.renderLogrosPanel(view, opts)).catch(() => renderLogros(view, opts));
     else renderLogros(view, opts);
   }
   else if (a === 'logro' && b) { current = { name: 'logro', refresh() {} }; renderLogro(view, { api, esc, toast, normalize: normalizeText, id: Number(b) }); window.scrollTo(0, 0); }
@@ -1106,6 +1107,7 @@ $('#btnSaveKey').addEventListener('click', async () => {
     const r = await api('/api/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ apiKey: v }) });
     $('#keyStatus').textContent = `OK: cuenta ${r.name} · permisos: ${r.permissions.join(', ')}`;
     toast('API key guardada');
+    if (STATUS) STATUS.hasKey = true;
     if (current?.name === 'cuenta') renderAccount(true);
   } catch (e) {
     $('#keyStatus').textContent = e.message;
@@ -1114,6 +1116,7 @@ $('#btnSaveKey').addEventListener('click', async () => {
 $('#btnClearKey').addEventListener('click', async () => {
   await api('/api/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ apiKey: '' }) });
   $('#keyStatus').textContent = 'Key borrada.';
+  if (STATUS) STATUS.hasKey = false;
 });
 $('#btnRefresh').addEventListener('click', async () => { await api('/api/refresh', { method: 'POST' }); toast('Actualizando precios…'); });
 
