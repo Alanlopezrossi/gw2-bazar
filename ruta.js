@@ -163,7 +163,7 @@ export async function renderRuta(view, { api, esc, coin }) {
         <p class="muted small">Actualizado ${new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}. La API de GW2 puede tardar unos minutos en reflejar lo que hiciste en el juego.</p>`;
       paint();
     } catch (e) {
-      out.innerHTML = `<div class="empty">No pude leer tu cuenta: ${esc(e.message)}. Revisá que la API key esté cargada en «Mi cuenta».</div>`;
+      out.innerHTML = `<div class="empty">No pude traer los logros de la API oficial de Guild Wars 2 (${esc(e.message)}). Probá de nuevo en un rato con ↻.</div>`;
     }
   }
 

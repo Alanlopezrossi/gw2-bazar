@@ -884,7 +884,7 @@ table.cr-fixed td .coin { white-space: normal; }
 .ho-wide { grid-column: 1 / -1; }
 .ho-ev { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 6px; }
 .ho-ev li { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); }
-.ho-ev li.live { border-color: #3f9a5a; background: rgba(63,154,90,.08); }
+.ho-ev li.is-live { border-color: #3f9a5a; background: rgba(63,154,90,.08); }
 .ho-when { min-width: 150px; font-size: 13px; }
 .ho-what { flex: 1; min-width: 0; }
 .ho-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 5px; font-size: 14px; }
@@ -900,6 +900,48 @@ table.cr-fixed td .coin { white-space: normal; }
 .ho-ev li { display: grid; grid-template-columns: 150px minmax(0, 1fr) auto; gap: 8px; align-items: center; }
 .ho-ev li .ho-when { min-width: 0; }
 @media (max-width: 520px) { .ho-ev li { grid-template-columns: 1fr auto; } .ho-ev li .ho-when { grid-column: 1 / -1; } }
+/* ---------- Menú en dos niveles (secciones + páginas) ---------- */
+.top { flex-wrap: wrap; row-gap: 0; padding-bottom: 0; }
+.top > .brand, .top > .groups, .top > .live, .top > #btnSettings { margin-bottom: 10px; }
+.groups { display: flex; gap: 4px; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.groups::-webkit-scrollbar { display: none; }
+.groups a { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; color: var(--muted); padding: 7px 14px; border-radius: 999px; font-weight: 600; font-size: 15px; border: 1px solid transparent; }
+.groups a span { font-size: 15px; filter: grayscale(.3); }
+.groups a:hover { color: var(--text); background: var(--panel); text-decoration: none; }
+.groups a.active { color: var(--text); border-color: var(--accent); background: rgba(217,170,76,.12); }
+.top > .tabs { order: 10; flex: 0 0 100%; display: flex; gap: 2px; margin: 0 -20px; padding: 0 20px; border-top: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; }
+.top > .tabs[hidden] { display: none; }
+.top > .tabs::-webkit-scrollbar { display: none; }
+.top > .tabs a { white-space: nowrap; flex: 0 0 auto; color: var(--muted); padding: 9px 12px 8px; border-radius: 0; border-bottom: 3px solid transparent; font-weight: 500; font-size: 14px; background: none; }
+.top > .tabs a:hover { color: var(--text); background: none; text-decoration: none; border-bottom-color: var(--line); }
+.top > .tabs a.active { color: var(--accent); background: none; border-bottom-color: var(--accent); }
+.progress { top: var(--hdr, 96px) !important; }
+@media (max-width: 860px) {
+  .top { padding: 8px 12px 0; gap: 8px; }
+  .top > .tabs { order: 10; margin: 0 -12px; padding: 0 12px; width: auto; }
+  .groups { order: 5; flex: 0 0 100%; }
+  .groups a { padding: 6px 11px; font-size: 14px; }
+}
+.ach-cats, .leg-inv { top: calc(var(--hdr, 96px) + 12px) !important; max-height: calc(100vh - var(--hdr, 96px) - 24px); }
+.groups a b { font-weight: inherit; }
+.groups .gs { display: none; }
+.top > .tabs { flex-basis: calc(100% + 40px); }
+@media (max-width: 860px) {
+  .top > .tabs { flex-basis: calc(100% + 24px); }
+  .groups .gl { display: none; }
+  .groups .gs { display: inline; }
+}
+@media (max-width: 420px) { .groups a { padding: 6px 9px; gap: 4px; } }
+@media (max-width: 520px) {
+  .groups { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; overflow: visible; }
+  .groups a { flex-direction: column; gap: 1px; padding: 5px 2px; font-size: 11.5px; border-radius: 10px; justify-content: center; text-align: center; }
+  .groups a span { font-size: 17px; }
+}
+details.ev-alarms > summary { cursor: pointer; list-style: none; padding: 4px 0; }
+details.ev-alarms > summary::-webkit-details-marker { display: none; }
+details.ev-alarms > summary::after { content: ' ▸'; color: var(--muted); }
+details.ev-alarms[open] > summary::after { content: ' ▾'; }
+details.ev-alarms[open] > summary { margin-bottom: 8px; }
 
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }

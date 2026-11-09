@@ -54,7 +54,7 @@ export async function renderInicio(view, { api, esc, coin, itemCell }) {
       const mapEs = new Map((labels?.maps || []).map((m) => [m.en.toLowerCase(), m.es]));
       const es = (t) => NAME_ES[t] || mapEs.get(String(t || '').toLowerCase()) || t;
       rows.sort((a, b) => a.sg.start - b.sg.start);
-      const li = (r) => `<li class="${r.live ? 'live' : ''}">
+      const li = (r) => `<li class="${r.live ? 'is-live' : ''}">
           <span class="ho-when">${r.live ? `<b class="pill good">EN CURSO</b> quedan ${rel(r.sg.end - now)}` : `<b>${fmt(r.sg.start)}</b> <span class="muted">en ${rel(r.sg.start - now)}</span>`}</span>
           <span class="ho-what"><b>${esc(es(r.g[0]))}</b> <span class="muted small">· ${esc(es(r.ev.n))}</span></span>
           ${r.g[2] ? `<button class="btn ghost small" data-copy="${esc(r.g[2])}" title="Copiar waypoint">${esc(r.g[2])}</button>` : ''}</li>`;

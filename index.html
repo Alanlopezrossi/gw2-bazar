@@ -17,26 +17,12 @@
       <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 18c2 4 10 4 12 0M12 12h.01M20 12h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg>
       <span>Bazar <em>GW2</em></span>
     </a>
-    <nav class="tabs" id="tabs">
-      <a href="#/hoy" data-tab="hoy">Hoy</a>
-      <a href="#/bazar" data-tab="bazar">Bazar en vivo</a>
-      <a href="#/recs/vender" data-tab="recs">Recomendados</a>
-      <a href="#/items" data-tab="items">Items</a>
-      <a href="#/equipo" data-tab="equipo">Equipo</a>
-      <a href="#/profesiones" data-tab="profesiones">Profesiones</a>
-      <a href="#/guia" data-tab="guia">Guía</a>
-      <a href="#/builds" data-tab="builds">Builds</a>
-      <a href="#/legendarias" data-tab="legendarias">Legendarias</a>
-      <a href="#/ruta" data-tab="ruta">Ruta legendaria</a>
-      <a href="#/favoritos" data-tab="favoritos">Favoritos</a>
-      <a href="#/comparar" data-tab="comparar">Comparar</a>
-      <a href="#/vendedores" data-tab="vendedores">NPC</a>
-      <a href="#/logros" data-tab="logros">Logros</a>
-      <a href="#/monedas" data-tab="monedas">Monedas</a>
-      <a href="#/eventos" data-tab="eventos">Eventos</a>
-      <a href="#/mapa" data-tab="mapa">Mapa</a>
-      <a href="#/calc" data-tab="calc">Calculadora</a>
-      <a href="#/cuenta" data-tab="cuenta">Mi cuenta</a>
+    <nav class="groups" id="groups" aria-label="Secciones">
+      <a href="#/hoy" data-group="hoy"><span aria-hidden="true">☀</span> Hoy</a>
+      <a href="#/bazar" data-group="bazar"><span aria-hidden="true">⚖</span> Bazar</a>
+      <a href="#/legendarias" data-group="craft"><span aria-hidden="true">⚒</span> <b class="gl">Crafteo y legendarias</b><b class="gs">Crafteo</b></a>
+      <a href="#/eventos" data-group="juego"><span aria-hidden="true">🗺</span> Juego</a>
+      <a href="#/cuenta" data-group="cuenta"><span aria-hidden="true">👤</span> <b class="gl">Mi cuenta</b><b class="gs">Cuenta</b></a>
     </nav>
     <div class="live" id="live" title="Estado de sincronización">
       <span class="dot"></span><span id="liveText">conectando…</span>
@@ -44,6 +30,27 @@
     <button class="icon-btn" id="btnSettings" title="Ajustes" aria-label="Ajustes">
       <svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
     </button>
+    <nav class="tabs" id="tabs" aria-label="Páginas de la sección">
+      <a href="#/hoy" data-tab="hoy" data-g="hoy">Hoy</a>
+      <a href="#/bazar" data-tab="bazar" data-g="bazar">Bazar en vivo</a>
+      <a href="#/recs/vender" data-tab="recs" data-g="bazar">Recomendados</a>
+      <a href="#/items" data-tab="items" data-g="bazar">Items</a>
+      <a href="#/favoritos" data-tab="favoritos" data-g="bazar">Favoritos</a>
+      <a href="#/comparar" data-tab="comparar" data-g="bazar">Comparar</a>
+      <a href="#/monedas" data-tab="monedas" data-g="bazar">Monedas</a>
+      <a href="#/calc" data-tab="calc" data-g="bazar">Calculadora</a>
+      <a href="#/legendarias" data-tab="legendarias" data-g="craft">Legendarias</a>
+      <a href="#/ruta" data-tab="ruta" data-g="craft">Ruta legendaria</a>
+      <a href="#/equipo" data-tab="equipo" data-g="craft">Equipo</a>
+      <a href="#/profesiones" data-tab="profesiones" data-g="craft">Profesiones</a>
+      <a href="#/guia" data-tab="guia" data-g="craft">Guías</a>
+      <a href="#/eventos" data-tab="eventos" data-g="juego">Eventos</a>
+      <a href="#/logros" data-tab="logros" data-g="juego">Logros</a>
+      <a href="#/mapa" data-tab="mapa" data-g="juego">Mapa</a>
+      <a href="#/vendedores" data-tab="vendedores" data-g="juego">NPC vendedores</a>
+      <a href="#/builds" data-tab="builds" data-g="juego">Builds</a>
+      <a href="#/cuenta" data-tab="cuenta" data-g="cuenta">Mi cuenta</a>
+    </nav>
   </header>
   <div class="progress" id="progress"><span></span></div>
 

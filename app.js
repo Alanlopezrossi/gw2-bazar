@@ -227,10 +227,26 @@ let lastView = '';
 let calcKeys = null;
 document.addEventListener('keydown', (e) => { if (current?.name === 'calc' && calcKeys && !document.querySelector('.drawer.open')) calcKeys(e); });
 
+// Alto real del encabezado (cambia con el ancho de la ventana): lo usan la barra de progreso y las tablas pegajosas.
+(() => { const h = document.querySelector('header.top'); if (!h) return; const set = () => document.documentElement.style.setProperty('--hdr', `${h.offsetHeight}px`); new ResizeObserver(set).observe(h); set(); })();
+// Menú en dos niveles: arriba las secciones; abajo, las páginas de la sección actual.
+let navGroup = 'bazar';
+function paintNav(tab) {
+  const links = $$('#tabs a');
+  const me = links.find((x) => x.dataset.tab === tab);
+  if (me) navGroup = me.dataset.g;
+  links.forEach((x) => { x.classList.toggle('active', x === me); x.hidden = x.dataset.g !== navGroup; });
+  $$('#groups a').forEach((x) => x.classList.toggle('active', x.dataset.group === navGroup));
+  const n = links.filter((x) => x.dataset.g === navGroup).length;
+  $('#tabs').hidden = n < 2;
+  // El botón de cada sección lleva a la última página que abriste en ella.
+  if (me) { try { localStorage.setItem(`gw2-nav-${navGroup}`, me.getAttribute('href')); } catch {} }
+  $$('#groups a').forEach((x) => { try { const h = localStorage.getItem(`gw2-nav-${x.dataset.group}`); if (h) x.setAttribute('href', h); } catch {} });
+}
 function route() {
   const h = location.hash.replace(/^#\/?/, '') || 'bazar';
   const [a, b, c] = h.split('/');
-  $$('#tabs a').forEach((x) => x.classList.toggle('active', x.dataset.tab === (a === 'logro' ? 'logros' : a)));
+  paintNav(a === 'logro' ? 'logros' : a === 'moneda' ? 'monedas' : a);
   if (a !== 'calc' && a !== 'item') calcKeys = null;
   if (a === 'item' && b) {
     openItem(Number(b));

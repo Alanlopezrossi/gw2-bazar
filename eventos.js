@@ -71,14 +71,21 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
   const save = () => { try { localStorage.setItem('gw2-eventos', JSON.stringify({ hv: HIDE_V, cat: st.cat, hidden: [...st.hidden], window: st.window, range: st.range, top: st.top })); } catch {} };
 
   view.innerHTML = `
-    <div class="page-head"><div><h1>Eventos</h1><p>Metaeventos y jefes de mundo con sus horarios en <b>tu hora local</b>. Arriba, lo que está pasando y lo que empieza pronto; abajo, la línea de tiempo de cada mapa. Tocá un evento para copiar su waypoint o verlo en el mapa.</p></div>
+    <div class="page-head"><div><h1>Eventos</h1><p>Metaeventos y jefes de mundo con sus horarios en <b>tu hora local</b>. Primero la línea de tiempo de cada mapa (como la wiki), con la línea roja de «ahora»; abajo, las alarmas y la lista de lo que está pasando y empieza pronto. Tocá un evento para verlo en el mapa o su código para copiar el waypoint.</p></div>
       <div class="clock"><div class="muted small">Hora local</div><div id="evClock" class="num"></div><div class="muted small" id="evUtc"></div></div></div>
     <div class="filters">
       <input type="search" id="evQ" placeholder="Buscar evento o mapa… (ej: Tequatl, Octoparra, Arco del León)">
       <label>Expansión <select id="evCat"><option value="">Todas</option>${cats.map((c) => `<option value="${esc(c)}" ${st.cat === c ? 'selected' : ''}>${esc(CAT_ES[c] || c)}</option>`).join('')}</select></label>
       <label>Lista: próximas <select id="evWin">${[60, 120, 180, 360, 720].map((m) => `<option value="${m}" ${st.window === m ? 'selected' : ''}>${m / 60} h</option>`).join('')}</select></label>
     </div>
-    <div class="section ev-alarms"><h3>🔔 Alarmas <span class="muted small">(tocá la campanita de un evento para que te avise cuando empieza)</span></h3>
+    <div class="section"><h3>Horario <span class="muted small">(tu hora local · pasá el mouse por un evento para ver el detalle, tocalo para copiar el waypoint)</span></h3>
+      <div class="ev-tools">
+        <label>Mostrar <select id="evRange"><option value="2">períodos de 2 horas (como la wiki)</option><option value="4">períodos de 4 horas</option><option value="8">períodos de 8 horas</option></select></label>
+        <span class="wk-nav"><button class="btn ghost small" data-shift="-1" title="Período anterior">◀</button><button class="btn ghost small" data-shift="0">Ahora</button><button class="btn ghost small" data-shift="1" title="Período siguiente">▶</button> <b id="evPeriod" class="num"></b></span>
+      </div>
+      <div id="evTimeline" class="wk-wrap"></div>
+      <p class="muted small" id="evHiddenNote"></p></div>
+    <details class="section ev-alarms" id="evAlarms"><summary><h3 style="display:inline">🔔 Alarmas</h3> <span class="muted small">tocá la campanita 🔕 de un evento para que te avise cuando empieza · ajustes de sonido</span></summary>
       <div class="ev-tools">
         <label>Avisar <select id="alLead">${[0, 1, 2, 5, 10, 15].map((m) => `<option value="${m}">${m ? `${m} min antes` : 'justo al empezar'}</option>`).join('')}</select></label>
         <label>Sonido <select id="alSound">${SOUND_NAMES.map(([k, l]) => `<option value="${k}">${esc(l)}</option>`).join('')}</select></label>
@@ -87,14 +94,7 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
         <button class="btn ghost small" id="alNotif"></button>
       </div>
       <div id="alList" class="al-list"></div>
-      <p class="muted small">Las alarmas se repiten todos los días a la hora de ese evento hasta que las saques. Suenan mientras el Bazar esté abierto en el navegador (puede estar en otra pestaña o minimizado). Si jugás en pantalla completa y no lo escuchás, subí el volumen del navegador en el mezclador de Windows o usá el juego en «ventana sin bordes».</p></div>
-    <div class="section"><h3>Horario <span class="muted small">(tu hora local · pasá el mouse por un evento para ver el detalle, tocalo para copiar el waypoint)</span></h3>
-      <div class="ev-tools">
-        <label>Mostrar <select id="evRange"><option value="2">períodos de 2 horas (como la wiki)</option><option value="4">períodos de 4 horas</option><option value="8">períodos de 8 horas</option></select></label>
-        <span class="wk-nav"><button class="btn ghost small" data-shift="-1" title="Período anterior">◀</button><button class="btn ghost small" data-shift="0">Ahora</button><button class="btn ghost small" data-shift="1" title="Período siguiente">▶</button> <b id="evPeriod" class="num"></b></span>
-      </div>
-      <div id="evTimeline" class="wk-wrap"></div>
-      <p class="muted small" id="evHiddenNote"></p></div>
+      <p class="muted small">Las alarmas se repiten todos los días a la hora de ese evento hasta que las saques. Suenan mientras el Bazar esté abierto en el navegador (puede estar en otra pestaña o minimizado). Si jugás en pantalla completa y no lo escuchás, subí el volumen del navegador en el mezclador de Windows o usá el juego en «ventana sin bordes».</p></details>
     <div class="section"><h3>Ahora y próximos</h3><div id="evNext"></div></div>
     <p class="muted small">Horarios: temporizador de la wiki oficial (${esc(data.v || '')}, copia del ${esc(data.at || '')}). Los eventos que dependen de que los jugadores los completen pueden adelantarse o atrasarse unos minutos. Los festivales sólo ocurren mientras el festival está activo en el juego.</p>`;
 
@@ -127,6 +127,7 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
     nb.textContent = cfg.notif && perm === 'granted' ? '🪟 Aviso de Windows: activado' : '🪟 Activar también aviso de Windows';
     nb.disabled = perm === 'denied';
     const list = alarmList();
+    if (list.length && !view.dataset.alOpened) { view.dataset.alOpened = '1'; view.querySelector('#evAlarms').open = true; }
     view.querySelector('#alList').innerHTML = list.length ? `<b class="small">Activas:</b> ${list.map((a) => `<span class="chip">🔔 ${esc(a.name)} <span class="muted">· ${esc(a.map)}</span> <button class="al-x" data-aldel="${esc(a.id)}" title="Sacar alarma">✕</button></span>`).join(' ')}` : '<span class="muted small">No tenés alarmas. Tocá 🔕 al lado de un evento (en la lista o en el horario) para activarla.</span>';
   }
   function paint() {
