@@ -876,6 +876,30 @@ table.cr-fixed td .coin { white-space: normal; }
 .rt-sec-intro { color: var(--muted); font-size: 14px; max-width: 95ch; margin: 6px 0 4px; }
 .rt-more { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .rt-guide:not(:empty) { margin-top: 10px; border-top: 1px dashed var(--line); padding-top: 8px; }
+/* Hoy */
+.ho-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 14px; }
+.ho-card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; min-width: 0; }
+.ho-card h3 { margin: 0 0 8px; font-size: 16px; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.ho-card h4 { margin: 10px 0 4px; font-size: 14px; }
+.ho-wide { grid-column: 1 / -1; }
+.ho-ev { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 6px; }
+.ho-ev li { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); }
+.ho-ev li.live { border-color: #3f9a5a; background: rgba(63,154,90,.08); }
+.ho-when { min-width: 150px; font-size: 13px; }
+.ho-what { flex: 1; min-width: 0; }
+.ho-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 5px; font-size: 14px; }
+.ho-list li.done { opacity: .55; }
+.ho-list li { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
+.ho-price { margin-left: auto; }
+.ho-ach { grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+.ho-ach li { display: block; }
+.ho-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 14px; }
+.ho-cols h4 { margin: 0 0 6px; }
+.ho-ev { display: grid; grid-template-columns: 1fr; }
+.ho-ev li { justify-self: stretch; width: 100%; box-sizing: border-box; text-align: left; }
+.ho-ev li { display: grid; grid-template-columns: 150px minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.ho-ev li .ho-when { min-width: 0; }
+@media (max-width: 520px) { .ho-ev li { grid-template-columns: 1fr auto; } .ho-ev li .ho-when { grid-column: 1 / -1; } }
 
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }

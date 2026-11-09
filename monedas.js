@@ -94,9 +94,18 @@ export async function renderMoneda(view, id, { api, esc, coin }) {
 /** Sección "Acquisition" de la página de la wiki (copia archivada, a través del Bazar local). Sólo texto. */
 async function loadWiki(box, title, url, esc) {
   try {
-    const r = await fetch(`/api/wiki-archive?title=${encodeURIComponent(title.replace(/ /g, '_'))}`);
-    if (!r.ok) throw new Error(String(r.status));
-    const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
+    // Primero la wiki oficial en vivo (su API permite leer desde cualquier página); si no responde, la copia archivada del Bazar local.
+    let html = null;
+    try {
+      const j = await fetch(`https://wiki.guildwars2.com/api.php?action=parse&redirects=1&prop=text&format=json&origin=*&page=${encodeURIComponent(title.replace(/ /g, '_'))}`).then((x) => x.json());
+      if (j.parse?.text?.['*']) html = `<div id="mw-content-text"><div class="mw-parser-output">${j.parse.text['*']}</div></div>`;
+    } catch { /* wiki caída */ }
+    if (!html) {
+      const r = await fetch(`/api/wiki-archive?title=${encodeURIComponent(title.replace(/ /g, '_'))}`);
+      if (!r.ok) throw new Error(String(r.status));
+      html = await r.text();
+    }
+    const doc = new DOMParser().parseFromString(html, 'text/html');
     const root = doc.querySelector('#mw-content-text .mw-parser-output') || doc.querySelector('#mw-content-text');
     const h = root && [...root.querySelectorAll('h2')].find((x) => /acquisition|obtain/i.test(x.textContent));
     if (!h) throw new Error('sin sección');

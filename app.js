@@ -248,6 +248,10 @@ function route() {
   else if (a === 'guia') { current = { name: 'guia', refresh() {} }; renderGuia(view, { api, esc, coin, itemCell }); }
   else if (a === 'profesiones') { current = { name: 'profesiones', refresh() {} }; renderProfesiones(view, { api, esc, coin, itemCell, debounce, meta: META, fillIcons }); }
   else if (a === 'legendarias') { const r = renderLegendarias(view, { api, esc, coin, itemCell, toast, debounce }); current = { name: 'legendarias', refresh() {} }; }
+  else if (a === 'hoy') {
+    current = { name: 'hoy', refresh() {} };
+    import('./inicio.js').then((m) => m.renderInicio(view, { api, esc, coin, itemCell })).catch((e) => { view.innerHTML = `<div class="empty">${esc(e.message)}</div>`; });
+  }
   else if (a === 'favoritos' || a === 'comparar' || a === 'vendedores') {
     current = { name: a, refresh() {} };
     import('./extras.js').then((m) => (a === 'favoritos' ? m.renderFavoritos : a === 'comparar' ? m.renderComparar : m.renderVendedores)(view, { api, esc, coin, itemCell, debounce }))

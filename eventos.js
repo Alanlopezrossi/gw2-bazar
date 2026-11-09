@@ -7,7 +7,7 @@ const CAT_ES = {
   'Path of Fire': 'Path of Fire', 'Living World Season 4': 'Mundo Viviente T4', 'The Icebrood Saga': 'The Icebrood Saga', 'End of Dragons': 'End of Dragons',
   'Secrets of the Obscure': 'Secrets of the Obscure', 'Janthir Wilds': 'Janthir Wilds', 'Visions of Eternity': 'Visions of Eternity', 'Public Instances': 'Instancias públicas', 'Special Events': 'Festivales',
 };
-const NAME_ES = {
+export const NAME_ES = {
   'Day and night': 'Día y noche', 'Cantha: Day and night': 'Cantha: día y noche', 'Castora: Day and night': 'Castora: día y noche', Day: 'Día', Dusk: 'Atardecer', Night: 'Noche', Dawn: 'Amanecer',
   'World bosses': 'Jefes de mundo', 'Hard world bosses': 'Jefes de mundo difíciles', 'Ley-Line Anomaly': 'Anomalía de línea ley', Invasions: 'Invasiones', 'Fractal Incursions': 'Incursiones fractales',
   'EU PvP Tournaments': 'Torneos PvP (EU)', 'NA PvP Tournaments': 'Torneos PvP (NA)', 'Awakened Invasion': 'Invasión de los Despertados', "Defeat Scarlet's minions": 'Derrotar a los esbirros de Scarlet',
