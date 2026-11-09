@@ -86,6 +86,22 @@ function fixHow(g, s) {
   return s.how;
 }
 
+// Secciones (por generación y tipo), con lo que tienen en común todas sus legendarias.
+const GEN1 = ['crepusculo', 'amanecer', 'haz', 'el bifrost', 'meteorlogico', 'rodgort', 'incineradora', 'el festin', 'colmilloescarcha', 'aullador', 'kudzu', 'el sonador', 'el juglar', 'el juggernaut', 'gracia', 'el depredador', 'las profecias del buscador de la llama', 'kraitkin', 'frenesi', 'kamohoali i kotaki', 'eternidad'];
+const SECTIONS = [
+  { id: 'g1', title: 'Armas de 1.ª generación (juego base)', test: (k) => GEN1.includes(k),
+    intro: 'Cada una se fabrica en la Forja Mística con 4 cosas: el precursor, el Don de la fortuna (77 tréboles místicos, 250 ectos, el Don de la magia y el Don del poder), el Don de la maestría (Don de la exploración por completar el mapa de Tyria central, Don de la batalla por la pista de recompensa de McM, esquirla de hematites y 250 esquirlas de obsidiana) y el don propio del arma. El precursor se compra en el bazar o se hace con 3 colecciones: la I pide «Anticuario venerado», la II «Maestre de leyendas» y la III «Historiador de armamento» (dominio Artesanía legendaria de Tyria central).' },
+  { id: 'g2', title: 'Armas de 2.ª generación (Heart of Thorns)', test: (k) => ['nunca mas', 'esperanza', 'astralaria', 'chuka y champawat'].includes(k),
+    intro: 'Precursor por colecciones (I → III) y una cuarta colección para su don. Se abren con «Erudito de los secretos», el último nivel de Artesanía legendaria (19 puntos de Tyria en total). La receta lleva el precursor, el don del arma, el Don de la maestría de Maguuma y el Tributo místico. Las demás legendarias de 2.ª generación no tienen colección: sus recetas se compran a Hobbs.' },
+  { id: 'g3', title: 'Armas de 3.ª generación (End of Dragons)', test: (k) => /facetas de aurene/.test(k),
+    intro: 'Don de maestría de jade (completar los 4 mapas de Cantha y materiales de jade) + Tributo dracónico + el precursor. Al vincular la primera en la armería, Leivas te abre las facetas de cada dragón anciano.' },
+  { id: 'new', title: 'Armas nuevas (Janthir Wilds y Visions of Eternity)', test: (k) => ['klobjarne geirr', 'jornal estelar'].includes(k), intro: 'Cada una tiene su colección de dones en la categoría de su expansión.' },
+  { id: 'arm', title: 'Armaduras legendarias', test: (k) => /armadura|agaleus|runas y sellos/.test(k), intro: 'Obsidiana (Secrets of the Obscure, mundo abierto), del enviado (incursiones) y el respirador acuático Agaleus. Las runas y sellos legendarios se cuentan aparte.' },
+  { id: 'tri', title: 'Abalorios y reliquia legendarios', test: (k) => /aurora|vision|coalescencia|verano eterno|reliquia/.test(k), intro: 'Aurora (Mundo Viviente 3), Visión (Mundo Viviente 4), Coalescencia (incursiones), Verano Eterno (Visions of Eternity) y la reliquia legendaria (Secrets of the Obscure).' },
+  { id: 'bp', title: 'Mochilas legendarias', test: (k) => /ad infinitum|orrax/.test(k), intro: 'Ad Infinitum (fractales) y Orrax Manifestado (mochila y planeador, Janthir Wilds).' },
+];
+const sectionOf = (name) => SECTIONS.find((x) => x.test(norm(name)))?.id || 'otros';
+
 export async function renderRuta(view, { api, esc, coin }) {
   let filter = 'all', q = '';
   try { filter = localStorage.getItem('gw2-ruta-f') || 'all'; } catch {}
@@ -165,7 +181,7 @@ export async function renderRuta(view, { api, esc, coin }) {
     const out = view.querySelector('#rtOut');
     const t = norm(q);
     const list = groups.filter((g) => (!t || norm(`${g.name} ${g.list.map((s) => s.name).join(' ')}`).includes(t)) && (filter === 'all' || g.count[filter] > 0));
-    out.innerHTML = list.length ? `<div class="rt-grid">${list.map((g) => `<details class="rt-card" ${g.count.run || g.count.ok || t ? 'open' : ''}>
+    const card = (g) => `<details class="rt-card" ${g.count.run || g.count.ok || t ? 'open' : ''}>
       <summary>${g.leg?.icon ? `<img src="${esc(g.leg.icon)}" alt="">` : ''}<h3>${esc(g.name)}</h3>
         <span class="rt-meta">${g.list.length} logro${g.list.length === 1 ? '' : 's'}${g.count.ok ? ` · <span class="rt-t-ok">${g.count.ok} hecho${g.count.ok === 1 ? '' : 's'}</span>` : ''}${g.count.run ? ` · <span class="rt-t-run">${g.count.run} empezado${g.count.run === 1 ? '' : 's'}</span>` : ''}${g.leg && !NOACC ? ` · materiales ${Math.round((g.leg.progress || 0) * 100)}%` : ''}</span></summary>
       ${g.note ? `<div class="rt-note"><b>Cómo se hace:</b> ${esc(g.note)}</div>` : ''}
@@ -173,11 +189,26 @@ export async function renderRuta(view, { api, esc, coin }) {
       <ol class="rt-chain">${g.list.map((s, i) => `<li class="rt-${s.st}"><span class="rt-dot">${s.st === 'ok' ? '✓' : i + 1}</span><div>
         <div class="rt-row"><a href="#/logro/${s.id}" class="rt-name">${esc(s.name)}</a><span class="rt-pill">${lab(s.st)}</span>${s.max ? `<span class="rt-cnt">${s.cur}/${s.max}</span>` : ''}</div>
         ${s.st === 'run' && s.max ? `<div class="rt-prog"><i style="width:${Math.round((s.cur / s.max) * 100)}%"></i></div>` : ''}
-        ${s.how ? `<div class="rt-how">${s.st === 'lock' ? '<b>Cómo desbloquearlo:</b> ' : ''}${esc(s.how)}</div>` : ''}</div></li>`).join('')}</ol></details>`).join('')}</div>` : '<div class="empty">Nada coincide.</div>';
+        ${s.how ? `<div class="rt-how">${s.st === 'lock' ? '<b>Cómo desbloquearlo:</b> ' : ''}${esc(s.how)}</div>` : ''}</div></li>`).join('')}</ol>
+      ${g.leg ? `<div class="rt-more"><button class="btn ghost small" data-guide="${g.leg.id}">📘 Guía completa: receta, dones, colecciones y de dónde sale cada cosa</button><a class="btn ghost small" href="#/legendarias">Árbol de materiales →</a></div><div class="rt-guide" id="guide-${g.leg.id}"></div>` : ''}</details>`;
+    const secs = [...SECTIONS, { id: 'otros', title: 'Otras', intro: '' }].map((sec) => ({ sec, gs: list.filter((g) => sectionOf(g.name) === sec.id) })).filter((x) => x.gs.length);
+    out.innerHTML = list.length ? `<nav class="rt-toc">${secs.map(({ sec, gs }) => `<a href="javascript:void 0" data-sec="${sec.id}">${esc(sec.title)} <span class="muted small">(${gs.length})</span></a>`).join('')}</nav>
+      ${secs.map(({ sec, gs }) => `<section class="rt-sec" id="sec-${sec.id}"><h2>${esc(sec.title)}</h2>${sec.intro ? `<p class="rt-sec-intro">${esc(sec.intro)}</p>` : ''}<div class="rt-grid">${gs.map(card).join('')}</div></section>`).join('')}` : '<div class="empty">Nada coincide.</div>';
     view.querySelectorAll('.rt-bar [data-f]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.f === filter)));
   }
 
   view.querySelector('#rtOut').addEventListener('click', async (e) => {
+    const sec = e.target.closest('[data-sec]');
+    if (sec) { e.preventDefault(); view.querySelector(`#sec-${sec.dataset.sec}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    const gd = e.target.closest('[data-guide]');
+    if (gd) {
+      const box = view.querySelector(`#guide-${gd.dataset.guide}`);
+      if (box.dataset.open) { box.innerHTML = ''; delete box.dataset.open; return; }
+      box.dataset.open = '1';
+      const { renderGuide } = await import('./guide-ui.js');
+      renderGuide(box, Number(gd.dataset.guide), { api, esc, coin });
+      return;
+    }
     const b = e.target.closest('[data-mat]');
     if (!b) return;
     const id = Number(b.dataset.mat);

@@ -870,6 +870,12 @@ table.cr-fixed td .coin { white-space: normal; }
 @media (max-width: 700px) { .wk { --lab: 120px; } .wk-label { font-size: 12px; } }
 .wk-narrow .ev-bell { display: none; }
 .wk-narrow .wk-badge { font-size: 10px; padding: 0 3px; }
+.rt-toc { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 10px 0 4px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); font-size: 14px; }
+.rt-sec { margin-top: 22px; scroll-margin-top: 70px; }
+.rt-sec > h2 { font-size: 20px; margin: 0 0 4px; padding-bottom: 4px; border-bottom: 2px solid var(--accent); }
+.rt-sec-intro { color: var(--muted); font-size: 14px; max-width: 95ch; margin: 6px 0 4px; }
+.rt-more { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.rt-guide:not(:empty) { margin-top: 10px; border-top: 1px dashed var(--line); padding-top: 8px; }
 
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }
