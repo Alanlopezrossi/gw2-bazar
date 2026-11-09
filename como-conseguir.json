@@ -1,0 +1,108 @@
+{
+  "_nota": "Guías cortas en español de cómo conseguir materiales y monedas. Datos sacados de la wiki oficial (wiki.guildwars2.com), noviembre 2026. 'items' va por id de item; 'monedas' por nombre en inglés de la moneda.",
+  "items": {
+    "86977": {
+      "resumen": "Material de la temporada 4 que no se vende en el bazar (ligado a cuenta). El lugar para farmearlo son las Islas Arenabarridas (Sandswept Isles); además, un nodo en tu instancia hogareña te da un poco todos los días.",
+      "fuentes": [
+        "Nodos de difluorita y cofres en las Islas Arenabarridas (Sandswept Isles, temporada 4).",
+        "Nodo de difluorita para tu instancia hogareña (se desbloquea y lo cosechás todos los días).",
+        "Recompensas de la Cámara de especímenes (Specimen Chamber) en Sandswept Isles.",
+        "NPC: el Comerciante elonio itinerante lo vende por Magia volátil; también se compra con Esquirlas de hielo eterno (Bjora) y con Esquirlas de magnetita (Emisario de la Vigilia).",
+        "Durante Dragon Bash (festival de junio) sale de sus recompensas."
+      ],
+      "tips": [
+        "Al romper un nodo de difluorita también te da Magia volátil."
+      ],
+      "wiki": "Difluorite Crystal"
+    },
+    "69910": {
+      "ver_moneda": "Spirit Shard"
+    }
+  },
+  "monedas": {
+    "Spirit Shard": {
+      "resumen": "Se ganan sobre todo subiendo experiencia con personajes de nivel 80. Se guardan en la cartera y se gastan en la Forja Mística (Miyani).",
+      "fuentes": [
+        "Nivel 80: cada vez que llenás la barra de experiencia (254.000 de XP) cuando ya no podés ganar experiencia de dominio en esa región, te da 1.",
+        "Tomos de conocimiento usados en nivel 80 (1 cada uno) y Pergaminos de conocimiento.",
+        "Hongos del tesoro (Treasure Mushrooms) de Heart of Thorns y temporada 3: drop diario garantizado.",
+        "Eventos: Dragon's Stand (Bastión del Dragón) y las Convergencias (Monte Balrior, Nexo de la Eternidad, Outer Nayos).",
+        "Bolsas de esquirlas espirituales, cofres de subida de rango de WvW y drops al azar de personajes nivel 80.",
+        "Pasos de la historia personal (capítulos 2 y 3)."
+      ],
+      "usos": [
+        "Miyani y los Asistentes de la Forja Mística: Piedras filosofales, Cristales místicos, etc.",
+        "Recetas de la Forja Mística (por ejemplo, tréboles místicos).",
+        "Glóbulo de energía espiritual condensada (100 esquirlas)."
+      ],
+      "tips": [
+        "Si ya completaste los dominios de un mapa, cualquier experiencia ahí te va dando esquirlas: farmear eventos en un mapa con dominios completos es la forma más tranquila."
+      ],
+      "wiki": "Spirit Shard"
+    },
+    "Volatile Magic": {
+      "resumen": "Moneda de la temporada 4 y la Saga de la Escarcha. Sale de casi todo lo que hacés en esos mapas.",
+      "fuentes": [
+        "Orbes de magia volátil en mapas de temporada 4 y la Saga de la Escarcha (requiere el dominio Resonancia de magia volátil).",
+        "Cristales volátiles en Dominio de Kourna: rompelos con el impulso del escarabajo (dominio Barrera rota).",
+        "Nodos garantizados: difluorita, piedra de marca (Brandstone), nodos de cristal de dragón, Mistonium, motas de bruma.",
+        "Cofres: cofres istaníes, cofres de Sandswept, recompensas de eventos y del meta de Dominio de Istan (100).",
+        "Herramientas de recolección volátiles (hoz, hacha, pico) o con Glifo de volatilidad.",
+        "Strike del Paso de Shiverpeaks (100) y el evento Enfrentar a Kralkatorrik."
+      ],
+      "usos": [
+        "Comprar en los NPC de los mapas de temporada 4 (Comerciante elonio itinerante, etc.).",
+        "Singularidad volátil (150 por contenedor)."
+      ],
+      "wiki": "Volatile Magic"
+    },
+    "Unbound Magic": {
+      "resumen": "Moneda de la temporada 3 del Mundo Viviente. Se gana en sus mapas.",
+      "fuentes": [
+        "Orbes de magia desatada en Bloodstone Fen, Ember Bay, Bitterfrost Frontier, Lake Doric, Draconis Mons y Siren's Landing (requiere el dominio para recolectarlos).",
+        "Eventos, cofres del héroe de cada mapa y metaeventos de esos mapas.",
+        "Herramientas de recolección de magia desatada."
+      ],
+      "usos": [
+        "Comprar en los NPC de magia desatada de los mapas de temporada 3 (bolsas, materiales, piezas de colección)."
+      ],
+      "wiki": "Unbound Magic"
+    },
+    "Magnetite Shard": {
+      "resumen": "Moneda de incursiones (raids).",
+      "fuentes": [
+        "Incursiones de Heart of Thorns y Path of Fire: 8–16 por jefe (10 extra en modo desafío). Tope de 800 por semana por encuentros.",
+        "Intentos fallidos: 1–5 según cuánto avanzó la pelea.",
+        "Logros semanales de incursión y logros \"Return to\".",
+        "Vender minis de incursión (40 c/u) y Dispositivos de portal del Manto Blanco (250) a los NPC de incursión; reciclar equipo ascendido exclusivo de raids (60 c/u)."
+      ],
+      "usos": [
+        "NPC de incursión: recompensas de cada jefe y equipo ascendido.",
+        "Abrir Cofres del Emisario de la Vigilia (20, 40 o 60).",
+        "Trofeos de manualidades (10 bronce, 40 plata, 100 oro)."
+      ],
+      "wiki": "Magnetite Shard"
+    },
+    "Karma": { "resumen": "Se gana con casi cualquier actividad: corazones, eventos, historia.", "usos": ["NPC de karma en todo el mundo (corazones completados, templos de Orr)."], "wiki": "Karma" },
+    "Laurel": { "resumen": "Se gana en la Bóveda del Mago y como recompensa de logros.", "wiki": "Laurel" },
+    "Badge of Honor": { "resumen": "Se gana jugando WvW (Mundo contra Mundo) y como recompensa de logros.", "fuentes": ["Matar jugadores, tomar campamentos/torres/fortalezas, cofres de subida de rango y la pista de recompensas de escaramuza."], "wiki": "Badge of Honor" },
+    "Airship Part": { "resumen": "Se gana en Verdant Brink (eventos, cofres, nodos).", "wiki": "Airship Part" },
+    "Lump of Aurillium": { "resumen": "Se gana en Auric Basin (eventos, cofres, nodos).", "wiki": "Lump of Aurillium" },
+    "Ley Line Crystal": { "resumen": "Se gana en Tangled Depths (eventos, cofres, nodos).", "wiki": "Ley Line Crystal" },
+    "Trade Contract": { "resumen": "Se gana en varios mapas del Desierto de Cristal (Path of Fire).", "wiki": "Trade Contract" },
+    "Elegy Mosaic": { "resumen": "Se gana en mapas del Desierto de Cristal derrotando objetivos de recompensa legendarios y completando los metaeventos.", "wiki": "Elegy Mosaic" },
+    "Research Note": { "resumen": "Se gana reciclando objetos crafteados aptos con un Kit de investigación.", "wiki": "Research Note" },
+    "Imperial Favor": { "resumen": "Se gana completando eventos en los mapas de Cantha (End of Dragons).", "wiki": "Imperial Favor" },
+    "Jade Sliver": { "resumen": "Se gana con el módulo Reciclador: astillas de jade del Jade Bot.", "wiki": "Jade Sliver" },
+    "Static Charge": { "resumen": "Se gana completando eventos en el Archipiélago Skywatch.", "wiki": "Static Charge" },
+    "Pinch of Stardust": { "resumen": "Se gana completando eventos en Amnytas.", "wiki": "Pinch of Stardust" },
+    "Calcified Gasp": { "resumen": "Se gana completando eventos en Inner Nayos.", "wiki": "Calcified Gasp" },
+    "Ursus Oblige": { "resumen": "Se gana en Janthir.", "wiki": "Ursus Oblige" },
+    "Antiquated Ducat": { "resumen": "Se gana en Castora.", "wiki": "Antiquated Ducat" },
+    "Aether-Rich Sap": { "resumen": "Se gana en Castora.", "wiki": "Aether-Rich Sap" },
+    "Fractal Relic": { "resumen": "Se gana y se gasta en Fractales de la Niebla.", "wiki": "Fractal Relic" },
+    "Pristine Fractal Relic": { "resumen": "Se gana en Fractales de la Niebla; sirve para comprar anillos ascendidos.", "wiki": "Pristine Fractal Relic" },
+    "Astral Acclaim": { "resumen": "Se gana en la Bóveda del Mago completando objetivos diarios, semanales y de temporada.", "wiki": "Astral Acclaim" },
+    "Testimony of Castoran Heroics": { "resumen": "Se gana subiendo de rango en WvW.", "wiki": "Testimony of Heroics" }
+  }
+}

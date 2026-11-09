@@ -813,6 +813,7 @@ async function openItem(id, { silent = false } = {}) {
     wireItem(body, d);
     if (body.querySelector('#guideBox')) renderGuide(body.querySelector('#guideBox'), id, { api, esc, coin, mode: S.crafteo.mode });
     if (body.querySelector('#charBox')) renderDetails(body.querySelector('#charBox'), id, { esc });
+    if (body.querySelector('#comoBox')) import('./como.js').then(async (m) => { const box = body.querySelector('#comoBox'); const e = await m.comoFind({ itemId: id }); if (box && openId === id) box.outerHTML = m.comoHTML(e, esc) || '<div id="comoBox"></div>'; }).catch(() => {});
     if (body.querySelector('#histBox')) renderHistory(body.querySelector('#histBox'), id, { coin, esc });
     body.querySelector('#wikiSec')?.addEventListener('toggle', (e) => { if (e.target.open && !e.target.dataset.loaded) { e.target.dataset.loaded = '1'; loadWiki(id); } });
     // Si no tenemos ninguna fuente propia, abrimos solo la sección de la wiki (cómo se consigue según la wiki).
@@ -941,6 +942,7 @@ function itemHTML(d) {
     ${it.desc ? `<p class="d-desc">${esc(it.desc)}</p>` : ''}
     ${d.props?.length ? `<div class="chips">${d.props.map((x) => `<span class="pill">${esc(x)}</span>`).join('')}</div>` : ''}
     <details class="section guide-sec" open><summary><h3 style="display:inline">📘 Guía</h3> <span class="muted small">qué necesitás, paso a paso, disciplinas y logros</span></summary><div id="guideBox"></div></details>
+    <div id="comoBox"></div>
     <div class="section ch-sec"><h3>Características</h3><div id="charBox"></div></div>
     ${summaryHTML(d)}
     <div id="mktBox">${m && (m.sell || m.buy) ? `<div class="cards">

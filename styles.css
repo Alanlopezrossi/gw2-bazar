@@ -942,6 +942,11 @@ details.ev-alarms > summary::-webkit-details-marker { display: none; }
 details.ev-alarms > summary::after { content: ' ▸'; color: var(--muted); }
 details.ev-alarms[open] > summary::after { content: ' ▾'; }
 details.ev-alarms[open] > summary { margin-bottom: 8px; }
+.como{border-left:3px solid var(--accent,#c9a227);padding-left:12px}
+.como h3 a{font-weight:400;margin-left:6px}
+.como h4{margin:10px 0 4px;font-size:.92em}
+.como-ul{margin:0 0 4px;padding-left:18px}
+.como-ul li{margin:3px 0}
 
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }

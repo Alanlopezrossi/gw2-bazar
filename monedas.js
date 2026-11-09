@@ -67,6 +67,7 @@ export async function renderMoneda(view, id, { api, esc, coin }) {
   view.innerHTML = `<p><a href="#/monedas">← Monedas</a></p>
     <div class="cur-head"><img src="${esc(c.icon)}" alt=""><div><h1>${esc(c.name)}</h1><div class="muted small">EN: ${esc(c.nameEn)} · id ${c.id}</div>
       <p>${esc(c.description || '')}</p>${w.size ? `<p>Tenés: <b>${have ? valueOf(c, have, coin) : '0'}</b></p>` : ''}</div></div>
+    <div id="comoBox"></div>
     ${uses.items.length ? `<div class="section"><h3>Items que dan esta moneda</h3><p class="small muted">Al usarlos (doble clic) se suman a la cartera. Tocá uno para ver de dónde sale.</p><div class="gd-needs">${uses.items.map((x) => `<span>${itemA(x)}</span>`).join('')}</div></div>` : ''}
     <div class="section"><h3>Dónde se gasta: NPC que la aceptan <span class="muted small">(${uses.vendors.length} NPC · ${uses.total} ofertas)</span></h3>
       ${uses.vendors.length ? `<input type="search" id="curItQ" placeholder="Buscar qué comprar con esta moneda…" style="width:100%;max-width:420px;margin-bottom:8px">
@@ -78,6 +79,7 @@ export async function renderMoneda(view, id, { api, esc, coin }) {
     <div class="section"><details id="curWiki"><summary><h3 style="display:inline">Cómo se consigue según la wiki <span class="muted small">(en inglés)</span></h3></summary><div id="curWikiBox"><div class="skeleton"></div></div></details>
       <div class="links" style="margin-top:8px"><a class="btn ghost small" target="_blank" rel="noopener" href="${esc(wikiUrl)}">Wiki (inglés)</a> <a class="btn ghost small" target="_blank" rel="noopener" href="https://wiki-es.guildwars2.com/index.php?search=${encodeURIComponent(c.name)}">Wiki (español)</a></div></div>`;
   wireGuide(view);
+  import('./como.js').then(async (m) => { const box = view.querySelector('#comoBox'); const e = await m.comoFind({ currencyEn: c.nameEn }); if (box) box.outerHTML = m.comoHTML(e, esc); }).catch(() => {});
   view.querySelector('#curItQ')?.addEventListener('input', (e) => {
     const t = norm(e.target.value).trim();
     view.querySelectorAll('.cur-vendor').forEach((d) => {
