@@ -21,11 +21,16 @@ const NAME_ES = {
   'Defend Jora\'s Keep': 'Defender la Fortaleza de Jora', 'Shards and Construct': 'Esquirlas y constructo', 'Icebrood Champions': 'Campeones de la Progenie Gélida', 'Aetherblade Assault': 'Asalto de Filoetéreo',
   'Kaineng Blackout': 'Apagón en Kaineng', 'Gang War': 'Guerra de bandas', 'Preparations': 'Preparativos', 'Jade Maw': 'Fauces de Jade', 'The Battle for the Jade Sea': 'La batalla por el Mar de Jade',
   'Target Practice': 'Práctica de tiro', 'Fly by Night': 'Vuelo nocturno', 'Twisted Marionette': 'La Marioneta Retorcida', "Battle For Lion's Arch": 'Batalla por Arco del León', 'Tower of Nightmares': 'Torre de las Pesadillas',
+  'Defending Tarir (Pylons)': 'Defender Tarir (pilones)', 'Battle in Tarir (Octovine)': 'Batalla en Tarir (Octoparra)', 'King of the Jungle (Chak Gerent)': 'Rey de la jungla (Gerente chak)',
+  'Advancing Across Tangled Roots (Outposts)': 'Avance por las Profundidades Enredadas (puestos)', 'Day: Securing Verdant Brink': 'Día: asegurar el Linde Verdeante', 'Night: Night and the Enemy': 'Noche: la noche y el enemigo',
+  'Nexus of Eternity': 'Nexo de la Eternidad', 'Mount Balrior': 'Monte Balrior', 'Outer Nayos': 'Nayos Exterior',
   'Skiff Race': 'Carrera de esquifes', 'Water Balloons': 'Globos de agua', 'Treasure Hunt': 'Búsqueda del tesoro', 'Skimmer Race': 'Carrera de rayas', Fishing: 'Pesca', 'Dolyak Race': 'Carrera de dolyaks', 'Mad King Says': 'El Rey Loco dice',
 };
 const DAY = 1440;
 // Ocultos de entrada: ciclos de día/noche, torneos PvP y festivales que no siempre están activos.
-const HIDE_BY_DEFAULT = new Set(['core-dn', 'eod-dn', 'voe-dn', 'core-ateu', 'core-atna', 'festival-lc', 'festival-db']);
+const HIDE_BY_DEFAULT = new Set(['core-dn', 'eod-dn', 'voe-dn', 'core-ateu', 'core-atna', 'festival-lc', 'festival-db', 'festival-ha']);
+// Versión de los ocultos por defecto: al subirla, los que se agregan se ocultan también a quien ya tenía su configuración.
+const HIDE_V = 2, HIDE_NEW = ['festival-ha'];
 
 /** Todos los tramos (también los vacíos) que tocan [desde, hasta). */
 function segmentsAll(ev, fromMin, toMin) {
@@ -62,8 +67,8 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
 
   let saved = {};
   try { saved = JSON.parse(localStorage.getItem('gw2-eventos') || '{}'); } catch {}
-  const st = { cat: saved.cat || '', q: '', hidden: new Set(saved.hidden || [...HIDE_BY_DEFAULT]), window: saved.window || 180, range: ['2', '4', '8'].includes(saved.range) ? saved.range : '2', top: !!saved.top };
-  const save = () => { try { localStorage.setItem('gw2-eventos', JSON.stringify({ cat: st.cat, hidden: [...st.hidden], window: st.window, range: st.range, top: st.top })); } catch {} };
+  const st = { cat: saved.cat || '', q: '', hidden: new Set(saved.hidden ? [...saved.hidden, ...((saved.hv || 1) < HIDE_V ? HIDE_NEW : [])] : [...HIDE_BY_DEFAULT]), window: saved.window || 180, range: ['2', '4', '8'].includes(saved.range) ? saved.range : '2', top: !!saved.top };
+  const save = () => { try { localStorage.setItem('gw2-eventos', JSON.stringify({ hv: HIDE_V, cat: st.cat, hidden: [...st.hidden], window: st.window, range: st.range, top: st.top })); } catch {} };
 
   view.innerHTML = `
     <div class="page-head"><div><h1>Eventos</h1><p>Metaeventos y jefes de mundo con sus horarios en <b>tu hora local</b>. Arriba, lo que está pasando y lo que empieza pronto; abajo, la línea de tiempo de cada mapa. Tocá un evento para copiar su waypoint o verlo en el mapa.</p></div>
@@ -178,7 +183,7 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
         const g = ev.s[sg.r] || [];
         const name = g[0] || '';
         const w = ((r - l) / span) * 100;
-        const cls = ['evt-seg', sg.r ? '' : 'evt-empty', sg.start >= limit ? 'future' : '', sg.start <= nowMin && sg.end > nowMin && sg.r ? 'on' : ''].join(' ');
+        const cls = ['evt-seg', w < 9 ? 'narrow' : '', sg.r ? '' : 'evt-empty', sg.start >= limit ? 'future' : '', sg.start <= nowMin && sg.end > nowMin && sg.r ? 'on' : ''].join(' ');
         const pl = sg.r ? placeOf(ev, sg.r) : null;
         const goto = pl ? `#/mapa/@${pl.c[0]},${pl.c[1]},${encodeURIComponent(`${pl.label} · ${fmt(sg.start)}–${fmt(sg.end)}${pl.exact ? '' : ' (punto de ruta)'}|${g[2] || ''}|${pl.wp && pl.exact ? `${pl.wp.c[0]};${pl.wp.c[1]};${pl.wp.es}` : ''}`)}` : '';
         parts.push(`<div class="${cls}${pl ? ' has-map' : ''}" style="width:${w}%;${sg.r ? `background:${bgOf(g[3])}` : ''}" ${goto ? `data-goto="${esc(goto)}"` : ''} ${sg.r ? `title="${esc(es(name))}${es(name) !== name ? ` (${esc(name)})` : ''} · ${fmt(sg.start)}–${fmt(sg.end)} (${sg.end - sg.start} min)${pl ? (pl.exact ? '\nClic: ver el lugar exacto en el mapa' : '\nClic: ver su punto de ruta en el mapa') : ''}${g[2] ? `\nWaypoint ${esc(g[2])}` : ''}"` : ''}>${sg.r ? `<span class="evt-time">${bell(ev, sg.r, name, true)}${fmt(sg.start)}${pl ? ' <span class="evt-pin">📍</span>' : ''}${g[1] ? ` <a class="evt-wiki" target="_blank" rel="noopener" href="https://wiki.guildwars2.com/wiki/${encodeURIComponent(g[1].replace(/ /g, '_'))}" title="Abrir en la wiki">wiki ↗</a>` : ''}</span><span class="evt-name">${esc(es(name))}</span>${g[2] ? `<span class="evt-chat" data-copy="${esc(g[2])}" title="Copiar waypoint">${esc(g[2])}</span>` : ''}` : ''}</div>`);

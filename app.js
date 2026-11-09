@@ -248,10 +248,22 @@ function route() {
   else if (a === 'guia') { current = { name: 'guia', refresh() {} }; renderGuia(view, { api, esc, coin, itemCell }); }
   else if (a === 'profesiones') { current = { name: 'profesiones', refresh() {} }; renderProfesiones(view, { api, esc, coin, itemCell, debounce, meta: META, fillIcons }); }
   else if (a === 'legendarias') { const r = renderLegendarias(view, { api, esc, coin, itemCell, toast, debounce }); current = { name: 'legendarias', refresh() {} }; }
+  else if (a === 'favoritos' || a === 'comparar' || a === 'vendedores') {
+    current = { name: a, refresh() {} };
+    import('./extras.js').then((m) => (a === 'favoritos' ? m.renderFavoritos : a === 'comparar' ? m.renderComparar : m.renderVendedores)(view, { api, esc, coin, itemCell, debounce }))
+      .catch(() => { view.innerHTML = '<div class="empty">Esta sección sólo está en el Bazar de tu PC.</div>'; });
+  }
+  else if (a === 'ruta') { current = { name: 'ruta', refresh() {} }; import('./ruta.js').then((m) => m.renderRuta(view, { api, esc, coin })).catch(() => { view.innerHTML = '<div class="empty">La Ruta legendaria sólo está en el Bazar de tu PC.</div>'; }); }
   else if (a === 'monedas') { current = { name: 'monedas', refresh() {} }; renderMonedas(view, { api, esc, coin }); }
   else if (a === 'moneda' && b) { current = { name: 'moneda', refresh() {} }; renderMoneda(view, Number(b), { api, esc, coin }); window.scrollTo(0, 0); }
   else if (a === 'eventos') { current = { name: 'eventos', refresh() {} }; renderEventos(view, { api, esc, toast, normalize: normalizeText }); }
-  else if (a === 'logros') { current = { name: 'logros', refresh() {} }; renderLogros(view, { api, esc, toast, normalize: normalizeText, catId: b === 'c' && c ? Number(c) : null }); }
+  else if (a === 'logros') {
+    current = { name: 'logros', refresh() {} };
+    const opts = { api, esc, toast, normalize: normalizeText, catId: b === 'c' && c ? Number(c) : null };
+    // Bazar local con tu cuenta: panel completo. En la versión pública (o con #/logros/cats) va la lista por categorías.
+    if (!b && STATUS && !STATUS.publicMode) import('./logros-pro.js').then((m) => m.renderLogrosPanel(view, opts)).catch(() => renderLogros(view, opts));
+    else renderLogros(view, opts);
+  }
   else if (a === 'logro' && b) { current = { name: 'logro', refresh() {} }; renderLogro(view, { api, esc, toast, normalize: normalizeText, id: Number(b) }); window.scrollTo(0, 0); }
   else if (a === 'mapa') { current = { name: 'mapa', refresh() {} }; renderMap(view, { api, esc, toast, normalize: normalizeText, focusKey: b ? decodeURIComponent(b) : null }); }
   else if (a === 'calc') { const c = renderCalc(view, { coin, esc, api, debounce, itemCell, setKeyHandler: (fn) => (calcKeys = fn) }); current = { name: 'calc', refresh: c.refresh }; }
@@ -688,6 +700,21 @@ function paintDrawerBar() {
   $('#drawerCrumb').textContent = prev ? `← ${prev.name || `#${prev.id}`}` : '';
 }
 $('#drawerBack').addEventListener('click', () => history.back());
+// Favoritos y comparador (sólo en el Bazar local).
+let drawerItem = null;
+let EXTRAS = null;
+const extras = () => (EXTRAS ||= import('./extras.js'));
+async function paintFavBtn() {
+  const local = STATUS && !STATUS.publicMode;
+  $('#drawerFav').hidden = $('#drawerCmp').hidden = !local || !drawerItem;
+  if (!local || !drawerItem) return;
+  const m = await extras();
+  const on = m.isFav(drawerItem.id);
+  $('#drawerFav').textContent = on ? '★' : '☆';
+  $('#drawerFav').title = on ? 'Quitar de favoritos' : 'Agregar a favoritos';
+}
+$('#drawerFav').addEventListener('click', async () => { if (!drawerItem) return; const m = await extras(); toast(m.toggleFav(drawerItem) ? 'Agregado a favoritos' : 'Quitado de favoritos'); paintFavBtn(); });
+$('#drawerCmp').addEventListener('click', async () => { if (!drawerItem) return; const m = await extras(); m.addCompare(drawerItem); toast('Agregado al comparador (máximo 4)'); });
 $('#drawerCrumb').addEventListener('click', () => { if (drawerStack.length > 1) history.back(); });
 const panel = drawer.querySelector('.drawer-panel');
 const PANEL_KEY = 'gw2-bazar-panel-w';
@@ -757,6 +784,8 @@ async function openItem(id, { silent = false } = {}) {
       return;
     }
     body.innerHTML = itemHTML(d);
+    drawerItem = d.item ? { id, name: d.item.name, icon: d.item.icon, rarity: d.item.rarity } : null;
+    paintFavBtn();
     const me = drawerStack.find((x) => x.id === id);
     if (me) me.name = d.item?.name;
     paintDrawerBar();

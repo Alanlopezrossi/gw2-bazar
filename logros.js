@@ -2,7 +2,7 @@
 // condiciones, pasos, recompensas, guía de la wiki y lugares en el mapa.
 const API = `${globalThis.GW2_API_BASE || 'https://api.guildwars2.com'}/v2`;
 const cache = new Map();
-function g(path) {
+export function g(path) {
   if (cache.has(path)) return cache.get(path);
   const p = fetch(API + path).then(async (r) => {
     if (!r.ok) throw new Error(`API de GW2: HTTP ${r.status}`);
@@ -20,7 +20,7 @@ function extraAch() {
 }
 const fromExtra = (e, lang) => ({ ...e.data, name: lang === 'en' ? e.nameEn || e.data.name : e.data.name, removed: true });
 
-async function many(endpoint, ids, lang = 'es') {
+export async function many(endpoint, ids, lang = 'es') {
   ids = [...new Set(ids.filter((x) => x != null))];
   const out = [];
   for (let i = 0; i < ids.length; i += 200) {
@@ -42,10 +42,10 @@ const FLAGS = {
   Pvp: 'PvP/McM', Repeatable: 'Repetible', Hidden: 'Oculto', RequiresUnlock: 'Requiere desbloqueo', Daily: 'Diario', Weekly: 'Semanal',
   Monthly: 'Mensual', Permanent: 'Permanente', CategoryDisplay: 'Destacado', MoveToTop: '', IgnoreNearlyComplete: '', RepairOnLogin: '',
 };
-const MASTERY = { Tyria: 'Tyria central', Maguuma: 'Maguuma (Heart of Thorns)', Desert: 'Desierto (Path of Fire)', Tundra: 'Picosescalofriantes (Icebrood Saga)', Jade: 'Cantha (End of Dragons)', Sky: 'Cielos (Secrets of the Obscure)', Wild: 'Janthir', Magic: 'Castora (Visions of Eternity)', Unknown: '' };
+export const MASTERY = { Tyria: 'Tyria central', Maguuma: 'Maguuma (Heart of Thorns)', Desert: 'Desierto (Path of Fire)', Tundra: 'Picosescalofriantes (Icebrood Saga)', Jade: 'Cantha (End of Dragons)', Sky: 'Cielos (Secrets of the Obscure)', Wild: 'Janthir', Magic: 'Castora (Visions of Eternity)', Unknown: '' };
 
 let META = null; // { groups, cats, catById, catOfAch }
-async function meta() {
+export async function meta() {
   if (META) return META;
   const [{ data: groups }, { data: cats }] = await Promise.all([g('/achievements/groups?ids=all&lang=es'), g('/achievements/categories?ids=all&lang=es')]);
   const catById = new Map(cats.map((c) => [c.id, { ...c, achievements: (c.achievements || []).map(idOf) }]));
@@ -62,8 +62,26 @@ async function meta() {
 }
 
 let ALL = null; // todos los logros (para buscar)
-async function loadAll(onProgress) {
+// Copia de todos los logros guardada en el navegador (IndexedDB) por 24 h: la API tarda ~1 minuto en mandarlos.
+function idb(mode, fn) {
+  return new Promise((res) => {
+    try {
+      const rq = indexedDB.open('gw2-bazar', 1);
+      rq.onupgradeneeded = () => rq.result.createObjectStore('kv');
+      rq.onerror = () => res(null);
+      rq.onsuccess = () => { try { const tx = rq.result.transaction('kv', mode); const r = fn(tx.objectStore('kv')); tx.oncomplete = () => res(r?.result ?? null); tx.onerror = () => res(null); } catch { res(null); } };
+    } catch { res(null); }
+  });
+}
+export async function loadAll(onProgress) {
   if (ALL) return ALL;
+  const cached = await idb('readonly', (st) => st.get('ach-all-es'));
+  if (cached && Date.now() - cached.at < 86400000 && cached.list?.length) {
+    const ex = await extraAch();
+    const have = new Set(cached.list.map((a) => a.id));
+    ALL = [...cached.list, ...Object.values(ex).filter((e) => !have.has(e.data.id)).map((e) => fromExtra(e, 'es'))];
+    return ALL;
+  }
   const first = await g('/achievements?page=0&page_size=200&lang=es');
   const list = [...first.data];
   const total = first.pages || 1;
@@ -72,6 +90,7 @@ async function loadAll(onProgress) {
     for (const b of batch) list.push(...b.data);
     onProgress?.(Math.min(total, p + 6), total);
   }
+  idb('readwrite', (st) => st.put({ at: Date.now(), list: list.slice() }, 'ach-all-es'));
   const ex = await extraAch();
   const have = new Set(list.map((a) => a.id));
   for (const e of Object.values(ex)) if (!have.has(e.data.id)) list.push(fromExtra(e, 'es'));
@@ -80,7 +99,8 @@ async function loadAll(onProgress) {
 }
 
 let PROGRESS = null; // Map id -> progreso de la cuenta (sólo versión local con API key)
-async function progress(api) {
+export async function progress(api, fresh = false) {
+  if (fresh) PROGRESS = null;
   if (PROGRESS) return PROGRESS;
   try {
     const d = await api('/api/account/achievements');
@@ -92,9 +112,9 @@ async function progress(api) {
   return PROGRESS;
 }
 
-const points = (a) => (a.tiers || []).reduce((s, t) => s + (t.points || 0), 0);
-const goal = (a) => (a.tiers?.length ? a.tiers[a.tiers.length - 1].count : 1);
-const requirement = (a) => (a.requirement || '').replace(/\s{2,}/, ` ${goal(a)} `).trim();
+export const points = (a) => (a.tiers || []).reduce((s, t) => s + (t.points || 0), 0);
+export const goal = (a) => (a.tiers?.length ? a.tiers[a.tiers.length - 1].count : 1);
+export const requirement = (a) => (a.requirement || '').replace(/\s{2,}/, ` ${goal(a)} `).trim();
 function flagPills(a, esc) {
   const f = (a.flags || []).map((x) => FLAGS[x]).filter(Boolean);
   if (a.type === 'ItemSet') f.unshift('Colección');
