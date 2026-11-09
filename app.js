@@ -251,7 +251,7 @@ function route() {
   else if (a === 'favoritos' || a === 'comparar' || a === 'vendedores') {
     current = { name: a, refresh() {} };
     import('./extras.js').then((m) => (a === 'favoritos' ? m.renderFavoritos : a === 'comparar' ? m.renderComparar : m.renderVendedores)(view, { api, esc, coin, itemCell, debounce }))
-      .catch(() => { view.innerHTML = '<div class="empty">Esta sección sólo está en el Bazar de tu PC.</div>'; });
+      .catch((e) => { view.innerHTML = `<div class="empty">No pude abrir esta sección: ${esc(e.message)}</div>`; });
   }
   else if (a === 'ruta') { current = { name: 'ruta', refresh() {} }; import('./ruta.js').then((m) => m.renderRuta(view, { api, esc, coin })).catch(() => { view.innerHTML = '<div class="empty">La Ruta legendaria sólo está en el Bazar de tu PC.</div>'; }); }
   else if (a === 'monedas') { current = { name: 'monedas', refresh() {} }; renderMonedas(view, { api, esc, coin }); }
@@ -705,9 +705,8 @@ let drawerItem = null;
 let EXTRAS = null;
 const extras = () => (EXTRAS ||= import('./extras.js'));
 async function paintFavBtn() {
-  const local = STATUS && !STATUS.publicMode;
-  $('#drawerFav').hidden = $('#drawerCmp').hidden = !local || !drawerItem;
-  if (!local || !drawerItem) return;
+  $('#drawerFav').hidden = $('#drawerCmp').hidden = !drawerItem;
+  if (!drawerItem) return;
   const m = await extras();
   const on = m.isFav(drawerItem.id);
   $('#drawerFav').textContent = on ? '★' : '☆';

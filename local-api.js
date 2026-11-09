@@ -14,7 +14,7 @@ import { levelingPlan } from './leveling.js';
 import { currencyUses } from './currencies.js';
 import { getAuthed } from './gw2api.js';
 import { containerContents, setContainersSnapshot } from './containers.js';
-import { listItems, flips, demand, craftingProfits } from './analysis.js';
+import { listItems, flips, demand, craftingProfits, row as marketRow } from './analysis.js';
 import { itemDetail } from './sources.js';
 import { acquisition } from './wiki.js';
 import { achievementGuide } from './achguide.js';
@@ -70,6 +70,7 @@ const routes = {
   }),
   '/api/meta': () => ({ types: TYPES, rarities: RARITIES, rarityOrder: RARITY_ORDER, disciplines: DISCIPLINES, gameTypes: GAME_TYPES, recipeFlags: RECIPE_FLAGS, subtypes: SUBTYPES, weights: WEIGHTS }),
   '/api/vendors': () => vendorMarkers(),
+  '/api/items/by-ids': (q) => (q.get('ids') || '').split(',').map(Number).filter((x) => x > 0).slice(0, 300).map((id) => marketRow(id)),
   '/api/currency': async (q) => { await loadCatalog(); return currencyUses(q.get('en') || ''); },
   '/api/account/wallet': async () => {
     const key = getKey();
