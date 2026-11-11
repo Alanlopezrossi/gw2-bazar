@@ -217,7 +217,7 @@ export async function renderLogros(view, { api, esc, normalize, catId = null, to
           const st = stateOf(a, P);
           const rw = (a.rewards || []).map((r) => (r.type === 'Item' ? '🎁 item' : r.type === 'Mastery' ? '⭐ maestría' : r.type === 'Title' ? '🏷 título' : r.type === 'Coins' ? '🪙 monedas' : r.type)).join(', ');
           return `<tr class="clickable" data-ach="${a.id}">
-            <td class="left"><b>${esc(a.name)}</b>${a.removed ? ' <span class="pill warn">fuera de la API</span>' : ''}<div class="muted small">${esc(c?.name || '')}</div></td>
+            <td class="left"><div class="ach-cell">${a.icon || c?.icon ? `<img src="${esc(a.icon || c.icon)}" alt="" loading="lazy">` : '<span class="ach-ph">🏆</span>'}<div><b>${esc(a.name)}</b>${a.removed ? ' <span class="pill warn">fuera de la API</span>' : ''}<div class="muted small">${esc(c?.name || '')}</div></div></div></td>
             <td class="left small">${esc(requirement(a)).slice(0, 180)}</td>
             <td class="num">${points(a)}</td>
             <td class="left small">${esc(rw)}</td>

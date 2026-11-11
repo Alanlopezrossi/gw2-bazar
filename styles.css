@@ -950,6 +950,13 @@ details.ev-alarms[open] > summary { margin-bottom: 8px; }
 .special-ev{border:1px solid var(--accent,#c9a227);background:rgba(201,162,39,.08);border-radius:10px;padding:10px 14px;margin:0 0 14px}
 .special-ev p{margin:4px 0}
 .wk-seg.wk-dim{opacity:.28;filter:grayscale(.6)}
+.ic20 { width: 20px; height: 20px; vertical-align: -5px; margin-right: 6px; border-radius: 3px; }
+.rt-noicon { width: 32px; height: 32px; display: inline-grid; place-items: center; border-radius: 6px; background: var(--panel2, #222); color: var(--accent, #c9a227); }
+.rt-card summary h3 a { color: inherit; }
+.ic-auto { width: 18px; height: 18px; vertical-align: -4px; margin-right: 5px; border-radius: 3px; display: inline-block; }
+.ach-cell { display: flex; gap: 10px; align-items: flex-start; }
+.ach-cell > img, .ach-ph { width: 32px; height: 32px; border-radius: 5px; flex: none; }
+.ach-ph { display: inline-grid; place-items: center; background: rgba(127,127,127,.15); font-size: 16px; }
 
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }

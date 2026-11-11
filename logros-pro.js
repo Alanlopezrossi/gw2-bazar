@@ -76,7 +76,7 @@ export async function renderLogrosPanel(view, { api, esc, normalize, toast }) {
     const p = prog(a), r = ratio(a), c = catOf(a);
     const status = p?.done ? '<span class="ach-st done">Hecho</span>' : p ? `<span class="ach-st prog">${nf(p.current || 0)} / ${nf(p.max || goal(a))}</span>` : isLocked(a) ? '<span class="ach-st lock">Bloqueado</span>' : '<span class="ach-st todo">Sin empezar</span>';
     return `<tr class="clickable" data-ach="${a.id}">
-      <td class="left"><b>${esc(a.name)}</b><div class="muted small">${esc(c?.name || '')}</div></td>
+      <td class="left"><div class="ach-cell">${a.icon || c?.icon ? `<img src="${esc(a.icon || c.icon)}" alt="" loading="lazy">` : '<span class="ach-ph">🏆</span>'}<div><b>${esc(a.name)}</b><div class="muted small">${esc(c?.name || '')}</div></div></div></td>
       <td class="left small">${esc(requirement(a)).slice(0, 160)}</td>
       <td class="num">${points(a)}</td>
       <td class="left small lp-rew">${rewardHTML(a, T)}</td>

@@ -58,6 +58,31 @@ const GROUP_NOTES = {
   'armadura de obsidiana': 'Por pieza: juntá los diseños de armadura y derrotá al jefe de esa pieza; después le comprás el Arcanum a Lyhr (torre del brujo) con un Cristal de visión menor. Piezas: Pensamiento = casco, Porte = hombros, Latido = pecho, Agarrón = guantes, Zancada = piernas, Huellas = botas.',
   'facetas de aurene 3 generacion': 'Primero hay que fabricar una legendaria de 3.ª generación (de Aurene): Don de maestría de jade (completar los mapas de Cantha: Provincia de Seitung, Nueva Kaineng, Bosque de Echovald y Fin del Dragón, + runas de jade, jade puro, ámbar gris y 100 piedras de invocación antiguas) + Tributo dracónico + el precursor. Al vincularla en la armería, hablá con Leivas.',
 };
+// Íconos: cada logro usa el suyo; si la API no le da uno, el del item que te da de recompensa y, si no, el de su categoría.
+// Las legendarias que el planificador no conoce (las más nuevas) buscan su ícono por nombre en el catálogo.
+const ICONS = new Map();
+async function itemIcons(ids) {
+  const need = [...new Set(ids)].filter((id) => id && !ICONS.has(id));
+  for (let i = 0; i < need.length; i += 200) {
+    try { for (const it of await getJSON(`${API()}/items?lang=es&ids=${need.slice(i, i + 200).join(',')}`)) ICONS.set(it.id, it.icon); } catch { /* sigue sin ícono */ }
+  }
+}
+async function addIcons(groups, api) {
+  const legIds = new Map();
+  await Promise.all(groups.filter((g) => !g.leg?.icon).map(async (g) => {
+    try {
+      const r = await api(`/api/catalog?q=${encodeURIComponent(g.name)}&rarity=Legendary&limit=10`);
+      const hit = (r.rows || []).find((x) => norm(x.name || '') === norm(g.name)) || (r.rows || []).find((x) => norm(x.name || '').includes(norm(g.name)) && /Weapon|Armor|Back|Trinket|Relic/.test(x.type || ''));
+      if (hit) legIds.set(g, hit.id);
+    } catch { /* sin catálogo */ }
+  }));
+  await itemIcons([...legIds.values(), ...groups.flatMap((g) => g.list.filter((s) => !s.icon).map((s) => s.rew[0]))]);
+  for (const g of groups) {
+    g.icon = g.leg?.icon || ICONS.get(legIds.get(g)) || '';
+    g.itemId = g.leg?.id || legIds.get(g) || 0;
+    for (const s of g.list) s.icon = s.icon || ICONS.get(s.rew[0]) || s.catIcon || g.icon;
+  }
+}
 let LEGCRAFT = -1; // niveles entrenados de Artesanía legendaria (id 6): 0 a 4; -1 = no se sabe
 const LV = ['', M.ant, M.mae, M.his, M.eru];
 function fixHow(g, s) {
@@ -142,7 +167,7 @@ export async function renderRuta(view, { api, esc, coin }) {
         const st = p?.done ? 'ok' : p && (p.current || 0) > 0 ? 'run' : !preOk || (a.locked_text && !p) ? 'lock' : 'open';
         const preNames = (a.prerequisites || []).filter((x) => !prog.get(x)?.done).map((x) => defs.byId.get(x)?.name).filter(Boolean);
         const how = st === 'ok' ? '' : st === 'lock' ? (a.locked_text || (preNames.length ? `Primero completá: ${preNames.join(', ')}.` : '')) : (a.requirement || '').replace(/\s{2,}/g, ' ');
-        map.get(k).list.push({ id, name: a.name, o, st, cur: p?.done ? max : p?.current || 0, max, how, rew: (a.rewards || []).filter((r) => r.type === 'Item').map((r) => r.id) });
+        map.get(k).list.push({ id, icon: a.icon || '', catIcon: c.icon || '', name: a.name, o, st, cur: p?.done ? max : p?.current || 0, max, how, rew: (a.rewards || []).filter((r) => r.type === 'Item').map((r) => r.id) });
       }
       groups = [...map.values()].map((g) => {
         g.list.sort((a, b) => a.o - b.o || a.name.localeCompare(b.name, 'es', { numeric: true }));
@@ -156,6 +181,7 @@ export async function renderRuta(view, { api, esc, coin }) {
         for (const s of g.list) g.count[s.st]++;
         return g;
       }).sort((a, b) => (b.count.ok + b.count.run > 0) - (a.count.ok + a.count.run > 0) || (b.leg?.progress || 0) - (a.leg?.progress || 0) || a.name.localeCompare(b.name, 'es'));
+      await addIcons(groups, api);
       const t = { ok: 0, run: 0, open: 0, lock: 0 };
       for (const g of groups) for (const k in t) t[k] += g.count[k];
       view.querySelector('#rtSum').innerHTML = NOACC ? `<div class="explain small"><b>Sin cuenta conectada.</b> Ves todas las cadenas en orden, qué pide cada paso y lo que cuesta cada legendaria en el bazar. Para ver tu avance, tus dominios y cuánto de los materiales ya tenés, cargá tu API key en <a href="#/cuenta">Mi cuenta</a> (queda guardada sólo en este navegador y sólo se usa con la API oficial de Guild Wars 2).</div>` : `<div class="cards">${['ok', 'run', 'open', 'lock'].map((k) => `<div class="card rt-${k}"><div class="k">${lab(k)}</div><div class="v num">${t[k]}</div></div>`).join('')}
@@ -182,12 +208,12 @@ export async function renderRuta(view, { api, esc, coin }) {
     const t = norm(q);
     const list = groups.filter((g) => (!t || norm(`${g.name} ${g.list.map((s) => s.name).join(' ')}`).includes(t)) && (filter === 'all' || g.count[filter] > 0));
     const card = (g) => `<details class="rt-card" ${g.count.run || g.count.ok || t ? 'open' : ''}>
-      <summary>${g.leg?.icon ? `<img src="${esc(g.leg.icon)}" alt="">` : ''}<h3>${esc(g.name)}</h3>
+      <summary>${g.icon ? `<img src="${esc(g.icon)}" alt="" loading="lazy">` : '<span class="rt-noicon">★</span>'}<h3>${g.itemId ? `<a href="#/item/${g.itemId}" class="rar-Legendary">${esc(g.name)}</a>` : esc(g.name)}</h3>
         <span class="rt-meta">${g.list.length} logro${g.list.length === 1 ? '' : 's'}${g.count.ok ? ` · <span class="rt-t-ok">${g.count.ok} hecho${g.count.ok === 1 ? '' : 's'}</span>` : ''}${g.count.run ? ` · <span class="rt-t-run">${g.count.run} empezado${g.count.run === 1 ? '' : 's'}</span>` : ''}${g.leg && !NOACC ? ` · materiales ${Math.round((g.leg.progress || 0) * 100)}%` : ''}</span></summary>
       ${g.note ? `<div class="rt-note"><b>Cómo se hace:</b> ${esc(g.note)}</div>` : ''}
       ${legHTML(g)}
       <ol class="rt-chain">${g.list.map((s, i) => `<li class="rt-${s.st}"><span class="rt-dot">${s.st === 'ok' ? '✓' : i + 1}</span><div>
-        <div class="rt-row"><a href="#/logro/${s.id}" class="rt-name">${esc(s.name)}</a><span class="rt-pill">${lab(s.st)}</span>${s.max ? `<span class="rt-cnt">${s.cur}/${s.max}</span>` : ''}</div>
+        <div class="rt-row"><a href="#/logro/${s.id}" class="rt-name">${s.icon ? `<img src="${esc(s.icon)}" alt="" class="ic20" loading="lazy">` : ''}${esc(s.name)}</a><span class="rt-pill">${lab(s.st)}</span>${s.max ? `<span class="rt-cnt">${s.cur}/${s.max}</span>` : ''}</div>
         ${s.st === 'run' && s.max ? `<div class="rt-prog"><i style="width:${Math.round((s.cur / s.max) * 100)}%"></i></div>` : ''}
         ${s.how ? `<div class="rt-how">${s.st === 'lock' ? '<b>Cómo desbloquearlo:</b> ' : ''}${esc(s.how)}</div>` : ''}</div></li>`).join('')}</ol>
       ${g.leg ? `<div class="rt-more"><button class="btn ghost small" data-guide="${g.leg.id}">📘 Guía completa: receta, dones, colecciones y de dónde sale cada cosa</button><a class="btn ghost small" href="#/legendarias">Árbol de materiales →</a></div><div class="rt-guide" id="guide-${g.leg.id}"></div>` : ''}</details>`;
