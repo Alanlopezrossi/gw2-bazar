@@ -965,6 +965,20 @@ details.ev-alarms[open] > summary { margin-bottom: 8px; }
 .wk-narrow .ev-bell, .wk-tiny .ev-bell { position: absolute; right: 1px; bottom: 1px; font-size: 11px; padding: 1px; margin: 0; background: rgba(255,255,255,.75); border-radius: 4px; z-index: 2; }
 .wk-narrow .ev-bell.on, .wk-tiny .ev-bell.on { background: #fff3c4; }
 .ho-ev .ev-bell { font-size: 15px; margin-right: 4px; }
+/* Fractales */
+.fr-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0; }
+.fr-acc { margin-top: 10px; }
+.fr-acc a.card { text-decoration: none; color: inherit; }
+.fr-daily { list-style: none; padding: 0; margin: 0; }
+.fr-daily li { padding: 7px 0; border-bottom: 1px solid var(--line); }
+.fr-daily li.done > a { text-decoration: line-through; opacity: .7; }
+.fr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.fr-card { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--bg-2); }
+.fr-card h4 { margin: 0 0 6px; }
+.fr-card p { margin: 0; }
+tr.fr-today td { background: rgba(80, 200, 120, .10); }
+tr.fr-me td { background: rgba(201, 162, 39, .14); }
+.fr-scales td, .fr-scales th { white-space: nowrap; }
 
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }

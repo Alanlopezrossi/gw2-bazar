@@ -83,26 +83,121 @@
       ],
       "wiki": "Magnetite Shard"
     },
-    "Karma": { "resumen": "Se gana con casi cualquier actividad: corazones, eventos, historia.", "usos": ["NPC de karma en todo el mundo (corazones completados, templos de Orr)."], "wiki": "Karma" },
-    "Laurel": { "resumen": "Se gana en la Bóveda del Mago y como recompensa de logros.", "wiki": "Laurel" },
-    "Badge of Honor": { "resumen": "Se gana jugando WvW (Mundo contra Mundo) y como recompensa de logros.", "fuentes": ["Matar jugadores, tomar campamentos/torres/fortalezas, cofres de subida de rango y la pista de recompensas de escaramuza."], "wiki": "Badge of Honor" },
-    "Airship Part": { "resumen": "Se gana en Verdant Brink (eventos, cofres, nodos).", "wiki": "Airship Part" },
-    "Lump of Aurillium": { "resumen": "Se gana en Auric Basin (eventos, cofres, nodos).", "wiki": "Lump of Aurillium" },
-    "Ley Line Crystal": { "resumen": "Se gana en Tangled Depths (eventos, cofres, nodos).", "wiki": "Ley Line Crystal" },
-    "Trade Contract": { "resumen": "Se gana en varios mapas del Desierto de Cristal (Path of Fire).", "wiki": "Trade Contract" },
-    "Elegy Mosaic": { "resumen": "Se gana en mapas del Desierto de Cristal derrotando objetivos de recompensa legendarios y completando los metaeventos.", "wiki": "Elegy Mosaic" },
-    "Research Note": { "resumen": "Se gana reciclando objetos crafteados aptos con un Kit de investigación.", "wiki": "Research Note" },
-    "Imperial Favor": { "resumen": "Se gana completando eventos en los mapas de Cantha (End of Dragons).", "wiki": "Imperial Favor" },
-    "Jade Sliver": { "resumen": "Se gana con el módulo Reciclador: astillas de jade del Jade Bot.", "wiki": "Jade Sliver" },
-    "Static Charge": { "resumen": "Se gana completando eventos en el Archipiélago Skywatch.", "wiki": "Static Charge" },
-    "Pinch of Stardust": { "resumen": "Se gana completando eventos en Amnytas.", "wiki": "Pinch of Stardust" },
-    "Calcified Gasp": { "resumen": "Se gana completando eventos en Inner Nayos.", "wiki": "Calcified Gasp" },
-    "Ursus Oblige": { "resumen": "Se gana en Janthir.", "wiki": "Ursus Oblige" },
-    "Antiquated Ducat": { "resumen": "Se gana en Castora.", "wiki": "Antiquated Ducat" },
-    "Aether-Rich Sap": { "resumen": "Se gana en Castora.", "wiki": "Aether-Rich Sap" },
-    "Fractal Relic": { "resumen": "Se gana y se gasta en Fractales de la Niebla.", "wiki": "Fractal Relic" },
-    "Pristine Fractal Relic": { "resumen": "Se gana en Fractales de la Niebla; sirve para comprar anillos ascendidos.", "wiki": "Pristine Fractal Relic" },
-    "Astral Acclaim": { "resumen": "Se gana en la Bóveda del Mago completando objetivos diarios, semanales y de temporada.", "wiki": "Astral Acclaim" },
-    "Testimony of Castoran Heroics": { "resumen": "Se gana subiendo de rango en WvW.", "wiki": "Testimony of Heroics" }
+    "Karma": {
+      "resumen": "Se gana con casi cualquier actividad: corazones, eventos, historia.",
+      "usos": [
+        "NPC de karma en todo el mundo (corazones completados, templos de Orr)."
+      ],
+      "wiki": "Karma"
+    },
+    "Laurel": {
+      "resumen": "Se gana en la Bóveda del Mago y como recompensa de logros.",
+      "wiki": "Laurel"
+    },
+    "Badge of Honor": {
+      "resumen": "Se gana jugando WvW (Mundo contra Mundo) y como recompensa de logros.",
+      "fuentes": [
+        "Matar jugadores, tomar campamentos/torres/fortalezas, cofres de subida de rango y la pista de recompensas de escaramuza."
+      ],
+      "wiki": "Badge of Honor"
+    },
+    "Airship Part": {
+      "resumen": "Se gana en Verdant Brink (eventos, cofres, nodos).",
+      "wiki": "Airship Part"
+    },
+    "Lump of Aurillium": {
+      "resumen": "Se gana en Auric Basin (eventos, cofres, nodos).",
+      "wiki": "Lump of Aurillium"
+    },
+    "Ley Line Crystal": {
+      "resumen": "Se gana en Tangled Depths (eventos, cofres, nodos).",
+      "wiki": "Ley Line Crystal"
+    },
+    "Trade Contract": {
+      "resumen": "Se gana en varios mapas del Desierto de Cristal (Path of Fire).",
+      "wiki": "Trade Contract"
+    },
+    "Elegy Mosaic": {
+      "resumen": "Se gana en mapas del Desierto de Cristal derrotando objetivos de recompensa legendarios y completando los metaeventos.",
+      "wiki": "Elegy Mosaic"
+    },
+    "Research Note": {
+      "resumen": "Se gana reciclando objetos crafteados aptos con un Kit de investigación.",
+      "wiki": "Research Note"
+    },
+    "Imperial Favor": {
+      "resumen": "Se gana completando eventos en los mapas de Cantha (End of Dragons).",
+      "wiki": "Imperial Favor"
+    },
+    "Jade Sliver": {
+      "resumen": "Se gana con el módulo Reciclador: astillas de jade del Jade Bot.",
+      "wiki": "Jade Sliver"
+    },
+    "Static Charge": {
+      "resumen": "Se gana completando eventos en el Archipiélago Skywatch.",
+      "wiki": "Static Charge"
+    },
+    "Pinch of Stardust": {
+      "resumen": "Se gana completando eventos en Amnytas.",
+      "wiki": "Pinch of Stardust"
+    },
+    "Calcified Gasp": {
+      "resumen": "Se gana completando eventos en Inner Nayos.",
+      "wiki": "Calcified Gasp"
+    },
+    "Ursus Oblige": {
+      "resumen": "Se gana en Janthir.",
+      "wiki": "Ursus Oblige"
+    },
+    "Antiquated Ducat": {
+      "resumen": "Se gana en Castora.",
+      "wiki": "Antiquated Ducat"
+    },
+    "Aether-Rich Sap": {
+      "resumen": "Se gana en Castora.",
+      "wiki": "Aether-Rich Sap"
+    },
+    "Fractal Relic": {
+      "resumen": "Se gana y se gasta en Fractales de la Niebla.",
+      "wiki": "Fractal Relic",
+      "fuentes": [
+        "Cofre final de cada fractal: 5 (escala 1–5) a 19 (escala 91–100).",
+        "Jefes con modo desafío activo: 20 o 100.",
+        "Bolsas y cofres de reliquias."
+      ],
+      "usos": [
+        "BUY-4373: Llaves de encriptación, Tréboles místicos (150), Don de la Ascensión (500), Kit de reciclaje ascendido.",
+        "BLING-9009: armadura y armas ascendidas, pociones infinitas de la Niebla."
+      ]
+    },
+    "Pristine Fractal Relic": {
+      "resumen": "Se gana en Fractales de la Niebla; sirve para comprar anillos ascendidos.",
+      "wiki": "Pristine Fractal Relic",
+      "fuentes": [
+        "Cofres de las diarias de fractales (hasta 15 por día).",
+        "Modos desafío: 2 cada uno.",
+        "Logros Fractal Initiate, Adept, Expert y Master."
+      ],
+      "usos": [
+        "Anillos ascendidos (10 c/u), Caja de armas fractales (20), Mist Band/Pendant/Talisman (100), mejoras de Deroir."
+      ]
+    },
+    "Astral Acclaim": {
+      "resumen": "Se gana en la Bóveda del Mago completando objetivos diarios, semanales y de temporada.",
+      "wiki": "Astral Acclaim"
+    },
+    "Testimony of Castoran Heroics": {
+      "resumen": "Se gana subiendo de rango en WvW.",
+      "wiki": "Testimony of Heroics"
+    },
+    "Fractalline Dust": {
+      "resumen": "Moneda de la Incursión fractal (noviembre 2026) para los guantes legendarios Mists-Grasper.",
+      "fuentes": [
+        "Eventos de Incursión fractal en Colinas Kessex, Meseta de Diessa, Selvas Brisbanas y Cúmulos de Guaridanieve (cada hora).",
+        "Fractales Quickplay: 4–6 por run completo.",
+        "Logro semanal: 25."
+      ],
+      "wiki": "Fractal Incursion"
+    }
   }
 }
