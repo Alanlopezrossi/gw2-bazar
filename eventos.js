@@ -30,7 +30,7 @@ export const NAME_ES = {
 /** Eventos especiales por tiempo limitado (fechas en UTC). Se muestran como aviso en Eventos y en Hoy mientras duran. */
 export const SPECIAL = [
   { id: 'fractal-incursion', from: '2026-11-10T19:00:00Z', to: '2026-12-01T19:00:00Z', key: 'core-fi', name: 'Incursión fractal',
-    text: 'Cada hora aparece una incursión fractal (15 min) en Colinas de Kessex, Meseta de Diessa, Tierras Salvajes de Brisban o Ventisqueros de Snowden; 15 min antes salen portales en las otras zonas que te llevan. La conferencia está en Arco del León (Coordinador Bixx). Da el polvo fractalino para los guantes legendarios Mists-Grasper, fichas de armas/armadura y ofertas extra en la Bóveda del Mago.',
+    text: 'Cada hora aparece una incursión fractal (15 min) en Colinas Kessex, Meseta de Diessa, Selvas Brisbanas o Cúmulos de Guaridanieve; 15 min antes salen portales en las otras zonas que te llevan. La conferencia está en Arco del León (Coordinador Bixx). Da el polvo fractalino para los guantes legendarios Mists-Grasper, fichas de armas/armadura y ofertas extra en la Bóveda del Mago.',
     wiki: 'Fractal_Incursion' },
 ];
 export function specialHTML(esc) {
@@ -75,12 +75,20 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
   const mapByEn = new Map((labels?.maps || []).map((m) => [normalize(m.en), m]));
   const es = (s) => NAME_ES[s] || mapByEn.get(normalize(s || ''))?.es || s;
   const events = Object.entries(data.events).map(([key, ev]) => ({ key, ...ev }));
+  // Mapa de cada tramo: el del waypoint del tramo; si no tiene, el nombre del tramo o del grupo si es un mapa.
+  const segMap = (ev, r) => {
+    const g = ev.s[r] || [];
+    return (g[2] && wpByChat.get(g[2])?.m) || mapByEn.get(normalize(g[0] || ''))?.es || mapByEn.get(normalize(ev.n))?.es || '';
+  };
+  const evMaps = new Map(events.map((ev) => [ev.key, new Set(Object.keys(ev.s).filter((r) => r !== '0' && ev.s[r]?.[0]).map((r) => segMap(ev, r)).filter(Boolean))]));
+  const allMaps = [...new Set([...evMaps.values()].flatMap((x) => [...x]))].sort((a, b) => a.localeCompare(b, 'es'));
+  const segNames = (ev) => Object.values(ev.s).map((g) => `${g[0] || ''} ${es(g[0] || '')}`).join(' ');
   const cats = [...new Set(events.map((e) => e.c))];
 
   let saved = {};
   try { saved = JSON.parse(localStorage.getItem('gw2-eventos') || '{}'); } catch {}
-  const st = { cat: saved.cat || '', q: '', hidden: new Set(saved.hidden ? [...saved.hidden, ...((saved.hv || 1) < HIDE_V ? HIDE_NEW : [])] : [...HIDE_BY_DEFAULT]), window: saved.window || 180, range: (saved.hv || 1) >= 3 && ['2', '4', '8'].includes(saved.range) ? saved.range : '2', top: !!saved.top, shift: 0 };
-  const save = () => { try { localStorage.setItem('gw2-eventos', JSON.stringify({ hv: HIDE_V, cat: st.cat, hidden: [...st.hidden], window: st.window, range: st.range, top: st.top })); } catch {} };
+  const st = { cat: saved.cat || '', map: saved.map || '', q: '', hidden: new Set(saved.hidden ? [...saved.hidden, ...((saved.hv || 1) < HIDE_V ? HIDE_NEW : [])] : [...HIDE_BY_DEFAULT]), window: saved.window || 180, range: (saved.hv || 1) >= 3 && ['2', '4', '8'].includes(saved.range) ? saved.range : '2', top: !!saved.top, shift: 0 };
+  const save = () => { try { localStorage.setItem('gw2-eventos', JSON.stringify({ hv: HIDE_V, cat: st.cat, map: st.map, hidden: [...st.hidden], window: st.window, range: st.range, top: st.top })); } catch {} };
 
   view.innerHTML = `
     <div class="page-head"><div><h1>Eventos</h1><p>Metaeventos y jefes de mundo con sus horarios en <b>tu hora local</b>. Primero la línea de tiempo de cada mapa (como la wiki), con la línea roja de «ahora»; abajo, las alarmas y la lista de lo que está pasando y empieza pronto. Tocá un evento para verlo en el mapa o su código para copiar el waypoint.</p></div>${specialHTML(esc)}
@@ -88,6 +96,7 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
     <div class="filters">
       <input type="search" id="evQ" placeholder="Buscar evento o mapa… (ej: Tequatl, Octoparra, Arco del León)">
       <label>Expansión <select id="evCat"><option value="">Todas</option>${cats.map((c) => `<option value="${esc(c)}" ${st.cat === c ? 'selected' : ''}>${esc(CAT_ES[c] || c)}</option>`).join('')}</select></label>
+      <label>Mapa <select id="evMap"><option value="">Todos</option>${allMaps.map((m) => `<option value="${esc(m)}" ${st.map === m ? 'selected' : ''}>${esc(m)}</option>`).join('')}</select></label>
       <label>Lista: próximas <select id="evWin">${[60, 120, 180, 360, 720].map((m) => `<option value="${m}" ${st.window === m ? 'selected' : ''}>${m / 60} h</option>`).join('')}</select></label>
     </div>
     <div class="section"><h3>Horario <span class="muted small">(tu hora local · pasá el mouse por un evento para ver el detalle, tocalo para copiar el waypoint)</span></h3>
@@ -148,14 +157,15 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
     view.querySelector('#evUtc').textContent = `${new Date().toISOString().slice(11, 16)} UTC (hora del servidor)`;
     const q = normalize(st.q).trim();
     const match = (ev, segName = '') => (!st.cat || ev.c === st.cat) && (!q || normalize(`${ev.n} ${es(ev.n)} ${segName} ${es(segName)} ${CAT_ES[ev.c] || ev.c}`).includes(q));
+    const onMap = (ev, r) => !st.map || (r == null ? evMaps.get(ev.key)?.has(st.map) : segMap(ev, r) === st.map);
 
     // Lista "ahora y próximos"
     const rows = [];
     for (const ev of events) {
-      if (HIDE_BY_DEFAULT.has(ev.key) && !q && st.cat !== ev.c) continue;
+      if (HIDE_BY_DEFAULT.has(ev.key) && !q && st.cat !== ev.c && !st.map) continue;
       for (const seg of segmentsBetween(ev, nowMin, nowMin + st.window)) {
         const name = ev.s[seg.r]?.[0] || '';
-        if (!match(ev, name)) continue;
+        if (!match(ev, name) || !onMap(ev, seg.r)) continue;
         rows.push({ ev, seg, name });
       }
     }
@@ -186,7 +196,8 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
     const limit = from + H;
     const rgb = (c) => `rgb(${c.join(',')})`;
     const bgOf = (b) => (!b || b === 'transparent' ? null : Array.isArray(b[0]) ? `linear-gradient(90deg, ${b.map(rgb).join(', ')})` : rgb(b));
-    const shown = events.filter((ev) => match(ev) && !st.hidden.has(ev.key));
+    // Con un mapa elegido se muestran también las filas ocultas que pasan por ese mapa.
+    const shown = events.filter((ev) => match(ev, segNames(ev)) && onMap(ev) && (st.map || !st.hidden.has(ev.key)));
     const byCat = new Map();
     for (const ev of shown) { if (!byCat.has(ev.c)) byCat.set(ev.c, []); byCat.get(ev.c).push(ev); }
     const tickStep = H <= 120 ? 15 : H <= 240 ? 30 : 60;
@@ -210,7 +221,7 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
         const next = sg.start >= limit;
         const pl = name ? placeOf(ev, sg.r) : null;
         const goto = pl ? `#/mapa/@${pl.c[0]},${pl.c[1]},${encodeURIComponent(`${pl.label} · ${fmt(sg.start)}–${fmt(sg.end)}${pl.exact ? '' : ' (punto de ruta)'}|${g[2] || ''}|${pl.wp && pl.exact ? `${pl.wp.c[0]};${pl.wp.c[1]};${pl.wp.es}` : ''}`)}` : '';
-        const cls = ['wk-seg', name ? '' : 'wk-empty', next ? 'wk-next' : '', live ? 'wk-live' : '', soon ? 'wk-soon' : '', px < 60 ? 'wk-tiny' : px < 140 ? 'wk-narrow' : '', pl ? 'has-map' : ''].join(' ');
+        const cls = ['wk-seg', name ? '' : 'wk-empty', next ? 'wk-next' : '', live ? 'wk-live' : '', soon ? 'wk-soon' : '', px < 60 ? 'wk-tiny' : px < 140 ? 'wk-narrow' : '', pl ? 'has-map' : '', name && st.map && segMap(ev, sg.r) !== st.map ? 'wk-dim' : ''].join(' ');
         const done = live ? ((nowMin - sg.start) / (sg.end - sg.start)) * 100 : 0;
         const badge = live ? `<span class="wk-badge">${px < 140 ? '' : 'EN CURSO · '}quedan ${rel(sg.end - nowMin)}</span>` : soon ? `<span class="wk-badge soon">en ${rel(sg.start - nowMin)}</span>` : '';
         const title = name ? `${es(name)}${es(name) !== name ? ` (${name})` : ''}\n${fmt(sg.start)}–${fmt(sg.end)} (${sg.end - sg.start} min)${live ? `\nEN CURSO: quedan ${rel(sg.end - nowMin)}` : sg.start > nowMin ? `\nEmpieza en ${rel(sg.start - nowMin)}` : ''}${g[2] ? `\nWaypoint ${g[2]} (clic en el código para copiarlo)` : ''}${pl ? '\nClic: ver en el mapa' : ''}` : '';
@@ -256,6 +267,7 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
     if (s) { st.hidden.delete(s.dataset.show); save(); paint(); }
   });
   view.querySelector('#evQ').addEventListener('input', (e) => { st.q = e.target.value; paint(); });
+  view.querySelector('#evMap').addEventListener('change', (e) => { st.map = e.target.value; save(); paint(); });
   view.querySelector('#evCat').addEventListener('change', (e) => { st.cat = e.target.value; save(); paint(); });
   view.querySelector('#evWin').addEventListener('change', (e) => { st.window = Number(e.target.value); save(); paint(); });
   const rangeSel = view.querySelector('#evRange'); rangeSel.value = st.range;
