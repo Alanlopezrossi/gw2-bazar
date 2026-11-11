@@ -132,8 +132,23 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
     if (m) return { c: m.c, label: `${es(g[0] || ev.n)} · ${m.es}` };
     return null;
   };
+  // Waypoint para copiar: el del evento; si la wiki no trae uno, el más cercano al punto exacto del evento.
+  const WPS = labels?.waypoints || [];
+  const chatOf = (ev, r) => {
+    const g = ev.s[r] || [];
+    if (g[2]) return g[2];
+    if (/continued/i.test(g[0] || '')) { const prev = Object.entries(ev.s).find(([k, x]) => Number(k) > 0 && x?.[2]); if (prev) return prev[1][2]; }
+    if (Array.isArray(g[4]) && WPS.length) {
+      let best = null, bd = Infinity;
+      for (const w of WPS) { const d = (w.c[0] - g[4][0]) ** 2 + (w.c[1] - g[4][1]) ** 2; if (d < bd) { bd = d; best = w; } }
+      if (best && bd < 4000 ** 2) return best.chat;
+    }
+    // Eventos de todo el mapa: un waypoint de ese mismo mapa (el de otro tramo del evento).
+    if (!/^(Day|Dusk|Night|Dawn)$|Tournament/.test(g[0] || '')) { const other = Object.entries(ev.s).find(([k, x]) => Number(k) > 0 && Number(k) !== Number(r) && x?.[2]); if (other) return other[1][2]; }
+    return '';
+  };
   const where = (ev, seg) => {
-    const chat = ev.s[seg.r]?.[2];
+    const chat = chatOf(ev, seg.r);
     const wp = chat ? wpByChat.get(chat) : null;
     return { chat, wp };
   };
@@ -229,7 +244,7 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
         const title = name ? `${es(name)}${es(name) !== name ? ` (${name})` : ''}\n${fmt(sg.start)}–${fmt(sg.end)} (${sg.end - sg.start} min)${live ? `\nEN CURSO: quedan ${rel(sg.end - nowMin)}` : sg.start > nowMin ? `\nEmpieza en ${rel(sg.start - nowMin)}` : ''}${g[2] ? `\nWaypoint ${g[2]} (clic en el código para copiarlo)` : ''}${pl ? '\nClic: ver en el mapa' : ''}` : '';
         parts.push(`<div class="${cls}" style="left:${left}%;width:${w}%;background:${name ? bgOf(g[3]) || '#e8e2c8' : empty}" ${goto ? `data-goto="${esc(goto)}"` : ''} ${title ? `title="${esc(title)}"` : ''}>
           ${live ? `<i class="wk-done" style="width:${done}%"></i>` : ''}
-          ${name ? `<span class="wk-name">${bell(ev, sg.r, name, true)}${esc(es(name))}</span>${badge}${g[2] ? `<span class="wk-chat" data-copy="${esc(g[2])}">${esc(g[2])}</span>` : ''}` : ''}</div>`);
+          ${name ? `<span class="wk-name">${bell(ev, sg.r, name, true)}${esc(es(name))}</span>${badge}${chatOf(ev, sg.r) ? `<span class="wk-chat" data-copy="${esc(chatOf(ev, sg.r))}" title="Copiar waypoint ${esc(chatOf(ev, sg.r))}${g[2] ? '' : ' (el más cercano)'}"><i>📋</i>${esc(chatOf(ev, sg.r))}</span>` : ''}` : ''}</div>`);
       }
       return `<div class="wk-row"><div class="wk-label" title="${esc(ev.n)}">${esc(es(ev.n))}</div><div class="wk-track">${parts.join('')}<button class="wk-x" data-hide="${ev.key}" title="Ocultar esta fila">✕</button></div></div>`;
     };
