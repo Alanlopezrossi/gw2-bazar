@@ -1,7 +1,7 @@
 // Pestaña "Hoy": lo que conviene mirar al entrar al juego, todo en una pantalla.
 // Eventos en curso y próximos, tus alarmas, tus favoritos con precio y, con API key, la Bóveda del Mago,
 // lo que ya hiciste hoy y los logros que tenés casi terminados.
-import { segmentsBetween, alarmList } from './alarmas.js';
+import { segmentsBetween, alarmList, toggleAlarm, hasAlarm, alarmId, alarmSettings } from './alarmas.js';
 import { NAME_ES, specialHTML } from './eventos.js';
 
 const nf = (n) => Number(n || 0).toLocaleString('es-AR');
@@ -55,9 +55,10 @@ export async function renderInicio(view, { api, esc, coin, itemCell }) {
       const mapEs = new Map((labels?.maps || []).map((m) => [m.en.toLowerCase(), m.es]));
       const es = (t) => NAME_ES[t] || mapEs.get(String(t || '').toLowerCase()) || t;
       rows.sort((a, b) => a.sg.start - b.sg.start);
+      const bell = (r) => { const on = hasAlarm(alarmId(r.key, r.sg.r)); return `<button type="button" class="ev-bell${on ? ' on' : ''}" data-bell="${esc(r.key)}" data-r="${r.sg.r}" data-name="${esc(es(r.g[0]))}" data-map="${esc(es(r.ev.n))}" data-chat="${esc(r.g[2] || '')}" title="${on ? 'Alarma activada: tocá para sacarla' : 'Avisarme cuando empiece'}">${on ? '🔔' : '🔕'}</button>`; };
       const li = (r) => `<li class="${r.live ? 'is-live' : ''}">
           <span class="ho-when">${r.live ? `<b class="pill good">EN CURSO</b> quedan ${rel(r.sg.end - now)}` : `<b>${fmt(r.sg.start)}</b> <span class="muted">en ${rel(r.sg.start - now)}</span>`}</span>
-          <span class="ho-what"><b>${esc(es(r.g[0]))}</b> <span class="muted small">· ${esc(es(r.ev.n))}</span></span>
+          <span class="ho-what">${bell(r)}<b>${esc(es(r.g[0]))}</b> <span class="muted small">· ${esc(es(r.ev.n))}</span></span>
           ${r.g[2] ? `<button class="btn ghost small" data-copy="${esc(r.g[2])}" title="Copiar waypoint">${esc(r.g[2])}</button>` : ''}</li>`;
       const live = rows.filter((r) => r.live).sort((a, b) => a.sg.end - b.sg.end);
       const next = rows.filter((r) => !r.live);
@@ -66,11 +67,20 @@ export async function renderInicio(view, { api, esc, coin, itemCell }) {
     } catch (e) { box.innerHTML = `<p class="muted">${esc(e.message)}</p>`; }
   })();
 
+  view.addEventListener('click', (e) => {
+    if (!view.querySelector('#hoEv')) return;
+    const b = e.target.closest('[data-bell]');
+    if (!b) return;
+    const on = toggleAlarm({ ev: b.dataset.bell, r: Number(b.dataset.r), name: b.dataset.name, map: b.dataset.map, chat: b.dataset.chat });
+    b.classList.toggle('on', on); b.textContent = on ? '🔔' : '🔕';
+    b.title = on ? `Alarma activada${alarmSettings().lead ? `: te aviso ${alarmSettings().lead} min antes` : ''}` : 'Avisarme cuando empiece';
+    paintAl();
+  });
   view.addEventListener('click', async (e) => { const c = e.target.closest('[data-copy]'); if (!c) return; try { await navigator.clipboard.writeText(c.dataset.copy); c.textContent = '✔ copiado'; } catch {} });
 
   // Alarmas y favoritos (de este navegador)
-  const al = alarmList();
-  view.querySelector('#hoAl').innerHTML = al.length ? `<ul class="ho-list">${al.map((a) => `<li>🔔 ${esc(a.name)} <span class="muted small">· ${esc(a.map)}</span></li>`).join('')}</ul>` : '<p class="muted small">No tenés alarmas. Ponelas tocando 🔕 en <a href="#/eventos">Eventos</a>.</p>';
+  const paintAl = () => { const al = alarmList(); const box = view.querySelector('#hoAl'); if (box) box.innerHTML = al.length ? `<ul class="ho-list">${al.map((a) => `<li>🔔 ${esc(a.name)} <span class="muted small">· ${esc(a.map)}</span></li>`).join('')}</ul>` : '<p class="muted small">No tenés alarmas. Ponelas tocando 🔕 en <a href="#/eventos">Eventos</a>.</p>'; };
+  paintAl();
   (async () => {
     const box = view.querySelector('#hoFav');
     let favs = [];

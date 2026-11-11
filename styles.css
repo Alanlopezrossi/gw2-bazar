@@ -861,14 +861,13 @@ table.cr-fixed td .coin { white-space: normal; }
 .wk-narrow .wk-chat { display: none; }
 .wk-narrow .wk-name { white-space: normal; font-size: 12px; line-height: 1.1; max-height: 2.3em; }
 .wk-tiny { padding: 3px 2px; }
-.wk-tiny .wk-chat, .wk-tiny .ev-bell { display: none; }
+.wk-tiny .wk-chat { display: none; }
 .wk-tiny .wk-name { white-space: normal; font-size: 10.5px; line-height: 1.05; overflow-wrap: anywhere; max-height: 3.2em; }
 .wk-tiny .wk-badge { font-size: 9.5px; padding: 0 2px; }
 .wk-x { position: absolute; right: 2px; top: 2px; z-index: 2; background: rgba(255,255,255,.6); border: 0; border-radius: 3px; font-size: 11px; color: #444; cursor: pointer; opacity: 0; }
 .wk-row:hover .wk-x { opacity: 1; }
 .wk-nav { display: inline-flex; gap: 4px; align-items: center; }
 @media (max-width: 700px) { .wk { --lab: 120px; } .wk-label { font-size: 12px; } }
-.wk-narrow .ev-bell { display: none; }
 .wk-narrow .wk-badge { font-size: 10px; padding: 0 3px; }
 .rt-toc { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 10px 0 4px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); font-size: 14px; }
 .rt-sec { margin-top: 22px; scroll-margin-top: 70px; }
@@ -961,6 +960,11 @@ details.ev-alarms[open] > summary { margin-bottom: 8px; }
 .ev-tools { position: sticky; top: var(--hdr, 100px); z-index: 6; background: var(--bg, #0e0f13); padding: 8px 0; }
 .wk-nav .btn { padding: 6px 12px; }
 .wk-nextlab[data-shift]:hover { background: #333; color: #fff; }
+
+/* En tramos angostos la campanita queda en la esquina, chiquita, pero siempre está */
+.wk-narrow .ev-bell, .wk-tiny .ev-bell { position: absolute; right: 1px; bottom: 1px; font-size: 11px; padding: 1px; margin: 0; background: rgba(255,255,255,.75); border-radius: 4px; z-index: 2; }
+.wk-narrow .ev-bell.on, .wk-tiny .ev-bell.on { background: #fff3c4; }
+.ho-ev .ev-bell { font-size: 15px; margin-right: 4px; }
 
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }

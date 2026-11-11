@@ -245,6 +245,7 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
   }
 
   view.addEventListener('click', async (e) => {
+    if (!view.querySelector('#evTimeline')) return; // la vista ya es otra pestaña
     const b = e.target.closest('[data-bell]');
     if (b) {
       e.stopPropagation();
@@ -273,7 +274,7 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
   const rangeSel = view.querySelector('#evRange'); rangeSel.value = st.range;
   rangeSel.addEventListener('change', (e) => { st.range = e.target.value; st.shift = 0; save(); paint(); });
   const shiftBy = (d) => { st.shift = d ? Math.max(-12, Math.min(12, st.shift + d)) : 0; paint(); };
-  view.addEventListener('click', (e) => { const b = e.target.closest('[data-shift]'); if (b && view.contains(b)) shiftBy(Number(b.dataset.shift)); });
+  view.addEventListener('click', (e) => { if (!view.querySelector('#evTimeline')) return; const b = e.target.closest('[data-shift]'); if (b && view.contains(b)) shiftBy(Number(b.dataset.shift)); });
   const onKey = (e) => {
     if (!view.isConnected || !view.querySelector('#evTimeline')) { document.removeEventListener('keydown', onKey); return; }
     if (e.target.closest?.('input, select, textarea') || e.altKey || e.ctrlKey || e.metaKey) return;

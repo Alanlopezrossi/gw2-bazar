@@ -224,6 +224,13 @@ function pagedTable(el, { head, rows, row, label = 'items', limit = 50, empty = 
 
 // ---------- router ----------
 const view = $('#view');
+// Los listeners que cada pestaña agrega a #view se sacan al cambiar de pestaña: si no, al volver a una pestaña
+// quedaban duplicados (por ejemplo, la campanita de alarma se prendía y apagaba en el mismo clic).
+const viewOwn = [];
+let trackView = false;
+const viewAdd = view.addEventListener.bind(view);
+view.addEventListener = (t, f, o) => { viewAdd(t, f, o); if (trackView) viewOwn.push([t, f, o]); };
+const resetViewListeners = () => { for (const [t, f, o] of viewOwn.splice(0)) view.removeEventListener(t, f, o); trackView = true; };
 let current = null; // { name, refresh }
 let lastView = '';
 let calcKeys = null;
@@ -258,6 +265,7 @@ function route() {
   closeDrawer(false);
   if (current && h === lastView) return; // volvimos de la ficha: no re-renderizar
   lastView = h;
+  resetViewListeners();
   if (a === 'recs') renderRecs(b || 'vender');
   else if (a === 'cuenta' && (!STATUS?.publicMode || STATUS?.browserKey)) renderAccount();
   else if (a === 'equipo') renderEquipo();
