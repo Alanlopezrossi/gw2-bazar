@@ -26,6 +26,18 @@ export const NAME_ES = {
   'Nexus of Eternity': 'Nexo de la Eternidad', 'Mount Balrior': 'Monte Balrior', 'Outer Nayos': 'Nayos Exterior',
   'Skiff Race': 'Carrera de esquifes', 'Water Balloons': 'Globos de agua', 'Treasure Hunt': 'Búsqueda del tesoro', 'Skimmer Race': 'Carrera de rayas', Fishing: 'Pesca', 'Dolyak Race': 'Carrera de dolyaks', 'Mad King Says': 'El Rey Loco dice',
 };
+
+/** Eventos especiales por tiempo limitado (fechas en UTC). Se muestran como aviso en Eventos y en Hoy mientras duran. */
+export const SPECIAL = [
+  { id: 'fractal-incursion', from: '2026-11-10T19:00:00Z', to: '2026-12-01T19:00:00Z', key: 'core-fi', name: 'Incursión fractal',
+    text: 'Cada hora aparece una incursión fractal (15 min) en Colinas de Kessex, Meseta de Diessa, Tierras Salvajes de Brisban o Ventisqueros de Snowden; 15 min antes salen portales en las otras zonas que te llevan. La conferencia está en Arco del León (Coordinador Bixx). Da el polvo fractalino para los guantes legendarios Mists-Grasper, fichas de armas/armadura y ofertas extra en la Bóveda del Mago.',
+    wiki: 'Fractal_Incursion' },
+];
+export function specialHTML(esc) {
+  const now = Date.now();
+  const fdate = (d) => new Date(d).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
+  return SPECIAL.filter((e) => now >= Date.parse(e.from) && now < Date.parse(e.to)).map((e) => `<div class="special-ev"><b>✨ Evento especial: ${esc(e.name)}</b> <span class="muted small">hasta el ${fdate(e.to)}</span><p class="small">${esc(e.text)}</p><a class="small" target="_blank" rel="noopener" href="https://wiki.guildwars2.com/wiki/${e.wiki}">wiki ↗</a></div>`).join('');
+}
 const DAY = 1440;
 // Ocultos de entrada: ciclos de día/noche, torneos PvP y festivales que no siempre están activos.
 const HIDE_BY_DEFAULT = new Set(['core-dn', 'eod-dn', 'voe-dn', 'core-ateu', 'core-atna', 'festival-lc', 'festival-db', 'festival-ha']);
@@ -71,7 +83,7 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
   const save = () => { try { localStorage.setItem('gw2-eventos', JSON.stringify({ hv: HIDE_V, cat: st.cat, hidden: [...st.hidden], window: st.window, range: st.range, top: st.top })); } catch {} };
 
   view.innerHTML = `
-    <div class="page-head"><div><h1>Eventos</h1><p>Metaeventos y jefes de mundo con sus horarios en <b>tu hora local</b>. Primero la línea de tiempo de cada mapa (como la wiki), con la línea roja de «ahora»; abajo, las alarmas y la lista de lo que está pasando y empieza pronto. Tocá un evento para verlo en el mapa o su código para copiar el waypoint.</p></div>
+    <div class="page-head"><div><h1>Eventos</h1><p>Metaeventos y jefes de mundo con sus horarios en <b>tu hora local</b>. Primero la línea de tiempo de cada mapa (como la wiki), con la línea roja de «ahora»; abajo, las alarmas y la lista de lo que está pasando y empieza pronto. Tocá un evento para verlo en el mapa o su código para copiar el waypoint.</p></div>${specialHTML(esc)}
       <div class="clock"><div class="muted small">Hora local</div><div id="evClock" class="num"></div><div class="muted small" id="evUtc"></div></div></div>
     <div class="filters">
       <input type="search" id="evQ" placeholder="Buscar evento o mapa… (ej: Tequatl, Octoparra, Arco del León)">

@@ -2,7 +2,7 @@
 // Eventos en curso y próximos, tus alarmas, tus favoritos con precio y, con API key, la Bóveda del Mago,
 // lo que ya hiciste hoy y los logros que tenés casi terminados.
 import { segmentsBetween, alarmList } from './alarmas.js';
-import { NAME_ES } from './eventos.js';
+import { NAME_ES, specialHTML } from './eventos.js';
 
 const nf = (n) => Number(n || 0).toLocaleString('es-AR');
 const fmt = (min) => new Date(min * 60000).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -12,6 +12,7 @@ const pretty = (id) => String(id).replace(/_/g, ' ').replace(/\b\w/g, (c) => c.t
 export async function renderInicio(view, { api, esc, coin, itemCell }) {
   view.innerHTML = `<div class="page-head"><div><h1>Hoy</h1><p>Lo que está pasando en Tyria ahora, lo que empieza pronto y, si cargaste tu API key, lo que te queda por hacer hoy.</p></div>
       <div class="clock"><div class="muted small">Hora local</div><div id="hoClock" class="num"></div><div class="muted small" id="hoReset"></div></div></div>
+    ${specialHTML(esc)}
     <div class="ho-grid">
       <section class="ho-card ho-wide"><h3>Eventos ahora y en las próximas 2 horas <a class="small" href="#/eventos">ver todos →</a></h3><div id="hoEv"><div class="skeleton"></div></div></section>
       <section class="ho-card"><h3>Bóveda del Mago</h3><div id="hoVault"><div class="skeleton"></div></div></section>
