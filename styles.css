@@ -957,6 +957,10 @@ details.ev-alarms[open] > summary { margin-bottom: 8px; }
 .ach-cell { display: flex; gap: 10px; align-items: flex-start; }
 .ach-cell > img, .ach-ph { width: 32px; height: 32px; border-radius: 5px; flex: none; }
 .ach-ph { display: inline-grid; place-items: center; background: rgba(127,127,127,.15); font-size: 16px; }
+/* La barra de períodos queda visible mientras bajás por la línea de tiempo */
+.ev-tools { position: sticky; top: var(--hdr, 100px); z-index: 6; background: var(--bg, #0e0f13); padding: 8px 0; }
+.wk-nav .btn { padding: 6px 12px; }
+.wk-nextlab[data-shift]:hover { background: #333; color: #fff; }
 
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }

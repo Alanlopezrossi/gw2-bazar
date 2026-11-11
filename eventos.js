@@ -102,7 +102,7 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
     <div class="section"><h3>Horario <span class="muted small">(tu hora local · pasá el mouse por un evento para ver el detalle, tocalo para copiar el waypoint)</span></h3>
       <div class="ev-tools">
         <label>Mostrar <select id="evRange"><option value="2">períodos de 2 horas (como la wiki)</option><option value="4">períodos de 4 horas</option><option value="8">períodos de 8 horas</option></select></label>
-        <span class="wk-nav"><button class="btn ghost small" data-shift="-1" title="Período anterior">◀</button><button class="btn ghost small" data-shift="0">Ahora</button><button class="btn ghost small" data-shift="1" title="Período siguiente">▶</button> <b id="evPeriod" class="num"></b></span>
+        <span class="wk-nav"><button class="btn ghost" data-shift="-1" title="Período anterior (tecla ←)">◀ Anterior</button><button class="btn ghost" data-shift="0" title="Volver a ahora">Ahora</button><button class="btn" data-shift="1" title="Período siguiente (tecla →)">Siguiente ▶</button> <b id="evPeriod" class="num"></b></span>
       </div>
       <div id="evTimeline" class="wk-wrap"></div>
       <p class="muted small" id="evHiddenNote"></p></div>
@@ -233,7 +233,7 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
     };
     let html = `<div class="wk"><div class="wk-head"><div class="wk-label"></div><div class="wk-ticks">
         ${ticks.map((m) => `<span class="wk-tick" style="left:${pctOf(m)}%">${fmt(m)}</span>`).join('')}
-        <span class="wk-nextlab" style="left:${pctOf(limit)}%">Período siguiente</span>
+        <span class="wk-nextlab" data-shift="1" title="Ir al período siguiente" style="left:${pctOf(limit)}%;cursor:pointer">Período siguiente ▶</span>
         ${nowIn ? `<span class="wk-nowlab" style="left:${pctOf(nowMin)}%">${fmt(nowMin)} · ahora</span>` : ''}</div></div>
       <div class="wk-body"><div class="wk-overlay"><i class="wk-limit" style="left:${pctOf(limit)}%"></i>${nowIn ? `<i class="wk-now" style="left:${pctOf(nowMin)}%"></i>` : ''}${ticks.map((m) => `<i class="wk-grid" style="left:${pctOf(m)}%"></i>`).join('')}</div>`;
     for (const [cat, list] of byCat) html += `<div class="wk-cat">${esc(CAT_ES[cat] || cat)}</div>${list.map(row).join('')}`;
@@ -272,7 +272,14 @@ export async function renderEventos(view, { api, esc, toast, normalize }) {
   view.querySelector('#evWin').addEventListener('change', (e) => { st.window = Number(e.target.value); save(); paint(); });
   const rangeSel = view.querySelector('#evRange'); rangeSel.value = st.range;
   rangeSel.addEventListener('change', (e) => { st.range = e.target.value; st.shift = 0; save(); paint(); });
-  view.querySelector('.wk-nav').addEventListener('click', (e) => { const b = e.target.closest('[data-shift]'); if (!b) return; const d = Number(b.dataset.shift); st.shift = d ? st.shift + d : 0; paint(); });
+  const shiftBy = (d) => { st.shift = d ? Math.max(-12, Math.min(12, st.shift + d)) : 0; paint(); };
+  view.addEventListener('click', (e) => { const b = e.target.closest('[data-shift]'); if (b && view.contains(b)) shiftBy(Number(b.dataset.shift)); });
+  const onKey = (e) => {
+    if (!view.isConnected || !view.querySelector('#evTimeline')) { document.removeEventListener('keydown', onKey); return; }
+    if (e.target.closest?.('input, select, textarea') || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.key === 'ArrowRight') shiftBy(1); else if (e.key === 'ArrowLeft') shiftBy(-1);
+  };
+  document.addEventListener('keydown', onKey);
   view.querySelector('#alLead').addEventListener('change', (e) => setAlarmSettings({ lead: Number(e.target.value) }));
   view.querySelector('#alSound').addEventListener('change', (e) => { setAlarmSettings({ sound: e.target.value }); playChime(e.target.value); });
   view.querySelector('#alVol').addEventListener('change', (e) => { setAlarmSettings({ vol: Number(e.target.value) }); playChime(); });
