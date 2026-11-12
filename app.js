@@ -255,7 +255,7 @@ function paintNav(tab) {
 function route() {
   const h = location.hash.replace(/^#\/?/, '') || 'bazar';
   const [a, b, c] = h.split('/');
-  paintNav(a === 'logro' ? 'logros' : a === 'moneda' ? 'monedas' : a);
+  paintNav(a === 'logro' ? 'logros' : a === 'moneda' ? 'monedas' : a === 'fractal' ? 'fractales' : a);
   if (a !== 'calc' && a !== 'item') calcKeys = null;
   if (a === 'item' && b) {
     openItem(Number(b));
@@ -286,6 +286,7 @@ function route() {
   else if (a === 'ruta') { current = { name: 'ruta', refresh() {} }; import('./ruta.js').then((m) => m.renderRuta(view, { api, esc, coin })).catch(() => { view.innerHTML = '<div class="empty">La Ruta legendaria sólo está en el Bazar de tu PC.</div>'; }); }
   else if (a === 'monedas') { current = { name: 'monedas', refresh() {} }; renderMonedas(view, { api, esc, coin }); }
   else if (a === 'moneda' && b) { current = { name: 'moneda', refresh() {} }; renderMoneda(view, Number(b), { api, esc, coin }); window.scrollTo(0, 0); }
+  else if (a === 'fractal') { current = { name: 'fractal', refresh() {} }; import('./fractales.js').then((m) => m.renderFractal(view, { api, esc }, b)).catch((e) => { view.innerHTML = `<div class="empty">${esc(e.message)}</div>`; }); }
   else if (a === 'fractales') { current = { name: 'fractales', refresh() {} }; import('./fractales.js').then((m) => m.renderFractales(view, { api, esc })).catch((e) => { view.innerHTML = `<div class="empty">${esc(e.message)}</div>`; }); }
   else if (a === 'eventos') { current = { name: 'eventos', refresh() {} }; renderEventos(view, { api, esc, toast, normalize: normalizeText }); }
   else if (a === 'logros') {

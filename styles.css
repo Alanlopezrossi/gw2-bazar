@@ -987,6 +987,14 @@ tr.fr-me td { background: rgba(201, 162, 39, .14); }
 .wk-track { height: 64px; }
 .wk-narrow .wk-chat { position: absolute; left: 4px; right: 2px; bottom: 2px; font-size: 10px; letter-spacing: -.2px; overflow: hidden; text-overflow: ellipsis; }
 .wk-narrow .wk-chat i { font-size: 9px; margin-right: 2px; }
+.fr-top { display: flex; justify-content: flex-end; margin-top: 8px; }
+.fr-lang { display: inline-flex; gap: 4px; }
+a.fr-link { text-decoration: none; color: inherit; display: block; }
+a.fr-link:hover { border-color: var(--accent, #c9a227); }
+a.fr-link h4 { color: var(--accent, #c9a227); }
+.fr-boss { padding: 6px 0; border-bottom: 1px solid var(--line); }
+.fr-boss p { margin: 2px 0 0; }
+.fr-ach tr.done td { opacity: .7; }
 
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }

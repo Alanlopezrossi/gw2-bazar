@@ -1,0 +1,238 @@
+{
+  "_nota": "Guías en español de cada fractal, resumidas de la wiki oficial de Guild Wars 2 (noviembre 2026). 'es' es el nombre en español (del juego cuando se conoce; la página lo reemplaza por el oficial que trae la API si lo encuentra).",
+  "fractales": {
+    "Aquatic Ruins": {
+      "es": "Ruinas Acuáticas",
+      "resumen": "El único fractal que se juega bajo el agua. Los krait capturaron a los habitantes de una aldea de pescadores: hay que explorar las ruinas sumergidas para liberarlos y estabilizar el fractal.",
+      "jefes": [["Jellyfish Beast", "Cada 25% de vida invoca Elite Krait Diviners y queda invulnerable hasta que mueren. Se come a los jugadores cercanos: liberate con «Struggle»; las burbujas que suben te llevan a la superficie."]],
+      "pasos": ["Entrá a las aguas poco profundas.", "Liberá a los dos pescadores matando a los krait de cada celda.", "Elegí camino (cambia cada día a las 07:30 UTC): el del delfín (izquierda) o el profundo (derecha).", "Camino profundo: seguí los hongos por la oscuridad hasta la cueva iluminada con un Campeón y la Planta luminosa. Camino del delfín: transformado en delfín usá «Echo» para revelar remolinos y krait ocultos sin que te detecten; al final hay un Campeón Krait Warden.", "Derrotá a la Jellyfish Beast."],
+      "consejos": ["En el camino profundo usá luz (o la Planta luminosa) para que no te ataquen las pirañas de las profundidades.", "Aplicate velocidad y égida antes de transformarte en delfín.", "Si alguien llega al siguiente punto de control, el resto puede usar /gg para reaparecer ahí.", "Llevá infusiones de agonía en el respirador y en las armas acuáticas."],
+      "recompensas": ["Recompensas normales de fractal (el cofre del jefe no se abre si lo completaste hace poco)."],
+      "logros": [["Aquatic Ruins Fractal Stabilizer", "Completar el fractal."], ["Just keep swimming", "Desafío: que no te capturen los krait mientras nadás como delfín."], ["Flawless Fins Foil Foes", "Logro de fractales que da un punto de dominio de Tyria central."]]
+    },
+    "Cliffside": {
+      "es": "Despeñadero",
+      "resumen": "Representa los comienzos de la historia de Tyria: hay que romper los sellos que tienen cautivo a un coloso gigante para liberarlo.",
+      "jefes": [["Legendary Archdiviner", "Usa el Martillo del culto: círculos rojos con condiciones, golpes en cono y, en la fase 3, un muro que refleja proyectiles. En las fases 3 y 4 encierra jugadores en jaulas (con tormento). Al 75, 50 y 25% queda invulnerable y suelta el martillo, que hay que cargar y usar contra el sello central."]],
+      "pasos": ["Derrotá a los fanáticos y cantores del inicio y agarrá el Martillo del culto en el altar a los pies del coloso.", "Subí el andamio y rompé los sellos de las rodillas.", "Pasá el túnel con trampas y gárgolas (un interruptor al final las apaga) y rompé el sello del pecho.", "Sellos de los brazos: alternalos en el pasillo mientras reaparecen enemigos; dos interruptores apagan las explosiones del andamio.", "En la cámara final derrotá al Legendary Archdiviner y rompé el último sello."],
+      "consejos": ["La corrupción aturde a las 30 acumulaciones: usá el martillo (habilidad 3) cerca de las 26 o tené estabilidad.", "Antes de usar el martillo cargado en un sello, matá a los enemigos que queden.", "En los brazos, llevá a los enemigos a un solo lado para que el sello se cure menos.", "Para salir de una jaula, pegale cuerpo a cuerpo o apuntá a la puerta."],
+      "recompensas": ["Martillo del culto (se usa dentro del fractal para romper los sellos).", "Seleccionador de desafíos del fractal del Despeñadero (para la mochila Ad Infinitum)."],
+      "logros": [["Cliffside Fractal Stabilizer", "Completar el fractal."], ["Headhunter", "Derrotar al Archdiviner matando como mucho 5 cultistas o cantores (sin contar el grupo inicial), escala 21 o más."], ["Take a Bow", "Hacer /bow ante el coloso después de la cinemática final."]]
+    },
+    "Snowblind": {
+      "es": "Ceguera de la Nieve",
+      "resumen": "Una ventisca causada por un elemental de hielo azota un bosque helado; los Hijos de Svanir y los elementales amenazan a los sobrevivientes de una aldea norn.",
+      "jefes": [["Elemental Source", "Elemental gigante rodeado de 5 fogatas. Lanza proyectiles que empujan y, al 75, 50 y 25%, apaga parte de las fogatas. Si se apagan todas, la ventisca baja la visibilidad y pega más. Reflejar y la estabilidad ayudan mucho."], ["Legendary Shaman Lornarr Dragonseeker", "Alterna cuerpo a cuerpo y Tormenta de hielo. Su Aliento helado es un cono que acumula daño. Al 75 y 50% sube a un balcón invulnerable hasta que matás a la Elite Icebrood Effigy; al 25% se transforma en oso con saltos que derriban."]],
+      "pasos": ["Encendé la fogata grande del inicio.", "Derretí el muro de hielo manteniendo el fuego cargado mientras matás elementales, lobos e Hijos de Svanir.", "Al sur, encendé las 5 fogatas del Elemental Source y derrotalo (se te va la Hipotermia).", "Seguí las huellas por el bosque oscuro hasta la aldea (con antorcha si tenés).", "Derrotá al chamán y abrí el cofre."],
+      "consejos": ["Mantené las fogatas casi llenas: el muro se derrite más rápido.", "Reflejá los Cristales de hielo corrompidos para romperlos rápido.", "Si te apunta el Aliento helado, retrocedé en línea recta para no pegarle a tus aliados."],
+      "recompensas": ["Reliquia svanir antigua (cofre del fractal).", "Seleccionador de desafíos del fractal de la Ceguera de la Nieve.", "Muestra de hielo de la Ceguera de la Nieve (con el Frasco glacial imbuido sobre el Elemental Source).", "Corazón congelado (infusionando el Corazón cristalino dentro del fractal)."],
+      "logros": [["Snowblind Fractal Stabilizer", "Completar el fractal."], ["If We Only Had Marshmallows", "Encender en equipo todas las fogatas del fractal."]]
+    },
+    "Solid Ocean": {
+      "es": "Océano Sólido",
+      "resumen": "Un océano solidificado en jade. Hay que llegar hasta la Jade Maw y derrotarla.",
+      "jefes": [["Jade Maw", "Inmune al daño normal. Sólo la daña un Cristal reflectante cargado (5% de vida) o matar sus tentáculos (~3%). Su rayo mortal se esquiva cuando desaparece o titila la calavera sobre tu cabeza; para cargar un cristal hay que absorber ese rayo."], ["Jade Colossi", "Reflejan proyectiles (se les saca aturdiéndolos) y tienen un área que derriba. Al morir sueltan Cristales reflectantes."]],
+      "pasos": ["Cruzá los fragmentos de jade flotantes hasta la plataforma de la Maw (los Irukandji se pueden saltear).", "Cuidado al saltar: si caés volvés a la plataforma anterior y el grupo no te puede revivir.", "Fase 1: matá 2 tentáculos.", "Fase 2: matá a los Colosos de jade y juntá los cristales.", "Fase final: tentáculos y cristales hasta terminarla; al final, alguien tiene que sostener un cristal para no morir."],
+      "consejos": ["Estabilidad para que no te derriben tentáculos ni colosos mientras te apunta el rayo verde.", "Con un cristal en la mano no usás las habilidades 1–5, pero sí las 6–10 y podés revivir.", "Los cristales en el suelo desaparecen a los 45–60 s: levantarlos y soltarlos reinicia el tiempo."],
+      "recompensas": ["Objetos de colecciones legendarias: Lente del ojo de la Jade Maw, Colmillo de la Jade Maw, Susurro del viento de jade, Botella de energía de jade, Tentáculo de Irukandji.", "Pedazo / Fragmentos del Océano Sólido (decoraciones)."],
+      "logros": [["Solid Ocean Fractal Stabilizer", "Completar el fractal."], ["Lessons in Agony", "Completar la escala 20."], ["No Lasers!", "Derrotar a la Jade Maw sin que el rayo le pegue a nadie del grupo."], ["Open Grave", "Matar a todos los monstruos del fractal salvo los de la plataforma de la Maw."]]
+    },
+    "Swampland": {
+      "es": "Cenagal",
+      "resumen": "Hay que expulsar a los espíritus malignos de un pantano lleno de trampas, espíritus errantes y dos jefes.",
+      "jefes": [["Mossman", "Invoca lobos y pega fuerte cuerpo a cuerpo. Se vuelve invisible y reaparece con un ataque cargado (seguilo en el minimapa). Hay que romperle la barra de desafío con control."], ["Bloomhunger", "Cargas, saltos, golpes al suelo y lluvia de veneno. Al 75 y 50% queda invulnerable y salen espíritus; al 25% hay que devolver fuegos fatuos a las grietas antes de que cargue un ataque que puede matar a todos."]],
+      "pasos": ["Devolvé los tres fuegos fatuos a sus grietas antes de que se termine el tiempo (de 1:04 a 0:30 según la escala).", "Cruzá el pasaje que se abre y derrotá a Mossman.", "En el claro, poné el fuego fatuo en una grieta y derrotá a Bloomhunger."],
+      "consejos": ["Que salga primero el que lleva el fuego fatuo más lejano, y que cada uno lo deje en la grieta de su lado.", "Las trampas están siempre en el mismo lugar: memorizá caminos seguros.", "Contra Bloomhunger quedate en los círculos verdes (Vigor del fuego fatuo)."],
+      "recompensas": ["Seleccionador de desafíos del fractal del Cenagal (Ad Infinitum).", "Protector del cenagal (trofeo)."],
+      "logros": [["Swampland Fractal Stabilizer", "Completar el fractal."], ["(desafío de las trampas)", "Completarlo sin activar ninguna trampa durante el evento de los fuegos fatuos."]]
+    },
+    "Uncategorized": {
+      "es": "Sin Clasificar",
+      "resumen": "Recrea un viejo desastre asura en unas ruinas (no son Rata Sum). Subís una estructura, liberás presos, superás a Old Tom y terminás contra el Raving Asura; Dessa aparece al inicio.",
+      "jefes": [["Presos (Champion Rabbit, Bandit Saboteur, Fire Shaman, Ettin)", "Escapan al destruir el Generador de energía; conviene matarlos en ese orden."], ["Old Tom", "Gólem que llena la sala de gas venenoso, dispara ráfagas en todas direcciones y te puede atraer."], ["Raving Asura", "Activa cuatro gólems y es invulnerable mientras vivan. Tira bolas de rayo reflejables y cargas positivas y negativas que dañan si se juntan cargas opuestas."]],
+      "pasos": ["Entrá a las ruinas y hablá con Dessa.", "Subí las plataformas matando arpías.", "Destruí el Generador de energía y derrotá a los presos.", "Escalera con 4 torretas: activá tres consolas a la vez.", "Old Tom: usá el ventilador de la consola para sacar el gas.", "Más plataformas con arpías y, al final, los cuatro gólems del Raving Asura."],
+      "consejos": ["Reflejá o bloqueá los proyectiles del Raving Asura (desde escala 20 tienen agonía).", "Quedate lejos de Old Tom para comer menos proyectiles.", "Con las arpías, ponete con la espalda al borde: si no hay suelo atrás, el empujón no te tira."],
+      "recompensas": ["Mecanismo encantado de la Niebla y Nuevo reactor de Old Tom (cofre final).", "Carta para Dessa (cofre del Raving Asura).", "Botella de energía sin clasificar y Pasta cáustica (colecciones).", "Seleccionador de desafíos de Sin Clasificar."],
+      "logros": [["Uncategorized Fractal Stabilizer", "Completar el fractal."], ["Hop, Skip, and Jump", "Completarlo sin morir por caída."]]
+    },
+    "Underground Facility": {
+      "es": "Instalación Subterránea",
+      "resumen": "Un complejo de excavación de los dredge con tres salas antes del jefe final. El camino de bombas o de fusiles se elige al azar.",
+      "jefes": [["Rabsovich", "Hace un rectángulo naranja frente a él y levanta un escudo que bloquea y aturde a quien le pegue. Llevalo a la parte de atrás del transportador usando la línea de visión."], ["Legendary Dredge Powersuit", "Pisotón, golpe de polvo y bomba de racimo que puede matar de un golpe. Sólo se lo daña llevándolo bajo los cubos de mineral fundido (Sobrecalentado)."], ["Rampaging Ice Elemental", "Jefe alternativo: misma estrategia de cubos; invoca elementales y hay que interrumpir su curación con aturdimiento o derribo."]],
+      "pasos": ["Sala 1: activá las placas para abrir las puertas y usá el panel de control unos 20 s sin interrupciones.", "Sala 2 (bombas): juntá bombas en sigilo evitando torretas y poné 9 en el depósito; o (fusiles): tres jugadores a la vez rompen la puerta con la habilidad 1.", "Sala 3: derrotá a Rabsovich; el transportador rompe una pared.", "Sala final: derrotá al Powersuit o al Ice Elemental."],
+      "consejos": ["Sigilo largo (por ejemplo Refugio de las sombras) facilita el panel del inicio.", "Que haya un segundo jugador para los cubos por si cae el primero.", "Un mesmer con Feedback le devuelve las bombas de racimo al Powersuit."],
+      "recompensas": ["Seleccionador de desafíos del fractal de la Instalación Subterránea."],
+      "logros": [["Underground Facility Fractal Stabilizer", "Completar el fractal."], ["Master of the Molten Ore", "Derrotar al jefe usando sólo cuatro cubos."], ["Stealth Bombers", "Romper la puerta reforzada en sigilo, sin activar torretas."], ["Carrier Cacophony", "Superar la oleada de Rabsovich sin morir."]]
+    },
+    "Urban Battleground": {
+      "es": "Campo de Batalla Urbano",
+      "resumen": "La invasión de una ciudad ascaloniana por la Legión de la Llama: el grupo, transformado en charr, rompe la puerta, toma el patio y derrota al capitán.",
+      "jefes": [["Siegemaster Dulfy", "Defiende la puerta con balistas, carros de flechas y tres Ollas de aceite hirviendo. Rompé primero el aceite a distancia y después a Dulfy y su asedio."], ["Captain Ashym", "Tiene Protección que no se saca y al empezar bloquea unos segundos. Invoca un escudero, tira una ola de fuego con agonía y cambia de arma según su vida."]],
+      "pasos": ["Andá al norte hasta el marcador.", "Rompé el aceite hirviendo, derrotá a Dulfy y tirá la puerta.", "Avanzá por la ciudad hasta el patio y capturalo, sacando balistas y carros de flechas.", "Defendé al Chamán de la llama durante el ritual.", "Derrotá a Captain Ashym en el centro del patio."],
+      "consejos": ["Separate de tus compañeros frente a las balistas: derriban en área.", "Estabilidad contra los derribos de las balistas y de Ashym.", "Guardá el daño fuerte hasta que se rompa la barra de desafío de Ashym; matá al escudero seguido."],
+      "recompensas": ["Objetos de colecciones legendarias: Espada diurna experimental, Bastón del Cuervo, Carta estelar: Caldero, Fuerza de los Abrasadores, entre otros.", "Algunos enemigos sueltan armas Steam."],
+      "logros": [["Urban Battleground Fractal Stabilizer", "Completar el fractal."], ["Out of Cluck", "Matar a todas las gallinas de la ciudad."]]
+    },
+    "Volcanic": {
+      "es": "Volcánico",
+      "resumen": "Hay que detener un culto grawl dentro de un volcán y terminar con el Chamán imbuido.",
+      "jefes": [["Champion Grawl Shaman", "Se protege con una burbuja que se rompe tirándole Piedras infundidas. Si sacrifican a los cautivos, el grupo pierde."], ["Legendary Imbued Shaman", "Cada 25% se envuelve en un escudo que necesita 40 golpes mientras intenta robarle la vida a un villano; en esa fase salen larvas."]],
+      "pasos": ["Derrotá las oleadas de grawl evitando las rocas que caen hasta la primera Singularidad de Mistlock.", "Rompé el escudo del Champion Grawl Shaman y derrotalo.", "Hacé el salto por la mina abandonada sin caer en la lava.", "Derrotá al Legendary Imbued Shaman en la arena final."],
+      "consejos": ["En la arena, movete de costado para evitar el Pie caliente y los proyectiles.", "En la fase de larvas usá área y tené limpieza de condiciones para las inmovilizaciones.", "Se puede saltear la mina desde la pared del primer chamán y usar /gg para reaparecer en el punto de control."],
+      "recompensas": ["Cofre magnífico con encriptación o llave si salvás a todos los cautivos.", "Reliquia grawl antigua, Corazón imbuido de fuego, Núcleo congelado ardiente, Corazón ardiente (colecciones).", "Seleccionador de desafíos del fractal Volcánico (Ad Infinitum)."],
+      "logros": [["Volcanic Fractal Stabilizer", "Completar el fractal."], ["Volcano Hero", "Derrotar al Imbued Shaman en escala 51+ sin perder cautivos."], ["The Floor Is Lava. Don't Step In It.", "Completarlo sin caer en la lava (da un punto de dominio de Tyria central)."]]
+    },
+    "Chaos": {
+      "es": "Caos",
+      "resumen": "Abre un arco paralelo a la temporada 3: investigás la desestabilización de la Niebla entre cultistas y criaturas de la Dra. Dessa.",
+      "jefes": [["Chaos Anomaly", "Empieza con cuatro gólems veteranos (BLIGHT, DOC, PLINK y CHOP); al 75% queda invulnerable y vuelven versiones élite y campeón. Marca jugadores con una Bomba de flujo."], ["Legendary Brazen Gladiator", "Tiene un Escudo protector que se apaga con el suelo electrificado. Al 55% hace un combo de atraer y girar; su tercer golpe automático aturde."]],
+      "pasos": ["Derrotá a los cantores y fanáticos del inicio (se transforman al 50%) y agarrá la nota 1/7.", "Cruzá el pasillo de saltos con gólems JT-12 (notas 2 a 4 en los costados).", "Derrotá a la Chaos Anomaly (nota 5 en la muralla).", "Sala de ventisca: pasá de fogata en fogata evitando tentáculos y el Devorador de llamas (nota 6).", "Nota 7 antes del jefe final; apagale el escudo al Gladiador con el suelo electrificado."],
+      "consejos": ["El último gólem que matás no vuelve en la fase siguiente: si buscás un campeón en particular, matalo primero.", "El que tiene la Bomba de flujo se aleja del grupo.", "En la ventisca la Congelación pega mucho: velocidad o sigilo."],
+      "recompensas": ["Aspecto Mandoble de la Niebla salvaje (logro Chaos Demolisher, tier Maestro)."],
+      "logros": [["Chaos Demolisher", "Completarlo en tier Maestro."], ["Kitty Compactor", "Derrotar a la Anomalía y a los cuatro gólems campeones."], ["Notetaker", "Encontrar las 7 páginas del diario perdidas."]]
+    },
+    "Nightmare": {
+      "es": "Pesadilla",
+      "resumen": "En la Torre de las Pesadillas escoltás a Arkk mientras junta energía de las creaciones de Scarlet. Termina contra Ensolyss.",
+      "jefes": [["MAMA (Multiform Ambulatory Mobile Artillery)", "Casi inmóvil, dispara y carga una explosión en toda la sala: ponete bajo el escudo de Arkk. Al 33% pasa a modo bípedo con saltos."], ["Siax the Unclean", "Cargas devastadoras que se interrumpen rompiendo su barra de desafío. Te infecta con toxina (vomitás) y crea Alucinaciones volátiles que te persiguen y explotan."], ["Ensolyss", "Muchos ataques. Al 66 y 33% queda invulnerable y aparecen cinco altares para capturar; al 15% el área se envenena y Arkk crea la única zona segura."]],
+      "pasos": ["Limpiá la primera sala y subí la rampa (no se puede volver).", "Matá a los Twisted Watchwork para invocar a MAMA.", "Pasillo de alucinaciones y tres altares para capturar.", "Cruzá el lago envenenado (Fleshgorge) esquivando explosiones.", "Derrotá a Siax y usá la plataforma de lanzamiento para ir a Ensolyss."],
+      "consejos": ["Bajo el escudo de Arkk cuando MAMA carga su explosión.", "No te metas al agua del lago: veneno permanente.", "Capturá los cinco altares de Ensolyss rápido y no revivas a nadie que caiga en un altar."],
+      "cm": ["Antes de MAMA aparecen tres Caballeros de asalto (rojo, azul y verde) y MAMA invoca uno al 75, 50 y 25%.", "Siax the Corrupted invoca Ecos en los bordes y al 66 y 33% hay que matarlos a tiempo.", "Ensolyss of the Endless Torment ataca más rápido y el veneno ocupa más lugar desde el inicio."],
+      "recompensas": ["Modo desafío: cofres diarios por jefe; con Ensolyss: 2 prístinas, 80 reliquias, 40 Esencia fractal inestable, Matriz fractal integrada, Muestra de espora tóxica prístina."],
+      "logros": [["Retrieval Squad", "Encontrar los cinco cadáveres del grupo anterior."], ["Maze Middle Manager", "Capturar primero el altar central del laberinto."], ["Shark Tank", "Matar a Fleshgorge en el lago."], ["Captured All Points within 30 Seconds", "Capturar los cinco puntos de Ensolyss en 30 s."]]
+    },
+    "Shattered Observatory": {
+      "es": "Observatorio Destrozado",
+      "resumen": "Un ataque al Observatorio de Mistlock con tres jefes: Skorvald, Artsariiv y Arkk. Hay que dominar el Impulso celestial (Lanzamiento nova e hipernova) para moverte y romper control.",
+      "jefes": [["Skorvald the Shattered", "Áreas en cono desde el centro. Debajo del 50% aparecen Flores solares que explotan (empujalas al borde). Su ojo da miedo si lo mirás; al 66 y 33% queda invulnerable hasta matar a las Anomalías de flujo de las islas."], ["Artsariiv", "Marcas en el suelo y clones que se dividen al morir. Un jugador recibe la calavera roja (Reasignación corpórea) y tiene que entrar a la cúpula oscura o el grupo come una explosión enorme."], ["Arkk", "Antes hay que romper cuatro reactores empujando Flores solares. Ojo que da miedo, calavera roja, orbes al 80, 50 y 30% y la plataforma se achica debajo del 40%."]],
+      "pasos": ["Bajá por las rocas hasta la plataforma circular y derrotá a Skorvald.", "Cruzá el portal y andá al norte con Yokko.", "Limpiá las islas y derrotá a Artsariiv.", "Portal del este e Hipernova hasta la plataforma de Arkk.", "Rompé los cuatro reactores y derrotá a Arkk."],
+      "consejos": ["Dale la espalda al ojo de Skorvald y de Arkk.", "El Impulso celestial rompe el miedo y el control.", "Con la calavera roja, preparate para entrar a la cúpula antes de que explote."],
+      "cm": ["Skorvald: ataques más grandes y rápidos; desde el 66% las Flores solares persiguen a un jugador; al final clones y embestidas que derriban.", "Artsariiv: más áreas, un refugio para la bomba que aparece al matar rápido a las Anomalías; clones al 66 y 33% que piden control.", "Arkk: fases de orbes al 80, 65 y 30% (empujarlos a los pilares), triángulos que giran y ola tipo Tequatl."],
+      "recompensas": ["Cofres diarios de Skorvald y Artsariiv; modo desafío con reliquias prístinas."],
+      "logros": [["Look in the face of death...", "Derrotar a Skorvald sin explosiones de Flor solar."], ["Extracurricular Studies of the Astral Kind", "Juntar los cinco discos de datos antes de Artsariiv."], ["Playing for Keeps", "Rebotar la canica 8 veces seguidas."], ["Be Dynamic", "Completarlo sin que muera nadie (título: Leaves No Hero Behind)."], ["Mind Out of Time", "Derrotar a Arkk en modo desafío (título: The Archdesigner)."]]
+    },
+    "Twilight Oasis": {
+      "es": "Oasis del Crepúsculo",
+      "resumen": "Dirigís a las fuerzas de la Media Luna Mordaz para afianzar el dominio de Palawa Joko sobre Elona. Larga pelea contra la Suma sacerdotisa Amala.",
+      "jefes": [["Elite Sunspear Sandbinder", "Tornados que ciegan y un Muro de tierra que daña."], ["High Priestess Amala", "Por fases: en cada una hay que romper la barra de desafío para revelar a una sacerdotisa (Lyssa se teletransporta; Melandru invoca elementales; Dwayna marca el suelo con rayos; Grenth invoca horrores; Balthazar está atada a cuatro Lanzas del Sol)."], ["Executioner Amala", "Jefe final después de derrotar a la Suma sacerdotisa."]],
+      "pasos": ["Bajá al suroeste y derrotá al Sandbinder en la arena.", "En el patio enfrentás a Amala; al 75% huye al templo y Joko te convierte en Despertado (Reflejos mejorados).", "Con Reflejos mejorados subí a los techos y matá a los dos sandbinders que sostienen la barrera.", "En el templo, matá a las Lanzas del Sol que protegen a Amala y pasá las cinco fases de sacerdotisas.", "Derrotá a Executioner Amala."],
+      "consejos": ["Fase de Lyssa: con Tab encontrás la verdadera (círculo violeta de legendaria).", "Fase de Melandru: la Onda mística sólo se esquiva saltando con Reflejos mejorados.", "Fase de Dwayna: separate del grupo y saltá para esquivar."],
+      "recompensas": ["Recompensas normales de fractal."],
+      "logros": [["Hollow Victory", "Completarlo en tier Maestro."], ["Aerialist", "Saltar tres veces la Onda mística sin que te pegue."], ["Mercy of the Mordant", "Rematar 15 enemigos en una misma partida."]]
+    },
+    "Deepstone": {
+      "es": "Rocahonda",
+      "resumen": "Fractal enano: como cazatesoros buscás por qué la bóveda de Rocahonda lleva siglos abandonada. Termina contra La Voz.",
+      "jefes": [["Brood Queen", "Araña campeona con conos telegrafiados y arañitas."], ["Deepstone Sentinel", "Elemental campeón: cada 20% invoca tornados que se rompen con su barra de desafío."], ["Shadow Minotaur", "Hay que sacarle la invulnerabilidad con la Luz de Deldrimor y matar a los veteranos."], ["The Voice", "Leyenda final: queda invulnerable al 61 y 21% y hay que derrotar 10 Llamas espectrales."]],
+      "pasos": ["Bajá siguiendo a los murciélagos; el camino se divide (este: puente con viento y arañas; oeste: corredor tipo Tetris y elementales).", "En cada ruta, dos jugadores activan las runas a la vez para abrir la sala final; el jefe deja un orbe de luz.", "En la cámara central usá los dos orbes en el Cristal vibrante (Luz de Deldrimor) y derrotá al Minotauro sombrío.", "En el abismo, revelá baldosas con la luz y activá los cuatro orbes.", "Torin se convierte en La Voz: derrotala."],
+      "consejos": ["Desactivá las trampas antes de los dos jefes para el logro Of Spiders and Sentinels.", "En la sala del Sentinel, ponete del lado de la entrada para tener más tiempo con los tornados.", "Evitá habilidades que te hagan rodar o saltar para el logro Boots on the Ground."],
+      "recompensas": ["Bolsa de Rocahonda por cada cofre oculto (Fragmentos empíreos y equipo).", "Esencia de piedra fantasmal (con comidas de Halloween, colección del Arsenal loco)."],
+      "logros": [["Riches Unveiled", "Encontrar los 10 cofres ocultos en una partida."], ["Of Spiders and Sentinels", "Derrotar a la Brood Queen y al Sentinel con menos de 3 minutos de diferencia."], ["Boots on the Ground", "No caer ni saltar de la plataforma contra La Voz."]]
+    },
+    "Siren's Reef": {
+      "es": "Arrecife de la Sirena",
+      "resumen": "Una isla tropical donde el fantasma de la pirata Arabella Crowe custodia su tesoro maldito. Recuperás el tesoro, la derrotás y escapás en su barco, el Orgullo del Kraken.",
+      "jefes": [["Champion Stonehead", "Queda aturdido si embiste contra paredes o árboles; al 25% se termina con minas."], ["Blasting Black Peter", "Crea minas que hay que romper con los cañones."], ["First Mate Calix", "Pone una Laguna sombría bajo un jugador que da condiciones y bendiciones a los enemigos."], ["Mad Jack Squall", "Vientos que te tiran al mar, lleno de pirañas."], ["Captain Arabella Crowe", "Dientes de las profundidades casi no se esquiva y derriba: quedate cerca de ella."]],
+      "pasos": ["Derrotá a los saurios y al Stonehead; rompé minas y el muro con el cañón.", "Derrotá a Black Peter mientras alguien usa el cañón de arriba.", "Laberinto: llevá tres bolsas de tesoro maldito al cofre pasándolas entre el grupo.", "Llevá los cofres de la playa al barco defendiéndolos de fantasmas.", "En el barco: Mad Jack, Calix y la capitana Crowe, con los cañones de sombra contra las oleadas."],
+      "consejos": ["Agrupá enemigos: acelera mucho, sobre todo en el barco.", "Dejá las Lagunas sombrías en las esquinas de la cubierta.", "Bloqueo o reflejo contra los Bristleback veteranos."],
+      "recompensas": ["Recompensas normales de fractal."],
+      "logros": [["Curse Catcher", "Capturar 8 bolsas de tesoro en el laberinto."], ["Savage Cannoneer", "Muertes con cañones de sombra (8, 88, 168, 288 y 368)."], ["Spirit Evader", "Hacer el laberinto en tier 4 sin activar orbes espectrales."], ["Master Diver: Siren's Reef", "Abrir el cofre hundido del final."]]
+    },
+    "Aetherblade": {
+      "es": "Filoetéreo",
+      "resumen": "Recrea la primera parte del ataque a la base oculta de los Filoetéreos en Arco del León (Piratas del cielo de Tyria).",
+      "jefes": [["Frizz", "Sus gólems bloquean ataques durante mucho tiempo y los campos de fuerza giratorios dañan y los refuerzan. Matá los gólems en tres fases; al final el generador cae sobre Frizz."]],
+      "pasos": ["Nadá por el pasaje submarino evitando las minas (letales).", "Derrotá a los dos grupos de piratas y pasá las dos zonas trampa (baldosas y campos de fuerza) apagándolas con terminales.", "Aguantá la andanada de cañones y las oleadas.", "Contra Frizz, matá los gólems de las tres fases evitando los campos de fuerza."],
+      "consejos": ["Usá daño que no se bloquee (por ejemplo Sello de poder).", "Con agonía, subite a las cajas y usá estabilidad.", "Si el Inspector Kiel no llega a la cámara final, hablá con Frizz y elegí «Let's finish this!»."],
+      "recompensas": ["Materiales filoetéreos y Pivotes de mecanismo (colecciones).", "Seleccionador de desafíos del Fractal Filoetéreo (Ad Infinitum).", "Resplandor fosforescente (colección Amanecer)."],
+      "logros": [["Aetherblade Retreat Stabilizer", "Completar el fractal."], ["Holo-Hornpipe", "Bailar (/dance) con los dos hologramas."], ["Still Faster Than Light", "Derrotar a Frizz sin que te peguen los láseres."]]
+    },
+    "Captain Mai Trin Boss": {
+      "es": "Capitana Mai Trin",
+      "resumen": "Fractal de jefe: la pelea contra Mai Trin en la base oculta de los Filoetéreos.",
+      "jefes": [["Captain Mai Trin", "Empieza con 10 cargas de Escudo de capitana (menos daño y menos condiciones). Se las sacan los disparos electrostáticos de Horrik (áreas azules)."], ["First Mate Horrik", "Dispara cañones sin parar y derriba si estás muy cerca."]],
+      "pasos": ["Derrotá a los guardias filoetéreos e Inquest (con un técnico campeón).", "Entrá a la plataforma de atraque (el grupo se teletransporta adentro).", "Al 75, 50 y 25% de Mai, ella sube a los cañones: bajale 25% de vida a Horrik cada vez.", "Cuando Horrik llega al 25%, Mai pierde el escudo."],
+      "consejos": ["Que Mai quede en las áreas eléctricas y esquivá en el último momento.", "Rompé su barra de desafío y limpiá condiciones.", "Al revivir a alguien, Mai suele apuntarte: protección o esquive."],
+      "cm": ["En tier Maestro, después de la tercera fase de cañones aparecen tres élites (Zonn, Stormsplit y Tarron): matalos antes de terminar, empezando por Tarron."],
+      "recompensas": ["Miniatura de Mai Trin, Manual de armas de aeronave de Mai Trin.", "Seleccionador contrarreloj de Mai Trin."],
+      "logros": [["Aetherblade Captain Stabilizer", "Completar el fractal."], ["Horrik's Horror", "Derrotar a Horrik (da un punto de dominio de Tyria central)."]]
+    },
+    "Molten Boss": {
+      "es": "Jefes Fundidos",
+      "resumen": "Fractal de jefe: ocho grupos de enemigos y una pelea doble contra el Molten Berserker y el Molten Firestorm.",
+      "jefes": [["Molten Berserker", "Se teletransporta, pega cuerpo a cuerpo y sus pisotones mandan ondas que dañan si saltás."], ["Molten Firestorm", "Flota y tira proyectiles de fuego en área con agonía."]],
+      "pasos": ["Derrotá los ocho grupos (uno con minijefe) y liberá a los prisioneros si podés.", "Bajá la rampa hasta la plataforma circular.", "Fase 1: cuando uno pierde 25%, enfurece al otro.", "Fase 2: al morir uno, el otro se cura todo y mejora sus ataques. Si el grupo cae, sólo se repite esta fase."],
+      "consejos": ["Sacale el enfurecimiento pegándole 50 veces, o concentrate en uno solo.", "En la fase 2 evitá el viento del borde.", "No saltes el pisotón del Berserker."],
+      "recompensas": ["Daga, Escudo y Espada nocturna experimentales y El Mecanismo (colecciones legendarias).", "Seleccionador contrarreloj de los Jefes Fundidos."],
+      "logros": [["Molten Boss Fractal Stabilizer", "Completar el fractal."], ["Shockwave Skipper", "Derrotarlos sin comer ondas de choque."], ["Firestorm Extinguisher", "Matar primero al Firestorm en la fase 1."], ["Going Berserk", "Matar primero al Berserker en la fase 1."]]
+    },
+    "Molten Furnace": {
+      "es": "Fragua Fundida",
+      "resumen": "El primer ataque a la planta de armas de la Alianza Fundida, junto a Rox y Braham: sobrevivís una emboscada, cruzás un túnel y destruís el núcleo térmico.",
+      "jefes": [["Thermal Core", "Sólo es vulnerable después de cada prueba de armas."], ["Weapons Test Engineer", "Aparece al caer el núcleo; tira tornados de fuego y activa pesos que hacen ondas."]],
+      "pasos": ["Hablá con Rox y derrotá la emboscada.", "Activá la perforadora y avanzá por el túnel (cinco cámaras con enemigos y nodos de mitril).", "Pasá el muro de vapor cuando baje.", "Cámara de pruebas: tres pruebas al azar (bola de fuego, ondas, tornados) y la cuarta las combina mientras dañás el núcleo.", "Derrotá al Weapons Test Engineer."],
+      "consejos": ["Guardá el daño para la cuarta fase.", "Alejá al Protector fundido del núcleo antes de que haga su anillo de invulnerabilidad.", "Contra los tornados, pegate a la puerta de la pared izquierda."],
+      "recompensas": ["Cristal de azurita y mineral de mitril (nodos del túnel).", "Materiales de la Fragua Fundida (colección)."],
+      "logros": [["Molten Furnace Fractal Stabilizer", "Completar el fractal."], ["Weapons Tester", "Destruir el núcleo sin que te pegue ninguna arma."]]
+    },
+    "Thaumanova Reactor": {
+      "es": "Reactor de Taumanova",
+      "resumen": "Desactivás colectores, rescatás investigadores y derrotás a la anomalía que se formó en el núcleo del reactor.",
+      "jefes": [["Elite Flame Legion Fire Shaman", "Arriba de la sala inicial; hay que matarlo para avanzar."], ["Subject 6", "Bloquea con escudo y acumula Sobrecarga: explota al llegar a 20."], ["Thaumanova Anomaly", "Hace desaparecer plataformas; al 75, 50 y 25% se pierden para siempre las exteriores."]],
+      "pasos": ["Usá el detonador para abrir la pared y derrotá al chamán.", "Desactivá los cuatro colectores (dormitorios, enfriamiento, repulsores y sujetos vivos).", "Rescatá a los investigadores.", "Volvé al panel central, sacá la muestra del núcleo y escapá.", "Activá la consola del oeste y derrotá a la Anomalía."],
+      "consejos": ["Con Subject 6 bloqueando, dejá de pegarle; que ataquen sólo 2 o 3.", "Contra la Anomalía, separate para no hacer caer a nadie.", "En el enfriamiento, usá las barras o teletransportes."],
+      "recompensas": ["Notas de la investigación de Taumanova, Botella de energía de Taumanova y otros objetos de colecciones legendarias."],
+      "logros": [["Thaumanova Reactor Fractal Stabilizer", "Completar el fractal."], ["Great Heights", "Derrotar a la Anomalía sin que nadie caiga."], ["Subject 6 Deep-Sixer", "Derrotar a Subject 6 con 19 de Sobrecarga sin llegar a 20."]]
+    },
+    "Sunqua Peak": {
+      "es": "Cumbre Sunqua",
+      "resumen": "Subís la montaña de Sunqua para calmar a los espíritus elementales y restaurar el equilibrio. Termina con la Hechicera afligida.",
+      "jefes": [["Voice of the Mountain", "Al 66 y 33% queda invulnerable hasta que juntás 3 cargas de Salto cargado para dispersar las nubes."], ["Fury of the Mountain", "Invoca meteoritos: saltá sobre ellos y escondete detrás de uno durante su canalización."], ["Sorrowful Spellcaster", "Tres fases (aire, fuego y agua) con tormentas, meteoritos y Pacto de la marea."], ["Ai, Keeper of the Peak", "Jefa del modo desafío: en la fase oscura aparecen Miedo, Pena y Culpa."]],
+      "pasos": ["Hablá con el Espíritu de la montaña y subí por las plataformas juntando orbes (Salto cargado).", "Derrotá a la Voz de la montaña.", "Hablá con los tres elementales de agua y rompé las rocas para liberar al atrapado.", "Derrotá los grupos de elementales de fuego y a la Furia de la montaña.", "Derrotá a la Hechicera afligida."],
+      "consejos": ["Al activar el jefe se borran las bendiciones: no las tires antes.", "En la fase de fuego escondete detrás de un meteorito entero.", "En la de agua cortá el Pacto de la marea antes de 10 acumulaciones."],
+      "cm": ["Fase de luz: hay que dispersar 8 fuentes de energía en vez de 6.", "Fase oscura: mantené lejos a los Miedos (explotan al tocarte).", "La Culpa se ata a un jugador y acumula Culpa aplastante; a 10 cae: otro tiene que cortar el vínculo."],
+      "recompensas": ["Tónico de combate del demonio interior infinito (sólo modo desafío).", "Armas abisales (salieron con este fractal)."],
+      "logros": [["Energy Dispersal", "Maestro: dispersar todas las nubes del jefe final en 10 s."], ["Raging Fire", "Maestro: derrotar al jefe sin daño de Tormenta de fuego."], ["Share the Burden", "Maestro: que nadie pase de 9 de Pacto de la marea."], ["Running up the Mountain", "Maestro: completarlo en 15 minutos o menos."], ["Respect for the Dead", "Arrodillarte ante las tres tumbas."], ["Dancing with Demons", "Modo desafío: completarlo los cinco sin morir."]]
+    },
+    "Silent Surf": {
+      "es": "Oleaje Silencioso",
+      "resumen": "Ambientado en el pasado de Cantha: el Capitán Thess busca sobrevivientes luxon bajo el Mar de Jade y se cruza con Kanaxai.",
+      "jefes": [["Corrupted First Mate Dolus", "Minijefe: no mires su Rostro del pavor y acomodate para sus embestidas en orden (objetivos 1 a 5)."], ["Kanaxai, Scythe of House Aurkus", "Tormenta desgarradora (hachas sobre marcados), Disparo atroz (no se esquiva), Rostro del pavor (no mirarlo) y Partemundos (derrotá a los Aspectos antes de que termine)."]],
+      "pasos": ["Saltá a la grieta y usá el Paracaídas (si fallás, volvés al primer punto de control).", "Gancho sobre la plataforma de jade y tirolinas; derrotá arañas y murciélagos.", "Hongos, gancho a la estalactita central y Cañón de viento; pelea con nagas.", "Más tirolinas hasta la última plataforma: marineros corrompidos y Dolus.", "Recargá paracaídas y saltá a la plataforma de Kanaxai."],
+      "consejos": ["Recargá en los Suministros sobrantes de cada punto de control.", "La Carga de pólvora negra facilita, pero impide el logro Peace and Quiet.", "Contra Kanaxai, grupo separado y fuera de las marcas."],
+      "cm": ["Te lleva al último punto de control, pero hay que derrotar a Dolus y a Kanaxai.", "Una caída en los saltos es muerte instantánea.", "El Rostro del pavor da Vulnerabilidad extrema: mirar a varios a la vez puede matarte."],
+      "recompensas": ["Modo desafío: Last Words y Trono del Señor Oni (raros), 2 prístinas y Matriz fractal integrada garantizadas."],
+      "logros": [["Cavalon's Champions", "Completarlo en tier Maestro."], ["Good Listener", "Escuchar todo el diálogo opcional de Thess."], ["Jade Sea Legs", "Completarlo sin ayuda de Thess ni caídas."], ["Peace and Quiet", "Tier 4 sin muertes, sin caídas y sin Carga de pólvora negra."], ["The Fearless Few", "Derrotar a Kanaxai sin recibir Rostro del pavor."], ["Unsundered", "Derrotar a todos los Aspectos antes de cada Partemundos."], ["Explorers of Antiquity", "Modo desafío: derrotar al jefe final."], ["Stalwart Serpents", "Modo desafío: completarlo sin muertes."]]
+    },
+    "Lonely Tower": {
+      "es": "Torre Solitaria",
+      "resumen": "Recrea el primer ataque de Eparch a Tyria dentro de la Torre del Mago: reparás purificadores, expulsás a Cerus y Deimos y derrotás a Eparch.",
+      "jefes": [["Cerus & Deimos", "El jugador más cercano a cada uno recibe Foco; hay que mantenerlos separados para evitar Hermanos unidos."], ["Eparch", "Alterna patrones y absorbe globos de emoción para llenar su barra de desafío (3000); después usa Consumir."]],
+      "pasos": ["Activá los 4 Nodos del purificador astral (minijuego: canalizar 10 veces en 2 s).", "Evitá a los Avatares del rencor (explotan e interrumpen).", "Expulsá a Cerus y Deimos manteniéndolos separados.", "Reuní a Isgarren y derrotá a las Encarnaciones del juicio.", "Derrotá a Eparch juntando globos y rompiendo su barra lo antes posible."],
+      "consejos": ["Eparch cambia de patrón si hay jugadores cerca (Golpe enfurecido) o no (Lluvia de desesperación).", "El Golpe enfurecido pega con retraso: saltá o esquivá temprano.", "Que Consumir no te agarre: te baja los atributos."],
+      "cm": ["Eparch tiene muchísima más vida y su barra de desafío no le saca los potenciamientos.", "Al 65 y 35% aparecen Grietas kryptis que se cierran derrotando al campeón vinculado.", "Consumir no se saca juntando globos: cuanto más tardás en romper la barra, más acumulaciones."],
+      "recompensas": ["Espada y mandoble de Eparch (raros en modo desafío).", "Modo desafío: 2 prístinas, 80 reliquias, 40 Esencia fractal inestable, Matriz integrada y página de investigación."],
+      "logros": [["Wizard's Tower Is Ours, Eparch", "Completarlo en cualquier tier."], ["Wayfind Yourself Out", "Completarlo en tier Maestro."], ["Brothers, Together", "Derrotar a Cerus y Deimos con menos de 5 s de diferencia."], ["Fissure Walker", "Derrotar a Eparch sin daño de sus fisuras."], ["Emotionless", "Que Eparch no llegue a 20 de una emoción."], ["Wavering Ward", "Completarlo sin muertes."], ["Secrets of the Tower", "Modo desafío: derrotar al jefe final."], ["We're Never Alone but We're Isolated", "Completar el modo desafío 25 veces."]]
+    },
+    "Kinfall": {
+      "es": "Kinfall",
+      "resumen": "Revive un suceso en la Guarida del Drakkar con el combate final en la Cueva de los Hijos Perdidos: como kodan de tierras bajas intentás rescatar a Silken Weir.",
+      "jefes": [["Legendary Whispering Shadow", "Sus Crioflash (en el suelo y en el aire) son la mecánica clave: evitalos siguiendo el patrón de los Dientes helados. Rompé su barra de desafío durante la Luz vacilante."]],
+      "pasos": ["Reunite con Dessa y ayudala con sus experimentos.", "Avanzá entre enemigos y escarcha, derrotá a los esbirros del dragón y sacrificá fuego vital para abrir la puerta (tres veces).", "Escapá de las cavernas de hielo.", "Derrotá a la Sombra susurrante."],
+      "consejos": ["Lo más importante es esquivar los Crioflash.", "Agrupate al perder fuego vital: la Escarcha mortal pega constante y te frena.", "Rompé la barra de desafío durante la Luz vacilante."],
+      "cm": ["Los Crioflash matan al instante.", "Fuegos fatuos roban el fuego vital hasta que les rompés la barra de desafío.", "Debajo del 80% aparece el Orbe invernal."],
+      "recompensas": ["Infusión de la Legión de la escarcha (curación) y lanza Shocking Prod (raras en modo normal).", "Modo desafío: 2 prístinas y Matriz fractal integrada garantizadas."],
+      "logros": [["Frozen Flight", "Completarlo en cualquier escala."], ["Agonizing Cold", "Completarlo en tier Maestro."], ["All That Remains", "Encontrar los seis fragmentos de memoria."], ["Shatterstep", "Derrotar a la Sombra sin recibir Crioflash."]]
+    },
+    "Solitary Throne": {
+      "es": "Trono Solitario",
+      "resumen": "Fractal de Visions of Eternity (actualización Code of Creation): un entorno de baja gravedad con cuatro plataformas elementales (fuego, hielo, tierra y viento) y la pelea contra el Tirano eterno, una versión corrompida de Isgarren.",
+      "jefes": [["Ice / Rime Sprite", "Marcan a un jugador: cambiá de objetivo enseguida y rompeles la barra de desafío."], ["Eternal Tyrant (Isgarren)", "Proyectil que te lanza por el aire y Agujero negro sobre un marcado (llevalo al borde). Al 70 y 40% queda invulnerable y llegan elementales que hay que frenar antes del centro; del 40 al 1% vuelven las mecánicas de las cuatro plataformas; al 1% ataque masivo final y una plataforma de salto para escapar."]],
+      "pasos": ["Cruzá el entorno celeste de baja gravedad.", "Plataforma de fuego: esquivá los muros giratorios.", "Plataforma de hielo: rompé rápido a los Sprites marcados.", "Plataformas de tierra (onda expansiva) y viento (áreas rojas) hasta la central.", "Derrotá al Tirano eterno con lo aprendido en cada plataforma."],
+      "consejos": ["Aprendé las plataformas: anticipan las mecánicas del jefe.", "Guardá el control para los Sprites de hielo.", "Dejá los agujeros negros en el borde para no tapar el centro."],
+      "cm": ["Tiene modo desafío; sus mecánicas todavía no están detalladas en las guías que consulté."],
+      "recompensas": ["Recompensas normales de fractal."],
+      "logros": []
+    }
+  }
+}
