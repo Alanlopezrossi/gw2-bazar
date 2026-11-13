@@ -83,6 +83,19 @@ async function addIcons(groups, api) {
     for (const s of g.list) s.icon = s.icon || ICONS.get(s.rew[0]) || s.catIcon || g.icon;
   }
 }
+// Legendarias que el planificador general no trae (las más nuevas): su costo se pide una por una.
+async function addPrices(groups, api, inv) {
+  await Promise.all(groups.filter((g) => !g.leg && g.itemId).map(async (g) => {
+    try {
+      const p = await api('/api/planner', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ target: g.itemId, inv, mode: 'instant' }) });
+      if (p?.missingCost == null && !p?.missing) return;
+      const missingCost = p.missingCost ?? (p.missing || []).reduce((t, m) => t + (m.total || 0), 0);
+      let total = p.totalCost || p.cost || 0;
+      if (!total && Object.keys(inv || {}).length) { try { const b = await api('/api/planner', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ target: g.itemId, inv: {}, mode: 'instant' }) }); total = b.missingCost || 0; } catch {} }
+      g.leg = { id: g.itemId, name: g.name, icon: g.icon, missingCost, progress: p.progress ?? (total ? Math.max(0, 1 - missingCost / total) : 0), untradableMissing: p.untradableMissing ?? (p.missing || []).filter((m) => m.unit == null).length };
+    } catch { /* sin precio */ }
+  }));
+}
 let LEGCRAFT = -1; // niveles entrenados de Artesanía legendaria (id 6): 0 a 4; -1 = no se sabe
 const LV = ['', M.ant, M.mae, M.his, M.eru];
 function fixHow(g, s) {
@@ -128,13 +141,14 @@ const SECTIONS = [
 const sectionOf = (name) => SECTIONS.find((x) => x.test(norm(name)))?.id || 'otros';
 
 export async function renderRuta(view, { api, esc, coin }) {
-  let filter = 'all', q = '';
-  try { filter = localStorage.getItem('gw2-ruta-f') || 'all'; } catch {}
+  let filter = 'all', q = '', sort = 'sec';
+  try { filter = localStorage.getItem('gw2-ruta-f') || 'all'; sort = localStorage.getItem('gw2-ruta-sort') || 'sec'; } catch {}
   view.innerHTML = `<div class="page-head"><div><h1>Ruta legendaria</h1><p>Cada legendaria con su <b>cadena de logros en orden</b> (qué está hecho, empezado, disponible o por desbloquear y cómo empezarlo) y <b>cuánto de los materiales ya tenés</b> en tu cuenta. Con una API key cargada en «Mi cuenta» se lee tu avance en vivo (banco, depósito de materiales y personajes); sin key ves las cadenas y lo que cuesta cada legendaria.</p></div>
       <div><button class="btn" id="rtRefresh">↻ Actualizar desde mi cuenta</button></div></div>
     <div class="filters rt-bar">
       ${['all', 'run', 'open', 'lock'].map((f) => `<button class="chip-btn" data-f="${f}" aria-pressed="${filter === f}">${f === 'all' ? 'Todas' : f === 'run' ? 'Con algo empezado' : f === 'open' ? 'Con algo disponible' : 'Por desbloquear'}</button>`).join('')}
       <input type="search" id="rtQ" placeholder="Buscar legendaria o logro…" style="flex:1;min-width:200px">
+      <label>Orden <select id="rtSort"><option value="sec">Por tipo</option><option value="cheap">Más baratas primero</option><option value="near">Más cerca de terminar</option><option value="exp">Más caras primero</option></select></label>
     </div>
     <div id="rtSum"></div><div id="rtOut"><div class="skeleton"></div></div>`;
 
@@ -182,6 +196,7 @@ export async function renderRuta(view, { api, esc, coin }) {
         return g;
       }).sort((a, b) => (b.count.ok + b.count.run > 0) - (a.count.ok + a.count.run > 0) || (b.leg?.progress || 0) - (a.leg?.progress || 0) || a.name.localeCompare(b.name, 'es'));
       await addIcons(groups, api);
+      await addPrices(groups, api, invMap);
       const t = { ok: 0, run: 0, open: 0, lock: 0 };
       for (const g of groups) for (const k in t) t[k] += g.count[k];
       view.querySelector('#rtSum').innerHTML = NOACC ? `<div class="explain small"><b>Sin cuenta conectada.</b> Ves todas las cadenas en orden, qué pide cada paso y lo que cuesta cada legendaria en el bazar. Para ver tu avance, tus dominios y cuánto de los materiales ya tenés, cargá tu API key en <a href="#/cuenta">Mi cuenta</a> (queda guardada sólo en este navegador y sólo se usa con la API oficial de Guild Wars 2).</div>` : `<div class="cards">${['ok', 'run', 'open', 'lock'].map((k) => `<div class="card rt-${k}"><div class="k">${lab(k)}</div><div class="v num">${t[k]}</div></div>`).join('')}
@@ -191,6 +206,14 @@ export async function renderRuta(view, { api, esc, coin }) {
     } catch (e) {
       out.innerHTML = `<div class="empty">No pude traer los logros de la API oficial de Guild Wars 2 (${esc(e.message)}). Probá de nuevo en un rato con ↻.</div>`;
     }
+  }
+
+  // Precio siempre visible en la tarjeta, aunque esté cerrada.
+  function priceTag(g) {
+    const l = g.leg;
+    if (!l) return '';
+    const pct = Math.round((l.progress || 0) * 100);
+    return `<span class="rt-price" title="${NOACC ? 'Comprando todo en el bazar al instante' : `Lo que tenés cubre ${pct}% · falta comprar`}">💰 ${coin(l.missingCost || 0)}${l.untradableMissing ? ` <span class="warn-t small">+${l.untradableMissing} sin bazar</span>` : ''}</span>`;
   }
 
   function legHTML(g) {
@@ -209,7 +232,7 @@ export async function renderRuta(view, { api, esc, coin }) {
     const list = groups.filter((g) => (!t || norm(`${g.name} ${g.list.map((s) => s.name).join(' ')}`).includes(t)) && (filter === 'all' || g.count[filter] > 0));
     const card = (g) => `<details class="rt-card" ${g.count.run || g.count.ok || t ? 'open' : ''}>
       <summary>${g.icon ? `<img src="${esc(g.icon)}" alt="" loading="lazy">` : '<span class="rt-noicon">★</span>'}<h3>${g.itemId ? `<a href="#/item/${g.itemId}" class="rar-Legendary">${esc(g.name)}</a>` : esc(g.name)}</h3>
-        <span class="rt-meta">${g.list.length} logro${g.list.length === 1 ? '' : 's'}${g.count.ok ? ` · <span class="rt-t-ok">${g.count.ok} hecho${g.count.ok === 1 ? '' : 's'}</span>` : ''}${g.count.run ? ` · <span class="rt-t-run">${g.count.run} empezado${g.count.run === 1 ? '' : 's'}</span>` : ''}${g.leg && !NOACC ? ` · materiales ${Math.round((g.leg.progress || 0) * 100)}%` : ''}</span></summary>
+        <span class="rt-meta">${g.list.length} logro${g.list.length === 1 ? '' : 's'}${g.count.ok ? ` · <span class="rt-t-ok">${g.count.ok} hecho${g.count.ok === 1 ? '' : 's'}</span>` : ''}${g.count.run ? ` · <span class="rt-t-run">${g.count.run} empezado${g.count.run === 1 ? '' : 's'}</span>` : ''}${g.leg && !NOACC ? ` · materiales ${Math.round((g.leg.progress || 0) * 100)}%` : ''}</span>${priceTag(g)}</summary>
       ${g.note ? `<div class="rt-note"><b>Cómo se hace:</b> ${esc(g.note)}</div>` : ''}
       ${legHTML(g)}
       <ol class="rt-chain">${g.list.map((s, i) => `<li class="rt-${s.st}"><span class="rt-dot">${s.st === 'ok' ? '✓' : i + 1}</span><div>
@@ -217,7 +240,12 @@ export async function renderRuta(view, { api, esc, coin }) {
         ${s.st === 'run' && s.max ? `<div class="rt-prog"><i style="width:${Math.round((s.cur / s.max) * 100)}%"></i></div>` : ''}
         ${s.how ? `<div class="rt-how">${s.st === 'lock' ? '<b>Cómo desbloquearlo:</b> ' : ''}${esc(s.how)}</div>` : ''}</div></li>`).join('')}</ol>
       ${g.leg ? `<div class="rt-more"><button class="btn ghost small" data-guide="${g.leg.id}">📘 Guía completa: receta, dones, colecciones y de dónde sale cada cosa</button><a class="btn ghost small" href="#/legendarias">Árbol de materiales →</a></div><div class="rt-guide" id="guide-${g.leg.id}"></div>` : ''}</details>`;
-    const secs = [...SECTIONS, { id: 'otros', title: 'Otras', intro: '' }].map((sec) => ({ sec, gs: list.filter((g) => sectionOf(g.name) === sec.id) })).filter((x) => x.gs.length);
+    const cost = (g) => (g.leg ? g.leg.missingCost || 0 : Infinity);
+    const near = (g) => (g.list.length ? (g.count.ok + g.count.run * 0.5) / g.list.length : 0) + (g.leg?.progress || 0);
+    const SORTS = { cheap: (a, b) => cost(a) - cost(b), exp: (a, b) => (b.leg ? b.leg.missingCost : -1) - (a.leg ? a.leg.missingCost : -1), near: (a, b) => near(b) - near(a) };
+    const secs = sort !== 'sec'
+      ? [{ sec: { id: 'todas', title: sort === 'cheap' ? 'Todas, de la más barata a la más cara' : sort === 'exp' ? 'Todas, de la más cara a la más barata' : 'Todas, de la más avanzada a la menos', intro: 'El precio es lo que falta comprar en el bazar al instante (con tu API key descuenta lo que ya tenés).' }, gs: list.slice().sort(SORTS[sort]) }]
+      : [...SECTIONS, { id: 'otros', title: 'Otras', intro: '' }].map((sec) => ({ sec, gs: list.filter((g) => sectionOf(g.name) === sec.id) })).filter((x) => x.gs.length);
     out.innerHTML = list.length ? `<nav class="rt-toc">${secs.map(({ sec, gs }) => `<a href="javascript:void 0" data-sec="${sec.id}">${esc(sec.title)} <span class="muted small">(${gs.length})</span></a>`).join('')}</nav>
       ${secs.map(({ sec, gs }) => `<section class="rt-sec" id="sec-${sec.id}"><h2>${esc(sec.title)}</h2>${sec.intro ? `<p class="rt-sec-intro">${esc(sec.intro)}</p>` : ''}<div class="rt-grid">${gs.map(card).join('')}</div></section>`).join('')}` : '<div class="empty">Nada coincide.</div>';
     view.querySelectorAll('.rt-bar [data-f]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.f === filter)));
@@ -252,6 +280,8 @@ export async function renderRuta(view, { api, esc, coin }) {
   });
   view.querySelector('.rt-bar').addEventListener('click', (e) => { const b = e.target.closest('[data-f]'); if (!b) return; filter = b.dataset.f; try { localStorage.setItem('gw2-ruta-f', filter); } catch {} paint(); });
   view.querySelector('#rtQ').addEventListener('input', (e) => { q = e.target.value; paint(); });
+  view.querySelector('#rtSort').value = sort;
+  view.querySelector('#rtSort').addEventListener('change', (e) => { sort = e.target.value; try { localStorage.setItem('gw2-ruta-sort', sort); } catch {} paint(); });
   view.querySelector('#rtRefresh').addEventListener('click', () => load(true));
   load();
 }

@@ -995,6 +995,7 @@ a.fr-link h4 { color: var(--accent, #c9a227); }
 .fr-boss { padding: 6px 0; border-bottom: 1px solid var(--line); }
 .fr-boss p { margin: 2px 0 0; }
 .fr-ach tr.done td { opacity: .7; }
+.rt-price { margin-left: auto; white-space: nowrap; font-size: 13px; padding: 2px 8px; border-radius: 999px; background: rgba(201,162,39,.12); border: 1px solid rgba(201,162,39,.35); }
 
 /* versión pública */
 .public-note { max-width: 1400px; margin: 0 auto; padding: 8px 20px 0; color: var(--faint); font-size: 12px; }
