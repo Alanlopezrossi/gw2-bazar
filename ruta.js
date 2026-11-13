@@ -71,8 +71,9 @@ async function addIcons(groups, api) {
   const legIds = new Map();
   await Promise.all(groups.filter((g) => !g.leg?.icon).map(async (g) => {
     try {
-      const r = await api(`/api/catalog?q=${encodeURIComponent(g.name)}&rarity=Legendary&limit=10`);
-      const hit = (r.rows || []).find((x) => norm(x.name || '') === norm(g.name)) || (r.rows || []).find((x) => norm(x.name || '').includes(norm(g.name)) && /Weapon|Armor|Back|Trinket|Relic/.test(x.type || ''));
+      const base = g.name.replace(/\s*\(.*\)\s*$/, '').trim();
+      const r = await api(`/api/catalog?q=${encodeURIComponent(base)}&rarity=Legendary&limit=10`);
+      const hit = (r.rows || []).find((x) => norm(x.name || '') === norm(base)) || (r.rows || []).find((x) => norm(x.name || '').includes(norm(base)) && /Weapon|Armor|Back|Trinket|Relic/.test(x.type || ''));
       if (hit) legIds.set(g, hit.id);
     } catch { /* sin catálogo */ }
   }));
@@ -211,7 +212,7 @@ export async function renderRuta(view, { api, esc, coin }) {
   // Precio siempre visible en la tarjeta, aunque esté cerrada.
   function priceTag(g) {
     const l = g.leg;
-    if (!l) return '';
+    if (!l) return '<a class="rt-price" href="#/legendarias" title="Es un conjunto de piezas: el precio de cada una está en Legendarias">💰 precio por pieza →</a>';
     const pct = Math.round((l.progress || 0) * 100);
     return `<span class="rt-price" title="${NOACC ? 'Comprando todo en el bazar al instante' : `Lo que tenés cubre ${pct}% · falta comprar`}">💰 ${coin(l.missingCost || 0)}${l.untradableMissing ? ` <span class="warn-t small">+${l.untradableMissing} sin bazar</span>` : ''}</span>`;
   }
